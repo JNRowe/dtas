@@ -18,9 +18,9 @@ tmp.binmode
 
 buf = c.req(%W(sink cat #{name}))
 abort(buf) if buf =~ /\AERR/
-buf << DTAS_DISCLAIMER
+orig = YAML.load(buf)
 
-tmp.write(buf)
+tmp.write(buf << DTAS_DISCLAIMER)
 cmd = "#{editor} #{tmp.path}"
 system(cmd) or abort "#{cmd} failed: #$?"
 tmp.rewind
@@ -33,14 +33,26 @@ if env = sink["env"]
   end
 end
 
+# remove deleted env
+if orig_env = orig["env"]
+  env ||= {}
+  deleted_keys = orig_env.keys - env.keys
+  deleted_keys.each { |k| cmd << "env##{k}" }
+end
+
 %w(nonblock active).each do |field|
   if sink.key?(field)
     cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
   end
 end
 
-%w(prio pipe_size command).each do |field|
+%w(prio pipe_size).each do |field|
   value = sink[field] and cmd << "#{field}=#{value}"
+end
+
+%w(command).each do |field|
+  value = sink[field]
+  cmd << "#{field}=#{value}"
 end
 
 c.req_ok(cmd)

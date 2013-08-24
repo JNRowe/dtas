@@ -18,6 +18,7 @@ tmp.binmode
 
 buf = c.req(%W(source cat))
 abort(buf) if buf =~ /\AERR/
+orig = YAML.load(buf)
 
 tmp.write(buf << DTAS_DISCLAIMER)
 cmd = "#{editor} #{tmp.path}"
@@ -32,8 +33,16 @@ if env = source["env"]
   end
 end
 
+# remove deleted env
+if orig_env = orig["env"]
+  env ||= {}
+  deleted_keys = orig_env.keys - env.keys
+  deleted_keys.each { |k| cmd << "env##{k}" }
+end
+
 %w(command).each do |field|
-  value = source[field] and cmd << "#{field}=#{value}"
+  value = source[field]
+  cmd << "#{field}=#{value}"
 end
 
 c.req_ok(cmd)
