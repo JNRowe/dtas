@@ -1,0 +1,110 @@
+% dtas-player(1) dtas user manual
+%
+
+# NAME
+
+dtas-player - playback process for dtas
+
+# SYNOPSYS
+
+dtas-player
+
+# DESCRIPTION
+
+dtas-player is intended as a music player, but implemented as Unix
+process and pipeline manager, so it may run arbitrary commands and route
+data to just about any process.
+
+dtas-player is currently only queue-based, enqueued tracks are played
+only once.  It only runs in a foreground console, so usage with
+screen(1) or tmux(1) is recommended.
+
+By default, dtas-player uses the sox(1) command to decode audio, and
+pipes the data to a play(1) process (also distributed with sox).  It may
+be configured to output to multiple/arbitrary processes, and may invoke
+arbitrary commands for outputting audio (or any other data).
+
+dtas-player is controlled by a Unix socket, see dtas-player_protocol(7)
+for details.  Given the power of dtas-player to run arbitrary commands,
+this socket is created with restricted permissions and is only
+accessible by the user who invoked dtas-player.
+
+dtas-player maintains state across restarts with a state file.
+
+# EXAMPLE
+
+Starting dtas-player is easy, it takes no arguments:
+
+    $ dtas-player
+
+In a different terminal, enqueue your favorite track for playback:
+
+    $ dtas-enq /path/to/your/favorite/music.flac
+
+In the terminal running dtas-player, some diagnostic information
+should be printed, as will any errors which occur.
+
+To see information about the currently playing track in YAML:
+
+    $ dtas-ctl current
+
+As you should be able to see, a "default" sink is automatically
+created and playing the audio.
+
+# TROUBLESHOOTING
+
+The most common problem with dtas-player is the play(1) command
+(distributed with SoX) not using the correct audio device.  Ensuring the
+play(1) command works with dtas-player is important.  See the play(1)
+documentation for details.
+
+Once you find the correct AUDIODEV/AUDIODRIVER environment variables,
+you may set them via dtas-ctl(1):
+
+To play audio on my favorite USB DAC directly to ALSA, I use:
+
+    $ dtas-ctl sink ed default env.AUDIODEV=hw:DAC env.AUDIODRIVER=alsa
+
+# ADVANCED EXAMPLES
+
+To configure a dumper sink (in addition to the "default" sink).  Note
+the use of $SOXFMT, this will be automatically expanded to match the
+internal format of the player.  The internal format of the player is
+described in dtas-player_protocol(7).
+
+    $ dtas-ctl sink ed dumper command='sox $SOXFMT - /tmp/dump.sox'
+
+Non-"default" sinks are not active by default, but may be made active.
+
+    $ dtas-ctl sink ed dumper active=true
+
+Changing it again to "active=false" will deactivate the sink.
+
+# ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player listen socket.
+This defaults to ~/.dtas/player.sock
+
+DTAS_PLAYER_STATE - the state file of the dtas-player
+This defaults to ~/.dtas/player_state.yml
+
+dtas-player will automatically populate $SOXFMT and $ECAFMT when
+invoking sink and source commands.
+
+ReplayGain values are also exported to the source command if they
+exist in the source file:
+
+    * REPLAYGAIN_TRACK_GAIN
+    * REPLAYGAIN_ALBUM_GAIN
+    * REPLAYGAIN_ALBUM_PEAK
+    * REPLAYGAIN_TRACK_PEAK
+
+# FILES
+
+~/.dtas/player_state.yml is a human-readable YAML file used to preserve
+state across restarts of dtas-player.
+
+# SEE ALSO
+
+dtas-player_protocol(7), dtas-ctl(1), dtas-enq(1), dtas-sourceedit(1),
+dtas-sinkedit(1), sox(1), play(1), screen(1), tmux(1)

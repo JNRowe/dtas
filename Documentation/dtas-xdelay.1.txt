@@ -1,0 +1,57 @@
+% dtas-xdelay(1) dtas user manual
+%
+
+# NAME
+
+dtas-xdelay - play audio with a crossover delay
+
+# SYNOPSYS
+
+dtas-xdelay [OPTIONS] INPUT1 INPUT2 DELAY
+
+# DESCRIPTION
+
+dtas-xdelay will delay an audio band by a given delay (in seconds or
+fractions thereof).  This can be useful for tuning a sub/sat speaker
+system.  It is intended for use a dtas-player sink command as displayed
+in the synopsis.
+
+The INPUT arguments (/dev/fd/lo and /dev/fd/hi) are automatically
+changed by dtas-player to match the given file descriptors of the pipes.
+
+Both descriptors receive the same audio data, but will be split using a
+Linkwitz-Riley crossover.  The high-band (second argument) will be
+delayed by default.
+
+# EXAMPLE
+
+To set this via dtas-player to delay the high frequencies by 20ms.
+
+	dtas-ctl sink ed SINKNAME \
+	   command='dtas-xdelay /dev/fd/lo /dev/fd/hi 0.020'
+
+# OPTIONS
+
+-x, \--crossover-frequency FREQUENCY
+:   Frequency at which to set the crossover.  This defaults to 80 (Hz).
+
+-l, \--lowpass-delay
+:   Delay the lowpass frequency instead of the highpass one.
+
+# ENVIRONMENT
+
+SOXFMT - this environment is automatically set if used as a dtas-player
+sink
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+# NOTES
+
+The author of this knows little about signal processing and is just
+parroting things he's learned on the sox documentation and mailing list.
+Corrections greatly appreciated (email Eric Wong e@80x24.org)
+
+# SEE ALSO
+
+dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), sox(1)

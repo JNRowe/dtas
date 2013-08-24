@@ -1,0 +1,64 @@
+% dtas-ctl(1) dtas user manual
+%
+
+# NAME
+
+dtas-ctl - low-level client for dtas-player
+
+# SYNOPSYS
+
+dtas-ctl [ARGS...]
+
+# DESCRIPTION
+
+dtas-ctl passes command-line arguments as-is to dtas-player.  It is mainly
+useful for simple commands such as ("current", "play_pause", "pause", "play",
+"rg RGARGS", "seek HH:MM:SS", "skip").
+
+See dtas-player_protocol(7) for a detailed description of the protocol.
+
+# EXAMPLES
+
+display the currently playing track
+
+        $ dtas-ctl current
+
+enqueue a file for playback (dtas-enq(1) is easier to use, here)
+
+        $ dtas-ctl enq /absolute/path/to/file
+
+toggle the play/pause state of the player
+
+        $ dtas-ctl play_pause
+
+change the ReplayGain mode
+
+        $ dtas-ctl rg mode=album_gain
+        # "track_gain", "off" may be used, too
+
+seek 5 seconds forward
+
+        $ dtas-ctl seek +5
+
+seek to an absolute position
+
+        $ dtas-ctl seek 1:00
+
+skip to the next track
+
+        $ dtas-ctl skip
+
+To play the output of an arbitrary command (note the quotes) and usage
+of $SOXFMT (see dtas-player_protocol(7)).
+
+	$ dtas-ctl enq-cmd 'sox -n $SOXFMT - synth 3 pluck'
+
+# ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+# SEE ALSO
+
+dtas-player(1), dtas-player_protocol(7), dtas-enq(1), dtas-sinkedit(1),
+dtas-sourceedit(1)

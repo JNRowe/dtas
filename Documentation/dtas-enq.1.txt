@@ -12,8 +12,12 @@ dtas-enq [FILE...]
 # DESCRIPTION
 
 dtas-enq will enqueue a list of files given on the command-line to a
-running instance of dtas-player.  dtas-player will start playing the
+running instance of dtas-player(1).  dtas-player will start playing the
 newly enqueued files in the order given.
+
+# EXAMPLE
+
+        $ dtas-enq /path/to/your/favorite/album/*.flac
 
 # ENVIRONMENT
 
@@ -22,6 +26,4 @@ This defaults to ~/.dtas/player.sock
 
 # SEE ALSO
 
-* dtas-player(1)
-* dtas-player(7)
-* dtas-ctl(1)
+dtas-player(1), dtas-ctl(1)

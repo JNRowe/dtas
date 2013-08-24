@@ -1,0 +1,41 @@
+% dtas-sinkedit(1) dtas user manual
+%
+
+# NAME
+
+dtas-sinkedit - edit the command and environment of a sink
+
+# SYNOPSYS
+
+dtas-sinkedit SINKNAME
+
+# DESCRIPTION
+
+dtas-sinkedit spawns an editor to allow editing of a sink as a YAML file.
+See dtas-player_protocol(7) for details on SINKARGS.
+
+# EXAMPLES
+
+To get a list of existing sink names
+
+	$ dtas-ctl ls
+
+Invoking dtas-sinkedit will spawn your favorite text editor on a
+given SINKNAME:
+
+	$ dtas-sinkedit SINKNAME
+
+If SINKNAME was not listed, it will be created (in an inactive state).
+Successfully exiting your text editor will send the changes to the
+running dtas-player.
+
+# ENVIRONMENT
+
+VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+# SEE ALSO
+
+dtas-player(1), dtas-player_protocol(7), dtas-ctl(1)

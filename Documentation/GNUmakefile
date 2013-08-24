@@ -4,7 +4,17 @@ PANDOC = pandoc
 PANDOC_OPTS = -f markdown --email-obfuscation=none
 pandoc = $(PANDOC) $(PANDOC_OPTS)
 
-man1 := $(addsuffix .1,dtas-enq)
+ones =
+ones += dtas-console
+ones += dtas-ctl
+ones += dtas-enq
+ones += dtas-msinkctl
+ones += dtas-player
+ones += dtas-xdelay
+ones += dtas-sinkedit
+ones += dtas-sourceedit
+
+man1 := $(addsuffix .1, $(ones))
 man7 := $(addsuffix .7,dtas-player_protocol)
 
 all:: man

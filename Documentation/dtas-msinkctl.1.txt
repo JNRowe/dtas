@@ -1,0 +1,45 @@
+% dtas-msinkctl(1) dtas user manual
+
+# NAME
+
+dtas-msinkctl - activate/deactivate multiple sinks at once
+
+# SYNOPSYS
+
+dtas-msinkctl COMMAND
+dtas-msinkctl COMMAND [SINKS...]
+
+# DESCRIPTION
+
+dtas-msinkctl is useful for activating/deactivating multiple sinks.
+
+# EXAMPLES
+
+Display only active sinks (unlike "dtas-ctl sink ls", which shows all sinks)
+
+    dtas-msinkctl active
+
+Display only non-blocking sinks
+
+    dtas-msinkctl nonblock
+
+Enable only SINK1 and SINK3, and close other sinks
+
+    dtas-msinkctl active-set SINK1 SINK3
+
+Add the default sink to the active set
+
+    dtas-msinkctl active-add default
+
+Remove SINK3 from the active set
+
+    dtas-msinkctl active-add SINK3
+
+# ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+# SEE ALSO
+
+dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), dtas-sinkedit(1)

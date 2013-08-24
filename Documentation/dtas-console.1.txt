@@ -1,0 +1,42 @@
+% dtas-console(1) dtas user manual
+
+# NAME
+
+dtas-console - rudimentary curses console client for dtas-player
+
+# SYNOPSIS
+
+dtas-console
+
+# DESCRIPTION
+
+dtas-console displays the elapsed decoder time of the track, which can be
+used as an approximation of the current playback time of a track.
+
+It cannot display an accurate playback time due to variable buffering
+in the sinks and pipes.
+
+See dtas-player_protocol(7) for a detailed description of the protocol.
+
+# KEYBOARD CONTROL
+
+Key bindings are inspired partially by mplayer(1)
+
+- 'j'/'k' - seek backward/forward 5 seconds
+- LEFT/RIGHT - seek backward/forward 10 seconds
+- UP/DOWN - seek forward/backward 1 minute
+- PGUP/PGDWN - seek forward/backward 10 minutes
+- SPACE - toggle play/pause state of the playback
+- 'p'/'P' - decrease/increase timer resolution
+- BACKSPACE - seek to the beginning of the track
+- Ctrl-C - exit dtas-console
+
+# ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+# SEE ALSO
+
+dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), dtas-sinkedit(1),
+dtas-sourceedit(1)

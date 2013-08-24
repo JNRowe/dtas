@@ -2,7 +2,27 @@
 %
 
 # NAME
-	dtas-player_protocol - protocol for controlling dtas-player
+
+dtas-player_protocol - protocol for controling dtas-player
+
+# DESCRIPTION
+
+This gives a specification of the dtas-player protocol over a local Unix
+SOCK_SEQPACKET or SOCK_DGRAM socket.  The dtas-player protocol should NOT be
+considered stable at this point and compatibility will break.
+
+Inspiration is taken from MPRIS and MPRIS 2.0 specifications (e.g.
+play_pause, play, pause), and there will be a proxy in the future to
+support MPRIS/MPRIS 2.0 clients.
+
+The DTAS_PLAYER_SOCK is the standard environment determining the control
+socket for dtas-player(1).  This defaults to $HOME/.dtas/player.sock if
+unset.
+
+Most low-level commands may be issued using the dtas-ctl(1) command.
+
+Higher-level commands such as dtas-console(1), dtas-sourceedit(1),
+dtas-sinkedit(1), and dtas-enq(1) also implement this protocol.
 
 # ARGUMENT TYPES
 
@@ -16,13 +36,77 @@
 - FILENAME - an expanded pathname relative to / is recommended since
              dtas-player and the client may run in different directories
 
+# VARIABLE EXPANSION
+
+For source and sink "command" arguments, the $SOXFMT and $ECAFMT
+environment variables are exported automatically to source to ease
+integration with sox(1) and ecasound(1).
+
+Both $SOXFMT and $ECAFMT are based on the configured "format" of
+the dtas-player (see below).
+
+For all machines, $SOXFMT defaults to: -ts32 -c2 -r44100
+For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
+
 # COMMANDS
+
+* cd - change the current working directory of the player
+
+* clear - clear current queue (current track/command continues running)
+  PENDING: this may be renamed to "queue clear" or "queue-clear"
+
+* current - output information about the currently-playing track/command
+  in YAML.  The structure of this is unstable and subject to change.
 
 * enq FILENAME - enqueue the given FILENAME for playback
   An expanded (full) pathname relative to '/' is recommended, as
   dtas-player and the client may be in different directories.
+  PENDING: this may be renamed to "queue add"
+
+* enq-cmd "COMMAND" - run the following command for playback.
+  The COMMAND is expected to output audio in the audio format matching
+  the current audio format of the player.  This may be a shell pipeline
+  and include multiple commands.  The $SOXFMT and $ECAFMT variables are
+  available here.
+  PENDING: this may be renamed to "queue add-cmd"
+
+* env ENVTOSET=ENVVALUE ENVTOSET2=ENVVALUE2
+  Set environment variables.  This affects all future source/sink
+  processes as well as helper commands dtas-player may spawn
+  (e.g. soxi(1)).  Environment variables set this way are currently not
+  preserved across invocations of dtas-player(1), but may change in the
+  future.
+
+* env ENVTOUNSET1# ENVTOUNSET#
+  Unset the given environment variable.
+  PENDING: the '#' is ugly and inconsistent with the per-sink/source.
+  env.
+
+* format FORMATARGS - configure the format between source and sink
+  Changing this will affect the $SOXFMT and $ECAFMT environments passed
+  to source and sink commands.  Changing this implies a "restart"
+  Changing rate to 48000 is probably useful if you plan on playing to some
+  laptop sound cards.
+
+    + channels=UNSIGNED - (default: 2 (stereo)) - number of channels
+      to use internally.  sox will internally invoke the remix effect
+      when decoding.
+    + endian=(big|little|swap) - (default: native) - there is probably no
+      point in changing this unless you output over a network sink to
+      a machine of different endianess.
+    + bits=UNSIGNED - (default: implied from type) - sample precision (decoded)
+      This may be pointless and removed in the future, since the sample
+      precision is implied from type.
+    + rate=UNSIGNED - (default: 44100) - sample rate of audio
+      Typical values of rate are 44100, 48000, 88200, 96000.  Not all
+      DSP effects are compatible with all sampling rates/channels.
+    + type=(s16|s24|s32|u16|u24|u32|f32|f64) - (default: s32)
+      change the raw PCM format.  s32 currently offers the best performance
+      when only sox/play are used.  f32 may offer better performance if
+      piping to/from non-sox applications (e.g. ecasound)
 
 * pause - pause playback
+  Player pause state is preserved across dtas-player invocations.
 
 * play - restart playback from pause.  Playback sinks will yield
   control of the audio playback device once no source is playing.
@@ -31,47 +115,67 @@
   paused, and pauses playback if playing.
 
 * restart - restarts all processes in the current pipeline.  Playback
-  will be momentarily interrupted while this change occurs.  This may
-  be necess
+  will be momentarily interrupted while this change occurs.  This is
+  necessary if one of the commands (e.g. sox or ecasound) or loaded
+  libraries (e.g. a LADSPA plugin) is upgraded.
 
-* seek HH:MM:SS.FRAC - seek the current track to a specified time.
+* rg RGARGS - configure ReplayGain support
+  All FLOAT values may be adjusted via '+=' or '-=' instead of simple
+  assignment ('=').  If RGARGS is empty, the current rg state of
+  non-default values will be dumped in YAML.
+    + fallback_gain=FLOAT (-6.0) - dB value
+      Adjust the volume by this level (usually negative) for tracks
+      missing ReplayGain tags.  This is useful when the queue contains
+      a mix of tracks with and without ReplayGain tags.
+    + fallback_track=BOOLEAN (true)
+      When in album_gain mode, fallback to track_gain if the
+      REPLAYGAIN_ALBUM_GAIN metadata is missing.
+    + mode=(album_gain|track_gain|track_norm|album_norm|off)
+      This controls the ReplayGain tag to use.  The *_norm options
+      are used for peak normalization and not commonly found in other
+      players.
+    + preamp=FLOAT (0) - dB value
+      Adjust the album_gain or track_gain amount by this value (in dB).
+    + norm_level=FLOAT (1.0 == dBFS)
+      Controls the level to normalize to when using album_norm or track_norm.
+
+* seek [+-]HH:MM:SS.FRAC - seek the current track to a specified time.
   This is passed directly as the first argument for the sox(1) "trim"
   command.   See the sox(1) manpage for details.
+  Seeking to a relative time is also supported by prefixing the time
+  with '+' or '-'
 
-* enq-cmd "COMMAND" - run the following command for playback.
-  The COMMAND is expected to output audio in the format compatible with
-  the current audio format of the player.  This may be a shell pipeline
-  and include multiple commands.
-
-* clear - clear current queue (current song continues playing)
-
-* skip - abort current track
+* skip - abort current track/command (via closing the output pipe)
   Running the "clear" command before this will abort playback.
 
 * sink ls - list names of current sinks
+
 * sink cat SINKNAME - dump SINKNAME config in YAML
+
 * sink rm SINKNAME - remove SINKNAME
+
 * sink ed SINKNAME SINKARGS - create/edit SINKNAME
+  This currently does not restart running (active) sinks.
+  This will stop active sinks if active is set to false, and start
+  active sinks if active is set to true.
+  See dtas-sinkedit(1) for an example of using this.
+    + command=COMMAND - change the command-line used for playback
+    + active=BOOLEAN - whether or not the sink will be in use (default: false)
+    + env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the sink process
+    + env#ENVNAME - unset ENVNAME in the sink process (only)
+    + prio=INTEGER - priority of the sink, lower values run first
+    + nonblock=BOOLEAN - drop audio data to avoid holding back other sinks
+    + pipe_size=UNSIGNED - set the size of the pipe for the sink (Linux-only)
 
-  SINKARGS:
-    command=COMMAND
-    active=BOOLEAN
-    env.ENVNAME=ENVVALUE
-    prio=INTEGER
-    nonblock=BOOLEAN
-    pipe_size=UNSIGNED
+* source cat - dump the current source command and env in YAML
 
-* env ENVTOSET=ENVVALUE ENVTOUNSET1# ENVTOSET2=ENVVALUE2
+* source ed SOURCEARGS - edit the source (decoder) command and environment.
+  This changes here will immediately restart the source process.
+  See the code for dtas-sourceedit(1) for an example of using this.
+    + command=COMMAND - change the command-line used to decode audio
+    + env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the source process
+    + env#ENVNAME - unset ENVNAME in the source process (only)
 
-ReplayGain state
-----------------
-
-* rg.mode=(album_gain|track_gain|track_norm|album_norm|off)
-
-* rg.preamp=DB_VALUE  (0)
-
-* rg.fallback_gain=DB_VALUE (-6.0)
-
-* rg.fallback_track=BOOLEAN (true)
-
-* rg.norm_level=FLOAT (1.0 == dBFS)
+* watch - adds the client to the passive watch list for notifications.
+  It is recommended clients issue no further commands and open
+  another client socket to issue non-watch commands.
