@@ -449,4 +449,15 @@ module DTAS::Player::ClientHandler
       io.emit("ERR unknown source op")
     end
   end
+
+  def chdir_handler(io, msg)
+    msg.size == 1 or return io.emit("ERR usage: cd DIRNAME")
+    begin
+      Dir.chdir(msg[0])
+    rescue => e
+      return io.emit("ERR chdir: #{e.message}")
+    end
+    # echo(%W(cd msg[0])) # should we broadcast this?
+    io.emit("OK")
+  end
 end

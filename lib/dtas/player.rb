@@ -180,6 +180,10 @@ class DTAS::Player
       io.emit("OK")
     when "source"
       source_handler(io, msg)
+    when "cd"
+      chdir_handler(io, msg)
+    when "pwd"
+      io.emit(Dir.pwd)
     end
   end
 

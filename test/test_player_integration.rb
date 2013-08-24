@@ -196,4 +196,25 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     assert(system("cmp", dump.path, expect.path),
            "files don't match #{dump.path} != #{expect.path}")
   end
+
+  def test_cd_pwd
+    s = client_socket
+    pwd = Dir.pwd
+
+    s.preq("pwd")
+    assert_equal pwd, s.readpartial(6666)
+
+    s.preq("cd /")
+    assert_equal "OK", s.readpartial(6)
+
+    s.preq("pwd")
+    assert_equal "/", s.readpartial(6)
+
+    s.preq("cd /this-better-be-totally-non-existent-on-any-system-#{rand}")
+    err = s.readpartial(666)
+    assert_match(%r{\AERR }, err, err)
+
+    s.preq("pwd")
+    assert_equal "/", s.readpartial(6)
+  end
 end
