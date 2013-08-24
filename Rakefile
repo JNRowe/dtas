@@ -31,16 +31,14 @@ Hoe.plugin :git
 include Rake::DSL
 
 Hoe.spec('dtas') do |p|
-  developer 'Eric Wong', 'normalperson@yhbt.net'
+  developer 'Eric Wong', 'e@80x24.org'
 
   self.readme_file = 'README'
   self.history_file = 'NEWS'
   self.urls = %w(http://dtas.80x24.org/)
   self.summary = x = File.readlines("README")[0].split(/\s+/)[1].chomp
   self.description = self.paragraphs_of("README", 1)
-  license "GPLv2+"
-
-  dependency 'io_splice', '~> 4.2.0'
+  license "GPLv3+"
 end
 
 task :publish_docs do
