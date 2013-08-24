@@ -82,7 +82,7 @@ begin
     if current = cur['current']
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr(current['infile'])
+      Curses.addstr(current['infile'] || current['command'])
 
       elapsed = Time.now.to_f - current['spawn_at']
       if (nr = cur['current_initial']) && (current_format = current['format'])
