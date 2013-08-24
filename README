@@ -1,0 +1,91 @@
+= dtas - duct tape audio suite for *nix
+
+Free Software command-line tools for audio playback, mastering, and
+whatever else related to audio.  dtas follows the worse-is-better
+philosophy and acts as duct tape to combine existing command-line tools
+for flexibility and ease-of-development.  dtas is currently implemented
+in Ruby (and some embedded shell), but may use other languages in the
+future.
+
+Primary executables available are:
+
+* dtas-player - gapless music player (or pipeline/process manager :P)
+* dtas-cueedit - embedded cuesheet editor (FLAC-only for now)
+
+The centerpiece is dtas-player, a gapless music player designed to aid
+in writing scripts for sox/ecasound use.  Unlike monolithic music
+players, dtas-player is close to a *nix shell in functionality, allowing
+for the execution of arbitrary commands as sources, filters, and sinks
+for audio.  dtas-player supports:
+
+* any DSP effects offered by SoX, ecasound, LADSPA, LV2, etc..
+* multiple outputs for playback (including dumping audio to
+  files or piping to arbitrary commands)
+* ReplayGain (including fallback gain and peak normalization)
+
+dtas-player is a *nix pipeline and process manager.  It may be used
+spawn and pipe to abitrary Unix commands, not just audio-related
+commands.  It can interactively restart/replace the source (audio
+decoder) component of a pipeline while keeping the sink (playback
+endpoint) running.
+
+Users of dtas-player will also be interested in the following scripts:
+
+* dtas-ctl - "raw" command-line scripting interface for dtas-player
+* dtas-ps - process viewer for dtas-player
+* dtas-enq - enqueue files/commands for dtas-player
+* dtas-sinkedit - edit sinks (playback targets) for dtas-player
+* dtas-play-xover-delay - alternative sink for dtas-player
+
+Coming:
+
+* MPRIS/MPRIS 2.0 bridge for partial dtas-player control
+* tracklist support in dtas-player (maybe?)
+* whatever command-line tools come to mind...
+* native ffmpeg/avconv/gst support in dtas-player
+* better error handling, many bugfixes, etc...
+* better documentation
+
+== Contact
+
+Feedback (results, bug reports, patches, pull-requests) via plain-text
+email is very much appreciated.
+
+Please send plain-text email to Eric Wong <normalperson@yhbt.net>,
+HTML will not be read.  dtas is for GUI-phobes, by GUI-phobes.
+Public mailing list coming soon.
+
+Please use git-format-patch(1) and git-send-email(1) distributed with
+the git(7) suite for generating and sending patches.  Please format
+pull requests with the git-request-pull(1) script (also distributed
+with git(7)) and send them via email.
+
+See http://www.git-scm.com/ for more information on git.
+
+== License
+
+dtas is copyrighted Free Software by all contributors, see logs
+in revision control for names and email addresses of all of them.
+
+dtas is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 3 of the License, or (at your
+option) any later version.
+
+dtas is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, see https://www.gnu.org/licenses/gpl-3.0.txt
+
+dtas is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+Note: The GPL does not and can not apply to external commands run by
+dtas scripts, so users _may_ run any non-Free Software you want via dtas
+(just like one may do so via bash).  However, the dtas project does not
+endorse nor support the use of any non-Free Software.

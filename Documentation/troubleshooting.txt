@@ -1,0 +1,13 @@
+dtas-player troubleshooting guide
+---------------------------------
+
+dtas-player is heavily dependent on external commands such as sox(1)/play(1)
+and ecasound(1).
+
+* problem: audio playback does not start
+
+  Since dtas-player just runs the play(1) command, the first step is to
+  ensure play(1) works without dtas-player.
+
+  Consult SoX documentation and mailing lists for getting play(1) to work,
+  first.

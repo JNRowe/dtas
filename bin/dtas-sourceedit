@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'tempfile'
+require 'yaml'
+require 'dtas/unix_client'
+require 'dtas/disclaimer'
+editor = ENV["VISUAL"] || ENV["EDITOR"]
+c = DTAS::UNIXClient.new
+usage = $0
+ARGV.size == 0 or abort usage
+name = ARGV[0]
+
+tmp = Tempfile.new(%w(dtas-sourceedit .yml))
+tmp.sync = true
+tmp.binmode
+
+buf = c.req(%W(source cat))
+abort(buf) if buf =~ /\AERR/
+
+tmp.write(buf << DTAS_DISCLAIMER)
+cmd = "#{editor} #{tmp.path}"
+system(cmd) or abort "#{cmd} failed: #$?"
+tmp.rewind
+source = YAML.load(tmp.read)
+
+cmd = %W(source ed)
+if env = source["env"]
+  env.each do |k,v|
+    cmd << (v.nil? ? "env##{k}" : "env.#{k}=#{v}")
+  end
+end
+
+%w(command).each do |field|
+  value = source[field] and cmd << "#{field}=#{value}"
+end
+
+c.req_ok(cmd)

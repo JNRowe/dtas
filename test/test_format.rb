@@ -1,0 +1,61 @@
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require './test/helper'
+require 'tempfile'
+require 'dtas/format'
+
+class TestFormat < Minitest::Unit::TestCase
+  def test_initialize
+    fmt = DTAS::Format.new
+    assert_equal %w(-ts32 -c2 -r44100), fmt.to_sox_arg
+    hash = fmt.to_hsh
+    assert_equal({}, hash)
+  end
+
+  def test_nonstandard
+    fmt = DTAS::Format.new
+    fmt.type = "s16"
+    fmt.rate = 48000
+    fmt.channels = 4
+    hash = fmt.to_hsh
+    assert_kind_of Hash, hash
+    assert_equal %w(channels rate type), hash.keys.sort
+    assert_equal "s16", hash["type"]
+    assert_equal 48000, hash["rate"]
+    assert_equal 4, hash["channels"]
+
+    # back to stereo
+    fmt.channels = 2
+    hash = fmt.to_hsh
+    assert_equal %w(rate type), hash.keys.sort
+    assert_equal "s16", hash["type"]
+    assert_equal 48000, hash["rate"]
+    assert_nil hash["channels"]
+  end
+
+  def test_from_file
+    Tempfile.open(%w(tmp .wav)) do |tmp|
+      # generate an empty file with 1s of audio
+      cmd = %W(sox -r 96000 -b 24 -c 2 -n #{tmp.path} trim 0 1)
+      system(*cmd)
+      assert $?.success?, "#{cmd.inspect} failed: #$?"
+      fmt = DTAS::Format.new
+      fmt.from_file tmp.path
+      assert_equal 96000, fmt.rate
+      assert_equal 2, fmt.channels
+      tmp.unlink
+    end
+  end
+
+  def test_bytes_per_sample
+    fmt = DTAS::Format.new
+    assert_equal 4, fmt.bytes_per_sample
+    fmt.type = "f64"
+    assert_equal 8, fmt.bytes_per_sample
+    fmt.type = "f32"
+    assert_equal 4, fmt.bytes_per_sample
+    fmt.type = "s16"
+    assert_equal 2, fmt.bytes_per_sample
+  end
+end

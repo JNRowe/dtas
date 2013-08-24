@@ -1,0 +1,7 @@
+/Manifest.txt
+/NEWS
+/pkg
+/lib/dtas/version.rb
+/coverage.dump
+*.tar.gz
+*.log

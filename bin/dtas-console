@@ -1,0 +1,160 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+#
+# Note: no idea what I'm doing, especially w.r.t. curses
+require 'dtas/unix_client'
+require 'curses'
+require 'yaml'
+
+w = DTAS::UNIXClient.new
+w.req_ok('watch')
+c = DTAS::UNIXClient.new
+cur = YAML.load(c.req('current'))
+readable = [ w, $stdin ]
+
+def update_tfmt(prec)
+  prec == 0 ? '%H:%M:%S' : "%H:%M:%S.%#{prec}N"
+end
+trap(:INT) { exit(0) }
+trap(:TERM) { exit(0) }
+
+# time precision
+prec_nr = 1
+prec_step = (0..9).to_a
+prec_max = prec_step.size - 1
+tfmt = update_tfmt(prec_step[prec_nr])
+events = []
+interval = 1.0 / 10 ** prec_nr
+
+def show_events(lineno, screen, events)
+  Curses.setpos(lineno += 1, 0)
+  Curses.clrtoeol
+  Curses.addstr('Events:')
+  maxy = screen.maxy - 1
+  maxx = screen.maxx
+  events.reverse_each do |e|
+    Curses.setpos(lineno += 1, 0)
+    Curses.clrtoeol
+    extra = e.size/maxx
+    break if (lineno + extra) >= maxy
+
+    # deal with long lines
+    if extra
+      rewind = lineno
+      extra.times do
+        Curses.setpos(lineno += 1, 0)
+        Curses.clrtoeol
+      end
+      Curses.setpos(rewind, 0)
+      Curses.addstr(e)
+      Curses.setpos(lineno, 0)
+    else
+      Curses.addstr(e)
+    end
+  end
+
+  # discard events we can't show
+  nr_events = events.size
+  if nr_events > maxy
+    events = events[(nr_events - maxy)..-1]
+    until lineno >= screen.maxy
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+    end
+  else
+    Curses.setpos(maxy + 1, 0)
+    Curses.clrtoeol
+  end
+end
+
+begin
+  Curses.init_screen
+  Curses.nonl
+  Curses.cbreak
+  Curses.noecho
+  screen = Curses.stdscr
+  screen.scrollok(true)
+  screen.keypad(true)
+  loop do
+    lineno = -1
+    if current = cur['current']
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr(current['infile'])
+
+      elapsed = Time.now.to_f - current['spawn_at']
+      if (nr = cur['current_initial']) && (current_format = current['format'])
+        rate = current_format['rate'].to_f
+        elapsed += nr / rate
+        total = " [#{Time.at(current['samples'] / rate).strftime(tfmt)}]"
+      else
+        total = ""
+      end
+
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total}")
+    else
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr(cur['paused'] ? 'paused' : 'idle')
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+    end
+
+    show_events(lineno, screen, events)
+
+    Curses.refresh # draw and wait
+    r = IO.select(readable, nil, nil, current ? interval : nil) or next
+    r[0].each do |io|
+      case io
+      when w
+        event = w.res_wait
+        events << "#{Time.now.strftime(tfmt)} #{event}"
+        # something happened, refresh current
+        # we could be more intelligent here, maybe, but too much work.
+        cur = YAML.load(c.req('current'))
+      when $stdin
+        # keybindings taken from mplayer / vi
+        case key = Curses.getch
+        when "j" then c.req_ok("seek +5")
+        when "k" then c.req_ok("seek -5")
+        when Curses::KEY_DOWN then c.req_ok("seek -60")
+        when Curses::KEY_UP then c.req_ok("seek +60")
+        when Curses::KEY_LEFT then c.req_ok("seek -10")
+        when Curses::KEY_RIGHT then c.req_ok("seek +10")
+        when Curses::KEY_BACKSPACE then c.req_ok("seek 0")
+        # yes, some of us have long audio files
+        when Curses::KEY_PPAGE then c.req_ok("seek +600")
+        when Curses::KEY_NPAGE then c.req_ok("seek -600")
+        when " "
+          c.req("play_pause")
+        when "p" # lower precision of time display
+          if prec_nr >= 1
+            prec_nr -= 1
+            tfmt = update_tfmt(prec_step[prec_nr])
+            interval = 1.0 / 10 ** prec_nr
+          end
+        when "P" # increase precision of time display
+          if prec_nr < prec_max
+            prec_nr += 1
+            tfmt = update_tfmt(prec_step[prec_nr])
+            interval = 1.0 / 10 ** prec_nr
+          end
+        when 27 # TODO readline/edit mode?
+        else
+          Curses.setpos(screen.maxy - 1, 0)
+          Curses.clrtoeol
+          Curses.addstr("unknown key=#{key.inspect}")
+        end
+      end
+    end
+  end
+rescue EOFError
+  Curses.close_screen
+  abort "dtas-player exited"
+ensure
+  Curses.close_screen
+end

@@ -1,0 +1,27 @@
+% dtas-enq(1) dtas user manual
+%
+
+# NAME
+
+dtas-enq - enqueue audio files for playback with dtas-player
+
+# SYNOPSYS
+
+dtas-enq [FILE...]
+
+# DESCRIPTION
+
+dtas-enq will enqueue a list of files given on the command-line to a
+running instance of dtas-player.  dtas-player will start playing the
+newly enqueued files in the order given.
+
+# ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player listen socket.
+This defaults to ~/.dtas/player.sock
+
+# SEE ALSO
+
+* dtas-player(1)
+* dtas-player(7)
+* dtas-ctl(1)

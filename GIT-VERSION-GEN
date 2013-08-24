@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+CONSTANT = "DTAS::VERSION"
+RVF = "lib/dtas/version.rb"
+DEF_VER = "v0.0.0"
+vn = DEF_VER
+
+# First see if there is a version file (included in release tarballs),
+# then try git-describe, then default.
+if File.exist?(".git")
+  describe = `git describe --abbrev=4 HEAD 2>/dev/null`.strip
+  case describe
+  when /\Av[0-9]*/
+    vn = describe
+    system(*%w(git update-index -q --refresh))
+    unless `git diff-index --name-only HEAD --`.chomp.empty?
+      vn << "-dirty"
+    end
+    vn.tr!('-', '.')
+  end
+end
+
+vn = vn.sub!(/\Av/, "")
+new_ruby_version = "#{CONSTANT} = '#{vn}'\n"
+cur_ruby_version = File.read(RVF) rescue nil
+if new_ruby_version != cur_ruby_version
+  File.open(RVF, "w") { |fp| fp.write(new_ruby_version) }
+end
+puts vn if $0 == __FILE__

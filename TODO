@@ -1,0 +1,4 @@
+* _limited_ frontends for MPRIS/mpd/whatever-standards-are-in-use-today
+  Obviously we can't have untrusted users executing arbitrary commands
+
+* tests for bin/*

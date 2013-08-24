@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+Thread.abort_on_exception = $stderr.sync = $stdout.sync = true
+require 'yaml'
+require 'dtas/player'
+sock = (ENV["DTAS_PLAYER_SOCK"] ||
+        File.expand_path("~/.dtas/player.sock")).b
+state = (ENV["DTAS_PLAYER_STATE"] ||
+         File.expand_path("~/.dtas/player_state.yml")).b
+[ sock, state ].each do |file|
+  dir = File.dirname(file)
+  next if File.directory?(dir)
+  require 'fileutils'
+  FileUtils.mkpath(dir)
+end
+
+state = DTAS::StateFile.new(state)
+if tmp = state.tryload
+  tmp["socket"] ||= sock
+  player = DTAS::Player.load(tmp)
+  player.state_file ||= state
+else
+  player = DTAS::Player.new
+  player.state_file = state
+  player.socket = sock
+end
+
+at_exit { player.close }
+player.bind
+trap(:INT) { exit }
+trap(:TERM) { exit }
+player.run

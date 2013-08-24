@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'tempfile'
+require 'shellwords'
+usage = "Usage: #$0 FILENAME"
+editor = ENV["VISUAL"] || ENV["EDITOR"]
+ARGV.size > 0 or abort usage
+
+def err_msg(cmd, status)
+  err_cmd = cmd.map { |f| Shellwords.escape(f) }.join(' ')
+  "E: #{err_cmd} failed: #{status.inspect}"
+end
+
+def x!(*cmd)
+  system(*cmd) or abort err_msg(cmd, $?)
+end
+
+def tmpfile(file, suffix)
+  tmp = Tempfile.new([File.basename(file), suffix])
+  tmp.sync = true
+  tmp.binmode
+  tmp
+end
+
+ARGV.each do |file|
+  # Unix paths are encoding agnostic
+  file = file.b
+  file =~ /\.flac\z/i or warn "Unsupported suffix, assuming FLAC"
+  tmp = tmpfile(file, '.cue')
+  begin
+    # export the temporary file for the user to edit
+    if system(*%W(metaflac --export-cuesheet-to=#{tmp.path} #{file}))
+      remove_existing = true
+      backup = tmpfile(file, '.backup.cue')
+    else
+      remove_existing = false
+      backup = nil
+      tmp.puts 'FILE "dtas-cueedit.tmp.flac" FLAC'
+      tmp.puts '  TRACK 01 AUDIO'
+      tmp.puts '    INDEX 01 00:00:00'
+    end
+
+    # keep a backup, in case the user screws up the edit
+    original = File.binread(tmp.path)
+    backup.write(original) if backup
+
+    # user edits the file
+    x!("#{editor} #{tmp.path}")
+
+    # avoid an expensive update if the user didn't change anything
+    current = File.binread(tmp.path)
+    if current == original
+      $stderr.puts "tags for #{Shellwords.escape(file)} unchanged" if $DEBUG
+      next
+    end
+
+    # we must remove existing tags before importing again
+    if remove_existing
+      x!(*%W(metaflac --remove --block-type=CUESHEET #{file}))
+    end
+
+    # try to import the new file but restore from the original backup if the
+    # user wrote an improperly formatted cue sheet
+    cmd = %W(metaflac --import-cuesheet-from=#{tmp.path} #{file})
+    if ! system(*cmd) && backup
+      warn err_msg(cmd, $?)
+      warn "E: restoring original from backup"
+      x!(*%W(metaflac --import-cuesheet-from=#{backup.path} #{file}))
+      warn "E: backup cuesheet restored, #{Shellwords.escape(file)} unchanged"
+      exit(false)
+    end
+  ensure
+    tmp.close!
+    backup.close! if backup
+  end
+end

@@ -1,0 +1,34 @@
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require './test/player_integration'
+class TestSinkTeeIntegration < Minitest::Unit::TestCase
+  include PlayerIntegration
+
+  def test_tee_integration
+    s = client_socket
+    default_sink_pid(s)
+    tee_pid = Tempfile.new(%w(dtas-test .pid))
+    orig = Tempfile.new(%w(orig .junk))
+    ajunk = Tempfile.new(%w(a .junk))
+    bjunk = Tempfile.new(%w(b .junk))
+    cmd = "echo $$ > #{tee_pid.path}; " \
+          "cat /dev/fd/a > #{ajunk.path} & " \
+          "cat /dev/fd/b > #{bjunk.path}; wait"
+    s.send("sink ed split active=true command='#{cmd}'", Socket::MSG_EOR)
+    assert_equal("OK", s.readpartial(666))
+    pluck = "sox -n $SOXFMT - synth 3 pluck | tee #{orig.path}"
+    s.send("enq-cmd \"#{pluck}\"", Socket::MSG_EOR)
+    assert_equal "OK", s.readpartial(666)
+
+    wait_files_not_empty(tee_pid)
+    pid = read_pid_file(tee_pid)
+    dethrottle_decoder(s)
+    wait_pid_dead(pid)
+    assert_equal ajunk.size, bjunk.size
+    assert_equal orig.size, bjunk.size
+    assert_equal ajunk.read, bjunk.read
+    bjunk.rewind
+    assert_equal orig.read, bjunk.read
+  end
+end

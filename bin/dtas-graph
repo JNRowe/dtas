@@ -1,0 +1,129 @@
+#!/usr/bin/perl -w
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+use strict;
+use Graph::Easy; # for ASCII-art graphs
+$^O =~ /linux/ or print STDERR "$0 probably only works on Linux...\n";
+scalar @ARGV or die "Usage: $0 PID [PID ...]";
+our $procfs = $ENV{PROCFS} || "/proc";
+my $cull_self_pipe = 1;
+
+# returns a list of PIDs which are children of the given PID
+sub children_of {
+	my ($ppid) = @_;
+	my %rv = map {
+		s/\A\s*//g;
+		s/\s*\z//g;
+		my ($pid, $cmd) = split(/\s+/, $_, 2);
+		$pid => $cmd;
+	} `ps h -o pid,cmd --ppid=$ppid`;
+	\%rv;
+}
+
+# pid => [ child pids ]
+my %pids;
+
+# pipe_ino => { r => [ [pid, fd], [pid, fd] ], w => [ [pid, fd], ... ] }
+my %pipes;
+
+# pid => argv
+my %cmds;
+
+my $pipe_nr = 0;
+# pipe_id -> pipe_ino (we use short pipe IDs to save space on small terms)
+my %graphed;
+
+my @to_scan = (@ARGV);
+
+sub cmd_of {
+	my ($pid) = @_;
+	my $cmd = `ps h -o cmd $pid`;
+	chomp $cmd;
+	$cmd;
+}
+
+while (my $pid = shift @to_scan) {
+	my $children = children_of($pid);
+	my @child_pids = keys %$children;
+	push @to_scan, @child_pids;
+	$pids{$pid} = \@child_pids;
+	foreach my $child (keys @child_pids) {
+		$cmds{$child} = $children->{$child};
+	}
+}
+
+# build up a hash of pipes and their connectivity to processes:
+#
+foreach my $pid (keys %pids) {
+	my @out = `lsof -p $pid`;
+	# output is like this:
+	# play    12739   ew    0r  FIFO    0,7      0t0 36924019 pipe
+	foreach my $l (@out) {
+		my @l = split(/\s+/, $l);
+		$l[4] eq "FIFO" or next;
+
+		my $fd = $l[3];
+		my $pipe_ino = $l[7];
+		my $info = $pipes{$pipe_ino} ||= { r => [], w => [] };
+		if ($fd =~ s/r\z//) {
+			push @{$info->{r}}, [ $pid, $fd ];
+		} elsif ($fd =~ s/w\z//) {
+			push @{$info->{w}}, [ $pid, $fd ];
+		}
+
+	}
+}
+
+my $graph = Graph::Easy->new();
+foreach my $pid (keys %pids) {
+	$graph->add_node($pid);
+}
+
+foreach my $pipe_ino (keys %pipes) {
+	my $info = $pipes{$pipe_ino};
+	my %pairs;
+	my $pipe_node;
+
+	foreach my $rw (qw(r w)) {
+		foreach my $pidfd (@{$info->{$rw}}) {
+			my ($pid, $fd) = @$pidfd;
+			my $pair = $pairs{$pid} ||= {};
+			my $fds = $pair->{$rw} ||= [];
+			push @$fds, $fd;
+		}
+	}
+	# use Data::Dumper;
+	# print Dumper(\%pairs);
+	my $nr_pids = scalar keys %pairs;
+
+	foreach my $pid (keys %pairs) {
+		my $pair = $pairs{$pid};
+		my $r = $pair->{r} || [];
+		my $w = $pair->{w} || [];
+		next if $cull_self_pipe && $nr_pids == 1 && @$r && @$w;
+
+		unless ($pipe_node) {
+			my $pipe_id = $pipe_nr++;
+			$graphed{$pipe_id} = $pipe_ino;
+			$pipe_node = "|$pipe_id";
+			$graph->add_node($pipe_node);
+		}
+
+		$graph->add_edge($pipe_node, $pid, join(',', @$r)) if @$r;
+		$graph->add_edge($pid, $pipe_node, join(',', @$w)) if @$w;
+	}
+}
+
+print "   PID COMMAND\n";
+foreach my $pid (sort { $a <=> $b } keys %pids) {
+	printf "% 6d", $pid;
+	print " ", $cmds{$pid} || cmd_of($pid), "\n";
+}
+
+print "\nPIPEID PIPE_INO\n";
+foreach my $pipe_id (sort { $a <=> $b } keys %graphed) {
+	printf "% 6s", "|$pipe_id";
+	print " ", $graphed{$pipe_id}, "\n";
+}
+
+print $graph->as_ascii;

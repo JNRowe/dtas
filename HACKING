@@ -1,0 +1,12 @@
+serialization (dtas-player)
+---------------------------
+
+* objects serialize using the "to_hsh" method (like "to_hash", but omits
+  default values) and then to YAML.  We avoid exposing the fact we use
+  Ruby (or any programming language) in any formats.
+
+* every serializable class defines a "load" singleton method which takes the
+  output Hash of "to_hsh"
+
+* we avoid serializing default values to make the state file shorter and
+  more suitable for human viewing and editing.

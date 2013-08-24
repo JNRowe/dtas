@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'dtas/unix_client'
+require 'dtas/disclaimer'
+require 'tempfile'
+require 'yaml'
+editor = ENV["VISUAL"] || ENV["EDITOR"]
+c = DTAS::UNIXClient.new
+usage = "#$0 SINKNAME"
+ARGV.size == 1 or abort usage
+name = ARGV[0]
+
+tmp = Tempfile.new(%w(dtas-sinkedit .yml))
+tmp.sync = true
+tmp.binmode
+
+buf = c.req(%W(sink cat #{name}))
+abort(buf) if buf =~ /\AERR/
+buf << DTAS_DISCLAIMER
+
+tmp.write(buf)
+cmd = "#{editor} #{tmp.path}"
+system(cmd) or abort "#{cmd} failed: #$?"
+tmp.rewind
+sink = YAML.load(tmp.read)
+
+cmd = %W(sink ed #{name})
+if env = sink["env"]
+  env.each do |k,v|
+    cmd << (v.nil? ? "env##{k}" : "env.#{k}=#{v}")
+  end
+end
+
+%w(nonblock active).each do |field|
+  if sink.key?(field)
+    cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
+  end
+end
+
+%w(prio pipe_size command).each do |field|
+  value = sink[field] and cmd << "#{field}=#{value}"
+end
+
+c.req_ok(cmd)

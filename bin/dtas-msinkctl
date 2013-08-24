@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'yaml'
+require 'dtas/unix_client'
+usage = "#$0 <active-set|active-add|active-sub|nonblock|active> SINK"
+c = DTAS::UNIXClient.new
+action = ARGV.shift
+sink_args = ARGV
+
+buf = c.req("sink ls")
+abort(buf) if buf =~ /\AERR/
+player_sinks = buf.split(/ /)
+
+non_existent = sink_args - player_sinks
+non_existent[0] and
+  abort "non-existent sink(s): #{non_existent.join(' ')}"
+
+def activate_sinks(c, sink_names)
+  sink_names.each { |name| c.req_ok("sink ed #{name} active=true") }
+end
+
+def deactivate_sinks(c, sink_names)
+  sink_names.each { |name| c.req_ok("sink ed #{name} active=false") }
+end
+
+def filter(c, player_sinks, key)
+  rv = []
+  player_sinks.each do |name|
+    buf = c.req("sink cat #{name}")
+    sink = YAML.load(buf)
+    rv << sink["name"] if sink[key]
+  end
+  rv
+end
+
+case action
+when "active-set"
+  activate_sinks(c, sink_args)
+  deactivate_sinks(c, player_sinks - sink_args)
+when "active-add" # idempotent
+  activate_sinks(c, sink_args)
+when "active-sub"
+  deactivate_sinks(c, sink_args)
+when "active", "nonblock"
+  abort "`#$0 #{action}' takes no arguments" if sink_args[0]
+  puts filter(c, player_sinks, action).join(' ')
+else
+  abort usage
+end

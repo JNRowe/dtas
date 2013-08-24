@@ -1,0 +1,77 @@
+% dtas-player_protocol(7) dtas user manual
+%
+
+# NAME
+	dtas-player_protocol - protocol for controlling dtas-player
+
+# ARGUMENT TYPES
+
+- BOOLEAN - must be "true" or "false"
+- INTEGER - a signed integer in decimal notation (base 10)
+- UNSIGNED - an unsigned integer in decimal or hex notation
+- ENVNAME - must be a suitable environment variable (setenv(3))
+- ENVVALUE - must be a suitable environment variable (setenv(3))
+- COMMAND, this may be quoted string passed to sh -c "",
+           variable/argument expansion will be performed by the shell
+- FILENAME - an expanded pathname relative to / is recommended since
+             dtas-player and the client may run in different directories
+
+# COMMANDS
+
+* enq FILENAME - enqueue the given FILENAME for playback
+  An expanded (full) pathname relative to '/' is recommended, as
+  dtas-player and the client may be in different directories.
+
+* pause - pause playback
+
+* play - restart playback from pause.  Playback sinks will yield
+  control of the audio playback device once no source is playing.
+
+* play_pause - toggle the play/pause state.  This starts playback if
+  paused, and pauses playback if playing.
+
+* restart - restarts all processes in the current pipeline.  Playback
+  will be momentarily interrupted while this change occurs.  This may
+  be necess
+
+* seek HH:MM:SS.FRAC - seek the current track to a specified time.
+  This is passed directly as the first argument for the sox(1) "trim"
+  command.   See the sox(1) manpage for details.
+
+* enq-cmd "COMMAND" - run the following command for playback.
+  The COMMAND is expected to output audio in the format compatible with
+  the current audio format of the player.  This may be a shell pipeline
+  and include multiple commands.
+
+* clear - clear current queue (current song continues playing)
+
+* skip - abort current track
+  Running the "clear" command before this will abort playback.
+
+* sink ls - list names of current sinks
+* sink cat SINKNAME - dump SINKNAME config in YAML
+* sink rm SINKNAME - remove SINKNAME
+* sink ed SINKNAME SINKARGS - create/edit SINKNAME
+
+  SINKARGS:
+    command=COMMAND
+    active=BOOLEAN
+    env.ENVNAME=ENVVALUE
+    prio=INTEGER
+    nonblock=BOOLEAN
+    pipe_size=UNSIGNED
+
+* env ENVTOSET=ENVVALUE ENVTOUNSET1# ENVTOSET2=ENVVALUE2
+
+ReplayGain state
+----------------
+
+* rg.mode=(album_gain|track_gain|track_norm|album_norm|off)
+
+* rg.preamp=DB_VALUE  (0)
+
+* rg.fallback_gain=DB_VALUE (-6.0)
+
+* rg.fallback_track=BOOLEAN (true)
+
+* rg.norm_level=FLOAT (1.0 == dBFS)

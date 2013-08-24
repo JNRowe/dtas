@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'dtas/unix_client'
+
+# Unix paths are encoding agnostic
+ARGV.map! { |arg| arg.b }
+c = DTAS::UNIXClient.new
+puts c.req(ARGV)

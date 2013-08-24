@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+USAGE = "Usage: #$0 [-x FREQ] [-l] /dev/fd/LO /dev/fd/HI DELAY [DELAY ...]"
+require 'optparse'
+dryrun = false
+xover = '80'
+delay_lo = []
+delay_hi = []
+adj_delay = delay_hi
+out_channels = out_rate = out_type = nil
+
+lowpass = 'lowpass %s lowpass %s'
+highpass = 'highpass %s highpass %s'
+
+op = OptionParser.new('', 24, '  ') do |opts|
+  opts.banner = USAGE
+  opts.on('-x', '--crossover-frequency FREQ') do |freq|
+    xover = freq
+  end
+  opts.on('-l', '--lowpass-delay') { adj_delay = delay_lo }
+  opts.on('-c', '--channels INTEGER') { |val| out_channels = val }
+  opts.on('-r', '--rate RATE') { |val| out_rate = val }
+  opts.on('-t', '--type FILE-TYPE') { |val| out_type = val }
+  opts.on('-n', '--dry-run') { dryrun = true }
+  opts.on('--lowpass FORMAT_STRING') { |s| lowpass = s }
+  opts.on('--highpass FORMAT_STRING') { |s| highpass = s }
+  opts.parse!(ARGV)
+end
+
+dev_fd_lo = ARGV.shift
+dev_fd_hi = ARGV.shift
+if ARGV.delete('-')
+  # we re-add the '-' below
+  out_channels && out_rate && out_type or
+    abort "-c, -r, and -t must all be specified for standard output"
+  cmd = "sox"
+elsif out_channels || out_rate || out_type
+  abort "standard output (`-') must be specified with -c, -r, or -t"
+else
+  cmd = "play"
+end
+soxfmt = ENV["SOXFMT"] or abort "#$0 SOXFMT undefined"
+
+# configure the sox "delay" effect
+delay = ARGV.dup
+delay[0] or abort USAGE
+channels = ENV['CHANNELS'] or abort "#$0 CHANNELS env must be set"
+channels = channels.to_i
+adj_delay.replace(delay.dup)
+until adj_delay.size == channels
+  adj_delay << delay.last
+end
+adj_delay.unshift("delay")
+
+# prepare two inputs:
+delay_lo = delay_lo.join(' ')
+delay_hi = delay_hi.join(' ')
+
+lowpass_args = []
+lowpass.gsub('%s') { |s| lowpass_args << xover; s }
+highpass_args = []
+highpass.gsub('%s') { |s| highpass_args << xover; s }
+
+lo = "|exec sox #{soxfmt} #{dev_fd_lo} -p " \
+     "#{sprintf(lowpass, *lowpass_args)} #{delay_lo}".strip
+hi = "|exec sox #{soxfmt} #{dev_fd_hi} -p " \
+     "#{sprintf(highpass, *highpass_args)} #{delay_hi}".strip
+
+args = [ "-m", "-v1", lo, "-v1", hi ]
+case cmd
+when "sox"
+  args.unshift "sox"
+  args.concat(%W(-t#{out_type} -c#{out_channels} -r#{out_rate} -))
+when "play"
+  args.unshift "play"
+else
+  abort "BUG: bad cmd=#{cmd.inspect}"
+end
+if dryrun
+  p args
+else
+  exec *args, close_others: false
+end
