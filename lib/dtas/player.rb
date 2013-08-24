@@ -111,6 +111,10 @@ class DTAS::Player
         e = v["env"] and @srcenv = e
       end
 
+      if v = hash["format"]
+        @format = DTAS::Format.load(v)
+      end
+
       if sinks = hash["sinks"]
         sinks.each do |sink_hsh|
           sink = DTAS::Sink.load(sink_hsh)

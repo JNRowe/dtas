@@ -34,4 +34,14 @@ class TestPlayer < Minitest::Unit::TestCase
     hash = @player.to_hsh
     assert_equal({"socket" => @path}, hash)
   end
+
+  def test_player_serialize_format
+    fmt = DTAS::Format.new
+    fmt.type = "f32"
+    fmt.rate = 48000
+    player = DTAS::Player.load("format" => fmt.to_hsh)
+    fhash = player.to_hsh["format"]
+    assert_equal "f32", fhash["type"]
+    assert_equal 48000, fhash["rate"]
+  end
 end
