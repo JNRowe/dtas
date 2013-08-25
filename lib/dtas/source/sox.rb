@@ -86,9 +86,9 @@ class DTAS::Source::Sox # :nodoc:
     tmp
   end
 
-  def spawn(format, rg_state, opts)
+  def spawn(player_format, rg_state, opts)
     raise "BUG: #{self.inspect}#spawn called twice" if @to_io
-    e = format.to_env
+    e = player_format.to_env
     e["INFILE"] = @infile
 
     # make sure these are visible to the "current" command...
