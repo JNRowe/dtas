@@ -8,15 +8,22 @@ require_relative '../replaygain'
 # this is usually one input file
 class DTAS::Source::Sox # :nodoc:
   require_relative 'file'
-  require_relative 'mp3gain'
 
   include DTAS::Source::File
-  include DTAS::Source::Mp3gain
 
   SOX_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" => 'exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX',
     "comments" => nil,
   )
+
+
+  def self.try(infile, offset = nil)
+    err = ""
+    DTAS::Process.qx(%W(soxi #{infile}), err: err)
+    return if err =~ /soxi FAIL formats:/
+    new(infile, offset)
+  rescue
+  end
 
   def initialize(infile, offset = nil)
     command_init(SOX_DEFAULTS)
@@ -77,11 +84,6 @@ class DTAS::Source::Sox # :nodoc:
       end
     end
     tmp
-  end
-
-  def replaygain
-    @rg = DTAS::ReplayGain.new(comments) ||
-          DTAS::ReplayGain.new(mp3gain_comments)
   end
 
   def spawn(format, rg_state, opts)

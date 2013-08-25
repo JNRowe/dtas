@@ -6,6 +6,7 @@ require 'shellwords'
 require_relative '../dtas'
 require_relative 'source'
 require_relative 'source/sox'
+require_relative 'source/av'
 require_relative 'source/cmd'
 require_relative 'sink'
 require_relative 'unix_server'
@@ -297,6 +298,21 @@ class DTAS::Player # :nodoc:
     end
   end
 
+  def try_file(*args)
+    [ DTAS::Source::Sox, DTAS::Source::Av ].each do |klass|
+      rv = klass.try(*args) and return rv
+    end
+
+    # keep going down the list until we find something
+    while source_spec = @queue.shift
+      [ DTAS::Source::Sox, DTAS::Source::Av ].each do |klass|
+        rv = klass.try(*source_spec) and return rv
+      end
+    end
+    echo "idle"
+    nil
+  end
+
   def next_source(source_spec)
     @current = nil
     if source_spec
@@ -305,16 +321,17 @@ class DTAS::Player # :nodoc:
 
       case source_spec
       when String
-        @current = DTAS::Source::Sox.new(source_spec)
+        @current = try_file(source_spec)
         echo(%W(file #{@current.infile}))
       when Array
-        @current = DTAS::Source::Sox.new(*source_spec)
+        @current = try_file(*source_spec)
         echo(%W(file #{@current.infile} #{@current.offset_samples}s))
       else
         @current = DTAS::Source::Cmd.new(source_spec["command"])
         echo(%W(command #{@current.command_string}))
       end
 
+      # FIXME, support Av overrides
       if DTAS::Source::Sox === @current
         @current.command = @srccmd if @srccmd
         @current.env = @srcenv.dup unless @srcenv.empty?

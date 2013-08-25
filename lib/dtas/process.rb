@@ -84,4 +84,8 @@ module DTAS::Process # :nodoc:
     return res if status.success?
     raise RuntimeError, "`#{xs(cmd)}' failed: #{status.inspect}"
   end
+
+  # XXX only for DTAS::Source::{Sox,Av}.try
+  module_function :qx
+  module_function :xs
 end

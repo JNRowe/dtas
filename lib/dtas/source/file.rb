@@ -11,9 +11,11 @@ module DTAS::Source::File # :nodoc:
   attr_reader :infile
   attr_reader :offset
   require_relative 'common' # dtas/source/common
+  require_relative 'mp3gain'
   include DTAS::Command
   include DTAS::Process
   include DTAS::Source::Common
+  include DTAS::Source::Mp3gain
 
   FILE_SIVS = %w(infile comments command env)
 
@@ -60,4 +62,10 @@ module DTAS::Source::File # :nodoc:
     rv["samples"] = samples
     rv
   end
+
+  def replaygain
+    @rg ||= DTAS::ReplayGain.new(comments) ||
+            DTAS::ReplayGain.new(mp3gain_comments)
+  end
+
 end
