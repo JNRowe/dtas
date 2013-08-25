@@ -4,6 +4,7 @@
 require './test/helper'
 require 'dtas/player'
 require 'dtas/state_file'
+require 'dtas/unix_client'
 require 'yaml'
 require 'tempfile'
 require 'shellwords'
@@ -46,18 +47,8 @@ module PlayerIntegration
     end
   end
 
-  module PlayerClient
-    def preq(args)
-      args = Shellwords.join(args) if Array === args
-      send(args, Socket::MSG_EOR)
-    end
-  end
-
   def client_socket
-    s = Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
-    s.connect(Socket.pack_sockaddr_un(@sock_path))
-    s.extend(PlayerClient)
-    s
+    DTAS::UNIXClient.new(@sock_path)
   end
 
   def wait_pid_dead(pid, time = 5)
@@ -79,8 +70,7 @@ module PlayerIntegration
   def default_sink_pid(s)
     default_pid = Tempfile.new(%w(dtas-test .pid))
     pf = "echo $$ >> #{default_pid.path}; "
-    s.send("sink ed default command='#{pf}#@cmd'", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default command='#{pf}#@cmd'")
     default_pid
   end
 
@@ -108,13 +98,11 @@ module PlayerIntegration
   end
 
   def dethrottle_decoder(s)
-    s.send("sink ed default active=false", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default active=false")
   end
 
   def stop_playback(pid_file, s)
-    s.send("skip", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("skip")
     pid = read_pid_file(pid_file)
     wait_pid_dead(pid)
   end

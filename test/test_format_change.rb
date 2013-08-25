@@ -13,15 +13,12 @@ class TestFormatChange < Minitest::Unit::TestCase
       d = "#{dir}/dump.$CHANNELS.$RATE"
       f44100 = File.open("#{dir}/dump.2.44100", IO::RDWR|IO::CREAT)
       f88200 = File.open("#{dir}/dump.2.88200", IO::RDWR|IO::CREAT)
-      s.preq("sink ed dump active=true command='cat > #{d}'")
-      assert_equal "OK", s.readpartial(666)
+      s.req_ok("sink ed dump active=true command='cat > #{d}'")
       noise, len = tmp_noise
-      s.preq(%W(enq #{noise.path}))
-      assert_equal "OK", s.readpartial(666)
+      s.req_ok(%W(enq #{noise.path}))
       wait_files_not_empty(default_pid, f44100)
 
-      s.preq("format rate=88200")
-      assert_equal "OK", s.readpartial(666)
+      s.req_ok("format rate=88200")
 
       wait_files_not_empty(f88200)
 
@@ -29,8 +26,7 @@ class TestFormatChange < Minitest::Unit::TestCase
 
       Timeout.timeout(len) do
         begin
-          s.preq("current")
-          cur = YAML.load(s.readpartial(6666))
+          cur = YAML.load(s.req("current"))
         end while cur["sinks"] && sleep(0.01)
       end
 

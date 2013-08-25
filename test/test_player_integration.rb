@@ -22,9 +22,8 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     default_pid = default_sink_pid(s)
     Tempfile.open('junk') do |junk|
       pink = "sox -n $SOXFMT - synth 0.0001 pinknoise | tee -i #{junk.path}"
-      s.send("enq-cmd \"#{pink}\"", Socket::MSG_EOR)
+      s.req_ok("enq-cmd \"#{pink}\"")
       wait_files_not_empty(junk)
-      assert_equal "OK", s.readpartial(666)
     end
     wait_files_not_empty(default_pid)
     pid = read_pid_file(default_pid)
@@ -36,8 +35,7 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     default_pid = default_sink_pid(s)
     cmd = Tempfile.new(%w(sox-cmd .pid))
     pink = "echo $$ > #{cmd.path}; sox -n $SOXFMT - synth 100 pinknoise"
-    s.send("enq-cmd \"#{pink}\"", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("enq-cmd \"#{pink}\"")
     wait_files_not_empty(cmd, default_pid)
     pid = read_pid_file(default_pid)
     Process.kill(:KILL, pid)
@@ -47,31 +45,28 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
 
   def test_sink_activate
     s = client_socket
-    s.send("sink ls", Socket::MSG_EOR)
-    assert_equal "default", s.readpartial(666)
+    res = s.req("sink ls")
+    assert_equal "default", res
 
     # setup two outputs
 
     # make the default sink trickle
     default_pid = Tempfile.new(%w(dtas-test .pid))
     pf = "echo $$ >> #{default_pid.path}; "
-    s.send("sink ed default command='#{pf}#@cmd'", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default command='#{pf}#@cmd'")
 
     # make a sleepy sink trickle, too
     sleepy_pid = Tempfile.new(%w(dtas-test .pid))
     pf = "echo $$ >> #{sleepy_pid.path};"
-    s.send("sink ed sleepy command='#{pf}#@cmd' active=true", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed sleepy command='#{pf}#@cmd' active=true")
 
     # ensure both sinks were created
-    s.send("sink ls", Socket::MSG_EOR)
-    assert_equal "default sleepy", s.readpartial(666)
+    res = s.req("sink ls")
+    assert_equal "default sleepy", res
 
     # generate pinknoise
     pinknoise = "sox -n -r 44100 -c 2 -t s32 - synth 0 pinknoise"
-    s.send("enq-cmd \"#{pinknoise}\"", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("enq-cmd \"#{pinknoise}\"")
 
     # wait for sinks to start
     wait_files_not_empty(sleepy_pid, default_pid)
@@ -80,8 +75,7 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     sleepy = File.read(sleepy_pid).to_i
     assert_operator sleepy, :>, 0
     Process.kill(0, sleepy)
-    s.send("sink ed sleepy active=false", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed sleepy active=false")
     wait_pid_dead(sleepy)
 
     # ensure default sink is still alive
@@ -93,8 +87,7 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     sleepy_pid.sync = true
     sleepy_pid.seek(0)
     sleepy_pid.truncate(0)
-    s.send("sink ed sleepy active=true", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed sleepy active=true")
 
     # wait for sleepy sink
     wait_files_not_empty(sleepy_pid)
@@ -105,8 +98,7 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     Process.kill(0, sleepy)
 
     # stop playing current track
-    s.send("skip", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("skip")
 
     wait_pid_dead(sleepy)
     wait_pid_dead(default)
@@ -115,22 +107,17 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
   def test_env_change
     s = client_socket
     tmp = Tempfile.new(%w(env .txt))
-    s.preq("sink ed default active=true command='cat >/dev/null'")
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default active=true command='cat >/dev/null'")
 
-    s.preq("env FOO=BAR")
-    assert_equal "OK", s.readpartial(666)
-    s.preq(["enq-cmd", "echo $FOO | tee #{tmp.path}"])
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("env FOO=BAR")
+    s.req_ok(["enq-cmd", "echo $FOO | tee #{tmp.path}"])
     wait_files_not_empty(tmp)
     assert_equal "BAR\n", tmp.read
 
     tmp.rewind
     tmp.truncate(0)
-    s.preq("env FOO#")
-    assert_equal "OK", s.readpartial(666)
-    s.preq(["enq-cmd", "echo -$FOO- | tee #{tmp.path}"])
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("env FOO#")
+    s.req_ok(["enq-cmd", "echo -$FOO- | tee #{tmp.path}"])
     wait_files_not_empty(tmp)
     assert_equal "--\n", tmp.read
   end
@@ -138,31 +125,25 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
   def test_sink_env
     s = client_socket
     tmp = Tempfile.new(%w(env .txt))
-    s.preq("sink ed default active=true command='echo -$FOO- > #{tmp.path}'")
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default active=true command='echo -$FOO- > #{tmp.path}'")
 
-    s.preq("sink ed default env.FOO=BAR")
-    assert_equal "OK", s.readpartial(666)
-    s.preq(["enq-cmd", "echo HI"])
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default env.FOO=BAR")
+    s.req_ok(["enq-cmd", "echo HI"])
     wait_files_not_empty(tmp)
     assert_equal "-BAR-\n", tmp.read
 
     tmp.rewind
     tmp.truncate(0)
-    s.preq("sink ed default env#FOO")
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("sink ed default env#FOO")
 
     Timeout.timeout(5) do
       begin
-        s.preq("current")
-        yaml = s.readpartial(66666)
+        yaml = s.req("current")
         cur = YAML.load(yaml)
       end while cur["sinks"] && sleep(0.01)
     end
 
-    s.preq(["enq-cmd", "echo HI"])
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok(["enq-cmd", "echo HI"])
     wait_files_not_empty(tmp)
     assert_equal "--\n", tmp.read
   end
@@ -171,15 +152,11 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     s = client_socket
     default_sink_pid(s)
     dump = Tempfile.new(%W(d .sox))
-    s.preq "sink ed dump active=true command='sox $SOXFMT - #{dump.path}'"
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok "sink ed dump active=true command='sox $SOXFMT - #{dump.path}'"
     noise, len = tmp_noise
-    s.preq("enq-head #{noise.path}")
-    assert_equal "OK", s.readpartial(666)
-    s.preq("enq-head #{noise.path} 4")
-    assert_equal "OK", s.readpartial(666)
-    s.preq("enq-head #{noise.path} 3")
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("enq-head #{noise.path}")
+    s.req_ok("enq-head #{noise.path} 4")
+    s.req_ok("enq-head #{noise.path} 3")
     dethrottle_decoder(s)
     expect = Tempfile.new(%W(expect .sox))
 
@@ -188,8 +165,7 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     assert system(c)
     Timeout.timeout(len) do
       begin
-        s.preq("current")
-        yaml = s.readpartial(66666)
+        yaml = s.req("current")
         cur = YAML.load(yaml)
       end while cur["sinks"] && sleep(0.01)
     end
@@ -201,20 +177,15 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     s = client_socket
     pwd = Dir.pwd
 
-    s.preq("pwd")
-    assert_equal pwd, s.readpartial(6666)
+    assert_equal pwd, s.req("pwd")
 
-    s.preq("cd /")
-    assert_equal "OK", s.readpartial(6)
+    s.req_ok("cd /")
 
-    s.preq("pwd")
-    assert_equal "/", s.readpartial(6)
+    assert_equal "/", s.req("pwd")
 
-    s.preq("cd /this-better-be-totally-non-existent-on-any-system-#{rand}")
-    err = s.readpartial(666)
+    err = s.req("cd /this-better-be-totally-non-existent-on-any-system-#{rand}")
     assert_match(%r{\AERR }, err, err)
 
-    s.preq("pwd")
-    assert_equal "/", s.readpartial(6)
+    assert_equal "/", s.req("pwd")
   end
 end

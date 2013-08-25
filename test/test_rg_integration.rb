@@ -28,19 +28,16 @@ class TestRgIntegration < Minitest::Unit::TestCase
     dump_pid = Tempfile.new(%w(dump .pid))
     default_pid = default_sink_pid(s)
     dump_cmd = "echo $$ > #{dump_pid.path}; sox $SOXFMT - #{dumper.path}"
-    s.send("sink ed dump active=true command='#{dump_cmd}'", Socket::MSG_EOR)
-    assert_equal("OK", s.readpartial(666))
+    s.req_ok("sink ed dump active=true command='#{dump_cmd}'")
 
     # start playback!
-    s.send("enq \"#{pluck.path}\"", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("enq \"#{pluck.path}\"")
 
     # wait for playback to start
     yaml = cur = nil
     Timeout.timeout(5) do
       begin
-        s.send("current", Socket::MSG_EOR)
-        cur = YAML.load(yaml = s.readpartial(1666))
+        cur = YAML.load(yaml = s.req("current"))
       end while cur["current_offset"] == 0 && sleep(0.01)
     end
 
@@ -52,12 +49,11 @@ class TestRgIntegration < Minitest::Unit::TestCase
     pid = read_pid_file(dump_pid)
 
     check_gain = proc do |expect, mode|
-      s.send("rg mode=#{mode}", Socket::MSG_EOR)
-      assert_equal "OK", s.readpartial(666)
+      s.req_ok("rg mode=#{mode}")
       Timeout.timeout(5) do
         begin
-          s.send("current", Socket::MSG_EOR)
-          cur = YAML.load(yaml = s.readpartial(3666))
+          yaml = s.req("current")
+          cur = YAML.load(yaml)
         end while cur["current"]["env"]["RGFX"] !~ expect && sleep(0.01)
       end
       assert_match expect, cur["current"]["env"]["RGFX"]
@@ -68,40 +64,28 @@ class TestRgIntegration < Minitest::Unit::TestCase
     check_gain.call(%r{vol 1\.3}, "track_peak")
     check_gain.call(%r{vol 1\.0}, "album_peak")
 
-    s.send("rg preamp+=1", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp+=1")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_equal 1, rg["preamp"]
 
-    s.send("rg preamp-=1", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp-=1")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_nil rg["preamp"]
 
-    s.send("rg preamp=2", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp=2")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_equal 2, rg["preamp"]
 
-    s.send("rg preamp-=0.3", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp-=0.3")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_equal 1.7, rg["preamp"]
 
-    s.send("rg preamp-=-0.3", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp-=-0.3")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_equal 2.0, rg["preamp"]
 
-    s.send("rg preamp-=+0.3", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
-    s.send("rg", Socket::MSG_EOR)
-    rg = YAML.load(yaml = s.readpartial(3666))
+    s.req_ok("rg preamp-=+0.3")
+    rg = YAML.load(yaml = s.req("rg"))
     assert_equal 1.7, rg["preamp"]
 
     dethrottle_decoder(s)
@@ -117,17 +101,13 @@ class TestRgIntegration < Minitest::Unit::TestCase
 
   def test_rg_env_in_source
     s = client_socket
-    s.preq("rg mode=album_gain")
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("rg mode=album_gain")
     pluck, _ = tmp_pluck
     cmd = DTAS::Source::SOURCE_DEFAULTS["command"]
     fifo = tmpfifo
-    s.preq("source ed command='env > #{fifo}; #{cmd}'")
-    assert_equal "OK", s.readpartial(666)
-    s.preq("sink ed default command='cat >/dev/null' active=true")
-    assert_equal "OK", s.readpartial(666)
-    s.preq(%W(enq #{pluck.path}))
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("source ed command='env > #{fifo}; #{cmd}'")
+    s.req_ok("sink ed default command='cat >/dev/null' active=true")
+    s.req_ok(%W(enq #{pluck.path}))
 
     rg = {}
     File.readlines(fifo).each do |line|

@@ -15,11 +15,9 @@ class TestSinkTeeIntegration < Minitest::Unit::TestCase
     cmd = "echo $$ > #{tee_pid.path}; " \
           "cat /dev/fd/a > #{ajunk.path} & " \
           "cat /dev/fd/b > #{bjunk.path}; wait"
-    s.send("sink ed split active=true command='#{cmd}'", Socket::MSG_EOR)
-    assert_equal("OK", s.readpartial(666))
+    s.req_ok("sink ed split active=true command='#{cmd}'")
     pluck = "sox -n $SOXFMT - synth 3 pluck | tee #{orig.path}"
-    s.send("enq-cmd \"#{pluck}\"", Socket::MSG_EOR)
-    assert_equal "OK", s.readpartial(666)
+    s.req_ok("enq-cmd \"#{pluck}\"")
 
     wait_files_not_empty(tee_pid)
     pid = read_pid_file(tee_pid)
