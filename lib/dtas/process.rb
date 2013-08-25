@@ -3,6 +3,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'shellwords'
 require 'io/wait'
+require_relative '../dtas'
 module DTAS::Process # :nodoc:
   PIDS = {}
 
@@ -43,7 +44,11 @@ module DTAS::Process # :nodoc:
 
   # this is like backtick, but takes an array instead of a string
   # This will also raise on errors
-  def qx(cmd, opts = {})
+  def qx(env, cmd = {}, opts = {})
+    unless Hash === env
+      cmd, opts = env, cmd
+      env = {}
+    end
     r, w = IO.pipe
     opts = opts.merge(out: w)
     r.binmode
@@ -53,7 +58,7 @@ module DTAS::Process # :nodoc:
       opts[:err] = we
     end
     pid = begin
-      Process.spawn(*cmd, opts)
+      Process.spawn(env, *cmd, opts)
     rescue Errno::EINTR # Ruby bug?
       retry
     end
