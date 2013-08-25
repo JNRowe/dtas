@@ -40,10 +40,12 @@ Users of dtas-player will also be interested in the following scripts:
 * dtas-xdelay - alternative sink for dtas-player
 
 All scripts have some documentation in the Documentation/ directory or
-manpages distributed with the gem.  dtas exposes no public APIs outside
-of command-line and YAML text.  dtas is aimed at users familiar with the
-*nix command-line and editing text files.  Familiarity with the Ruby
-programming language is absolutely NOT required.
+manpages distributed with the gem.  Documentation is also available on
+http://dtas.80x24.org/$COMMAND.txt in plain-text form.
+
+dtas exposes no public APIs outside of command-line and YAML text.  dtas is
+aimed at users familiar with the *nix command-line and editing text files.
+Familiarity with the Ruby programming language is absolutely NOT required.
 
 Coming:
 
