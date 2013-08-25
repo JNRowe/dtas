@@ -28,11 +28,6 @@ module DTAS::Command # :nodoc:
     end
   end
 
-  def kill(sig = :TERM)
-    # always kill the pgroup since we run subcommands in their own shell
-    Process.kill(sig, -@pid)
-  end
-
   def on_death(status)
     @pid = nil
   end
