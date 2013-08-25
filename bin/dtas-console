@@ -5,6 +5,7 @@
 #
 # Note: no idea what I'm doing, especially w.r.t. curses
 require 'dtas/unix_client'
+require 'dtas/rg_state'
 require 'curses'
 require 'yaml'
 
@@ -13,6 +14,14 @@ w.req_ok('watch')
 c = DTAS::UNIXClient.new
 cur = YAML.load(c.req('current'))
 readable = [ w, $stdin ]
+
+# current rg mode
+rg_mode = DTAS::RGState::RG_MODE.keys.unshift("off")
+if (rg = cur["rg"]) && (rg = rg["mode"])
+  rg_mode_i = rg_mode.index(cur["rg"]["mode"])
+else
+  rg_mode_i = 0
+end
 
 def update_tfmt(prec)
   prec == 0 ? '%H:%M:%S' : "%H:%M:%S.%#{prec}N"
@@ -69,6 +78,24 @@ def show_events(lineno, screen, events)
   end
 end
 
+def fmt_to_s(f)
+  r = [ f['rate'], f['channels'], f['type'], f['bits'] ]
+  r.compact!
+  r.join(',')
+end
+
+def rg_string(rg, current)
+  rv = "rg mode=#{rg['mode']||'off'}"
+  defaults = DTAS::RGState::RG_DEFAULT
+  # don't show things that are too rare
+  %w(preamp fallback_gain).each do |param|
+    val = rg[param] || defaults[param]
+    rv << " #{param}=#{val}"
+  end
+  env = current && current["env"] and rv << " / RGFX='#{env['RGFX']}'"
+  rv
+end
+
 begin
   Curses.init_screen
   Curses.nonl
@@ -79,6 +106,7 @@ begin
   screen.keypad(true)
   loop do
     lineno = -1
+    pfmt = cur['format']
     if current = cur['current']
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
@@ -89,19 +117,28 @@ begin
         rate = current_format['rate'].to_f
         elapsed += nr / rate
         total = " [#{Time.at(current['samples'] / rate).strftime(tfmt)}]"
+        fmt = "(#{fmt_to_s(current_format)} > #{fmt_to_s(pfmt)})"
       else
         total = ""
+        fmt = fmt_to_s(pfmt)
+        fmt = "(#{fmt} > #{fmt})"
       end
 
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total}")
+      Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
     else
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr(cur['paused'] ? 'paused' : 'idle')
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
+    end
+    if rg = cur["rg"]
+      rgs = rg_string(rg, current)
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr(rgs)
     end
 
     show_events(lineno, screen, events)
@@ -129,8 +166,17 @@ begin
         # yes, some of us have long audio files
         when Curses::KEY_PPAGE then c.req_ok("seek +600")
         when Curses::KEY_NPAGE then c.req_ok("seek -600")
+        when "9" then c.req_ok("rg preamp-=1")
+        when "0" then c.req_ok("rg preamp+=1")
+        when "F" then c.req_ok("rg fallback_gain+=1")
+        when "f" then c.req_ok("rg fallback_gain-=1")
         when " "
           c.req("play_pause")
+        when "r" # cycle through replaygain modes
+          rg_mode_i >= 1 and c.req_ok("rg mode=#{rg_mode[rg_mode_i -= 1]}")
+        when "R"
+          rg_mode_i < (rg_mode.size - 1) and
+            c.req_ok("rg mode=#{rg_mode[rg_mode_i += 1]}")
         when "p" # lower precision of time display
           if prec_nr >= 1
             prec_nr -= 1
