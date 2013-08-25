@@ -32,7 +32,6 @@ endpoint) running.
 Users of dtas-player will also be interested in the following scripts:
 
 * dtas-ctl - "raw" command-line scripting interface for dtas-player
-* dtas-ps - process viewer for dtas-player
 * dtas-enq - enqueue files/commands for dtas-player
 * dtas-sinkedit - edit sinks (playback targets) for dtas-player
 * dtas-xdelay - alternative sink for dtas-player
