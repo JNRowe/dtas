@@ -119,7 +119,7 @@ class TestRgIntegration < Minitest::Unit::TestCase
     s = client_socket
     s.preq("rg mode=album_gain")
     assert_equal "OK", s.readpartial(666)
-    pluck, len = tmp_pluck
+    pluck, _ = tmp_pluck
     cmd = DTAS::Source::SOURCE_DEFAULTS["command"]
     fifo = tmpfifo
     s.preq("source ed command='env > #{fifo}; #{cmd}'")
