@@ -75,14 +75,6 @@ class DTAS::Format # :nodoc:
     ivars_to_hash(SIVS)
   end
 
-  # FIXME, move to per-source (sox/avconv/ffmpeg)
-  def from_file(path)
-    @channels = qx(%W(soxi -c #{path})).to_i
-    @type = qx(%W(soxi -t #{path})).strip
-    @rate = qx(%W(soxi -r #{path})).to_i
-    # we don't need to care for bits, do we?
-  end
-
   # for the _decoded_ output
   def bits_per_sample
     return @bits if @bits

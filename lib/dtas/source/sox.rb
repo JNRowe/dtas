@@ -36,7 +36,10 @@ class DTAS::Source::Sox # :nodoc:
   def format
     @format ||= begin
       fmt = DTAS::Format.new
-      fmt.from_file(@infile)
+      path = @infile
+      fmt.channels = qx(%W(soxi -c #{path})).to_i
+      fmt.type = qx(%W(soxi -t #{path})).strip
+      fmt.rate = qx(%W(soxi -r #{path})).to_i
       fmt.bits ||= precision
       fmt
     end

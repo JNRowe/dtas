@@ -34,20 +34,6 @@ class TestFormat < Minitest::Unit::TestCase
     assert_nil hash["channels"]
   end
 
-  def test_from_file
-    Tempfile.open(%w(tmp .wav)) do |tmp|
-      # generate an empty file with 1s of audio
-      cmd = %W(sox -r 96000 -b 24 -c 2 -n #{tmp.path} trim 0 1)
-      system(*cmd)
-      assert $?.success?, "#{cmd.inspect} failed: #$?"
-      fmt = DTAS::Format.new
-      fmt.from_file tmp.path
-      assert_equal 96000, fmt.rate
-      assert_equal 2, fmt.channels
-      tmp.unlink
-    end
-  end
-
   def test_bytes_per_sample
     fmt = DTAS::Format.new
     assert_equal 4, fmt.bytes_per_sample

@@ -99,4 +99,17 @@ class TestSource < Minitest::Unit::TestCase
     source = DTAS::Source::Sox.new(tmp.path, '1')
     assert_equal 1000000.0, source.offset_us
   end
+
+  def test_format_from_file
+    Tempfile.open(%w(tmp .wav)) do |tmp|
+      # generate an empty file with 1s of audio
+      cmd = %W(sox -r 96000 -b 24 -c 2 -n #{tmp.path} trim 0 1)
+      system(*cmd)
+      assert $?.success?, "#{cmd.inspect} failed: #$?"
+      fmt = DTAS::Source::Sox.new(tmp.path).format
+      assert_equal 96000, fmt.rate
+      assert_equal 2, fmt.channels
+      tmp.unlink
+    end
+  end
 end
