@@ -134,12 +134,11 @@ begin
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
     end
-    if rg = cur["rg"]
-      rgs = rg_string(rg, current)
-      Curses.setpos(lineno += 1, 0)
-      Curses.clrtoeol
-      Curses.addstr(rgs)
-    end
+
+    rgs = rg_string(cur["rg"] || {}, current)
+    Curses.setpos(lineno += 1, 0)
+    Curses.clrtoeol
+    Curses.addstr(rgs)
 
     show_events(lineno, screen, events)
 
