@@ -241,8 +241,6 @@ class DTAS::Player # :nodoc:
       # we get here if source/sinks are all killed in restart_pipeline
       __sink_activate(sink)
       next_source(@queue.shift)
-    elsif sink.respawn
-      __sink_activate(sink) if @current
     end
   ensure
     sink.respawn = false
