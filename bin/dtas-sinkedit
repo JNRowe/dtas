@@ -6,7 +6,7 @@ require 'dtas/unix_client'
 require 'dtas/disclaimer'
 require 'tempfile'
 require 'yaml'
-editor = ENV["VISUAL"] || ENV["EDITOR"]
+editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
 c = DTAS::UNIXClient.new
 usage = "#$0 SINKNAME"
 ARGV.size == 1 or abort usage

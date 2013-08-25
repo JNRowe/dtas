@@ -5,7 +5,7 @@
 require 'tempfile'
 require 'shellwords'
 usage = "Usage: #$0 FILENAME"
-editor = ENV["VISUAL"] || ENV["EDITOR"]
+editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
 ARGV.size > 0 or abort usage
 
 def err_msg(cmd, status)

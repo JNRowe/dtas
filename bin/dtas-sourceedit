@@ -6,7 +6,7 @@ require 'tempfile'
 require 'yaml'
 require 'dtas/unix_client'
 require 'dtas/disclaimer'
-editor = ENV["VISUAL"] || ENV["EDITOR"]
+editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
 c = DTAS::UNIXClient.new
 usage = $0
 ARGV.size == 0 or abort usage
