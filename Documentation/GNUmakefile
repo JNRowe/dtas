@@ -21,16 +21,26 @@ all:: man
 
 man: $(man1) $(man7)
 
-install-man: man
-	mkdir -p ../man/man1
-	mkdir -p ../man/man7
-	install -m 644 $(man1) ../man/man1
-	install -m 644 $(man7) ../man/man7
+prefix?=$(HOME)
+mandir?=$(prefix)/share/man
+man1dir=$(mandir)/man1
+man5dir=$(mandir)/man5
+man7dir=$(mandir)/man7
 
-%.1: %.1.txt
-	$(pandoc) -s -t man < $< > $@+ && mv $@+ $@
-%.7: %.7.txt
+INSTALL = install
+
+gem-man: man
+	$(INSTALL) -d -m 755 ../man
+	$(INSTALL) -m 644 $(man1) ../man
+	$(INSTALL) -m 644 $(man7) ../man
+
+install-man: man
+	$(INSTALL) -d -m 755 $(DESTDIR)$(man1dir)
+	$(INSTALL) -d -m 755 $(DESTDIR)$(man7dir)
+	$(INSTALL) -m 644 $(man1) $(DESTDIR)$(man1dir)
+	$(INSTALL) -m 644 $(man7) $(DESTDIR)$(man7dir)
+%.1 %.7 : %.txt
 	$(pandoc) -s -t man < $< > $@+ && mv $@+ $@
 
 clean::
-	$(RM) $(man1)
+	$(RM) $(man1) $(man7)

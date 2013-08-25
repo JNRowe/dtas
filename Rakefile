@@ -10,7 +10,7 @@ if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
     if system("make -C Documentation")
       require 'fileutils'
       FileUtils.rm_rf 'man'
-      if system("make -C Documentation install-man")
+      if system("make -C Documentation gem-man")
         `git ls-files -o man`.split(/\n/).each do |man|
           fp.puts man
         end

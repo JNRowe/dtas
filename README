@@ -33,8 +33,15 @@ Users of dtas-player will also be interested in the following scripts:
 
 * dtas-ctl - "raw" command-line scripting interface for dtas-player
 * dtas-enq - enqueue files/commands for dtas-player
+* dtas-msinkctl - enable/disable multiple sinks with one command
+* dtas-console - rudimentary curses interface for dtas-player
 * dtas-sinkedit - edit sinks (playback targets) for dtas-player
+* dtas-sourceedit - edit source (decoder process parameters) for dtas-player
 * dtas-xdelay - alternative sink for dtas-player
+
+All scripts have some documentation in the Documention/ directory or
+manpages distributed with the gem.  dtas exposes no public APIs outside
+of command-line interfaces.
 
 Coming:
 
