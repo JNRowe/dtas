@@ -10,7 +10,11 @@
 
 class DTAS::ReplayGain # :nodoc:
   ATTRS = %w(reference_loudness track_gain album_gain track_peak album_peak)
-  ATTRS.each { |a| attr_reader a }
+  ENV_ATTRS = {}
+  ATTRS.each do |a|
+    attr_reader a
+    ENV_ATTRS["REPLAYGAIN_#{a.upcase}"] = a
+  end
 
   def check_gain(val)
     /([+-]?\d+(?:\.\d+)?)/ =~ val ? $1 : nil
@@ -20,13 +24,25 @@ class DTAS::ReplayGain # :nodoc:
     /(\d+(?:\.\d+)?)/ =~ val ? $1 : nil
   end
 
+  # note: this strips the "dB" suffix, but that should be easier for apps
+  # to deal with anyways...
+  def to_env
+    rv = {}
+    # this will cause nil to be set if some envs are missing, this causes
+    # Process.spawn to unset the environment if it was previously set
+    # (leaked from some other process)
+    ENV_ATTRS.each do |env_name, attr_name|
+      rv[env_name] = __send__(attr_name)
+    end
+    rv
+  end
+
   def initialize(comments)
     comments or return
 
     # the replaygain standard specifies 89.0 dB, but maybe some apps are
     # different...
-    @reference_loudness =
-              check_gain(comments["REPLAYGAIN_REFERENCE_LOUDNESS"]) || "89.0"
+    @reference_loudness = check_gain(comments["REPLAYGAIN_REFERENCE_LOUDNESS"])
 
     @track_gain = check_gain(comments["REPLAYGAIN_TRACK_GAIN"])
     @album_gain = check_gain(comments["REPLAYGAIN_ALBUM_GAIN"])

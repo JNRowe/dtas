@@ -34,6 +34,7 @@ class DTAS::Source # :nodoc:
     @offset = offset
     @comments = nil
     @samples = nil
+    @rg = nil
   end
 
   # this exists mainly to make the mpris interface easier, but it's not
@@ -120,7 +121,8 @@ class DTAS::Source # :nodoc:
   end
 
   def replaygain
-    DTAS::ReplayGain.new(comments) || DTAS::ReplayGain.new(mp3gain_comments)
+    @rg = DTAS::ReplayGain.new(comments) ||
+          DTAS::ReplayGain.new(mp3gain_comments)
   end
 
   def spawn(format, rg_state, opts)
@@ -131,6 +133,7 @@ class DTAS::Source # :nodoc:
     # make sure these are visible to the "current" command...
     @env["TRIMFX"] = @offset ? "trim #@offset" : nil
     @env["RGFX"] = rg_state.effect(self) || nil
+    e.merge!(@rg.to_env) if @rg
 
     @pid = dtas_spawn(e.merge!(@env), command_string, opts)
   end

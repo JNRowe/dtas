@@ -114,4 +114,34 @@ class TestRgIntegration < Minitest::Unit::TestCase
 
     stop_playback(default_pid, s)
   end
+
+  def test_rg_env_in_source
+    s = client_socket
+    s.preq("rg mode=album_gain")
+    assert_equal "OK", s.readpartial(666)
+    pluck, len = tmp_pluck
+    cmd = DTAS::Source::SOURCE_DEFAULTS["command"]
+    fifo = tmpfifo
+    s.preq("source ed command='env > #{fifo}; #{cmd}'")
+    assert_equal "OK", s.readpartial(666)
+    s.preq("sink ed default command='cat >/dev/null' active=true")
+    assert_equal "OK", s.readpartial(666)
+    s.preq(%W(enq #{pluck.path}))
+    assert_equal "OK", s.readpartial(666)
+
+    rg = {}
+    File.readlines(fifo).each do |line|
+      line =~ /\AREPLAYGAIN_/ or next
+      k, v = line.chomp!.split(/=/)
+      rg[k] = v
+    end
+    expect = {
+      "REPLAYGAIN_TRACK_GAIN" => "-2",
+      "REPLAYGAIN_ALBUM_GAIN" => "-3.0",
+      "REPLAYGAIN_TRACK_PEAK" => "0.666",
+      "REPLAYGAIN_ALBUM_PEAK" => "0.999",
+      "REPLAYGAIN_REFERENCE_LOUDNESS" => nil
+    }
+    assert_equal expect, rg
+  end
 end
