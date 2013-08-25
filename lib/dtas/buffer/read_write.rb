@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'io/wait'
@@ -7,7 +6,7 @@ require 'io/nonblock'
 require_relative '../../dtas'
 require_relative '../pipe'
 
-module DTAS::Buffer::ReadWrite
+module DTAS::Buffer::ReadWrite # :nodoc:
   MAX_AT_ONCE = 512 # min PIPE_BUF value in POSIX
   attr_accessor :buffer_size
 

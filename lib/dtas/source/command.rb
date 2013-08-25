@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../../dtas'
@@ -7,7 +6,7 @@ require_relative '../source'
 require_relative '../command'
 require_relative '../serialize'
 
-class DTAS::Source::Command
+class DTAS::Source::Command # :nodoc:
   require_relative '../source/common'
 
   include DTAS::Command

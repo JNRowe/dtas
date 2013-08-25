@@ -39,9 +39,11 @@ Users of dtas-player will also be interested in the following scripts:
 * dtas-sourceedit - edit source (decoder process parameters) for dtas-player
 * dtas-xdelay - alternative sink for dtas-player
 
-All scripts have some documentation in the Documention/ directory or
+All scripts have some documentation in the Documentation/ directory or
 manpages distributed with the gem.  dtas exposes no public APIs outside
-of command-line interfaces.
+of command-line and YAML text.  dtas is aimed at users familiar with the
+*nix command-line and editing text files.  Familiarity with the Ruby
+programming language is absolutely NOT required.
 
 Coming:
 
@@ -52,6 +54,17 @@ Coming:
 * better error handling, many bugfixes, etc...
 * better documentation
 
+== Source code
+
+  git clone git://80x24.org/dtas
+
+Please use git-format-patch(1) and git-send-email(1) distributed with
+the git(7) suite for generating and sending patches.  Please format
+pull requests with the git-request-pull(1) script (also distributed
+with git(7)) and send them via email.
+
+See http://www.git-scm.com/ for more information on git.
+
 == Contact
 
 Feedback (results, bug reports, patches, pull-requests) via plain-text
@@ -60,13 +73,6 @@ email is very much appreciated.
 Please send plain-text email to Eric Wong <normalperson@yhbt.net>,
 HTML will not be read.  dtas is for GUI-phobes, by GUI-phobes.
 Public mailing list coming soon.
-
-Please use git-format-patch(1) and git-send-email(1) distributed with
-the git(7) suite for generating and sending patches.  Please format
-pull requests with the git-request-pull(1) script (also distributed
-with git(7)) and send them via email.
-
-See http://www.git-scm.com/ for more information on git.
 
 == License
 

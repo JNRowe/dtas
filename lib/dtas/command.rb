@@ -1,12 +1,11 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 # common code for wrapping SoX/ecasound/... commands
 require_relative 'serialize'
 require 'shellwords'
 
-module DTAS::Command
+module DTAS::Command # :nodoc:
   include DTAS::Serialize
   attr_reader :pid
   attr_reader :to_io

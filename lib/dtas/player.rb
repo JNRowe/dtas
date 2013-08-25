@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'yaml'
@@ -14,7 +13,7 @@ require_relative 'sigevent'
 require_relative 'rg_state'
 require_relative 'state_file'
 
-class DTAS::Player
+class DTAS::Player # :nodoc:
   require_relative 'player/client_handler'
   include DTAS::Player::ClientHandler
   attr_accessor :state_file

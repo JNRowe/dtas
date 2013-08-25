@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 #
@@ -7,7 +6,7 @@
 # MAYBE: account for non-standard reference loudness (89.0 dB is standard)
 require_relative '../dtas'
 require_relative 'serialize'
-class DTAS::RGState
+class DTAS::RGState # :nodoc:
   include DTAS::Serialize
 
   RG_MODE = {

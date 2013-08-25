@@ -1,8 +1,7 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-module DTAS::Player::ClientHandler
+module DTAS::Player::ClientHandler # :nodoc:
 
   # returns true on success, wait_ctl arg on error
   def set_bool(io, kv, v)
@@ -461,3 +460,4 @@ module DTAS::Player::ClientHandler
     io.emit("OK")
   end
 end
+# :startdoc:

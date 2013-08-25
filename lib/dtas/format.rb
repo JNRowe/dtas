@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 # class represents an audio format (type/bits/channels/sample rate/...)
@@ -7,7 +6,7 @@ require_relative '../dtas'
 require_relative 'process'
 require_relative 'serialize'
 
-class DTAS::Format
+class DTAS::Format # :nodoc:
   include DTAS::Process
   include DTAS::Serialize
   NATIVE_ENDIAN = [1].pack("l") == [1].pack("l>") ? "big" : "little"

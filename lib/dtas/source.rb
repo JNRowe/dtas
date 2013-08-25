@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
@@ -10,7 +9,7 @@ require_relative 'process'
 require_relative 'serialize'
 
 # this is usually one input file
-class DTAS::Source
+class DTAS::Source # :nodoc:
   attr_reader :infile
   attr_reader :offset
   require_relative 'source/common'

@@ -1,10 +1,9 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
-module DTAS::WritableIter
+module DTAS::WritableIter # :nodoc:
   attr_accessor :on_writable
 
   def writable_iter_init

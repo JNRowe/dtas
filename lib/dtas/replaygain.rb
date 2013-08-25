@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 #
@@ -9,7 +8,7 @@
 # *_peak values are 0..inf (1.0 being full scale, but >1 is possible
 # *_gain values are specified in dB
 
-class DTAS::ReplayGain
+class DTAS::ReplayGain # :nodoc:
   ATTRS = %w(reference_loudness track_gain album_gain track_peak album_peak)
   ATTRS.each { |a| attr_reader a }
 

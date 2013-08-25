@@ -1,3 +1,7 @@
+# -*- encoding: binary -*-
+# :enddoc:
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 DTAS_DISCLAIMER = <<EOF
 # WARNING!
 #

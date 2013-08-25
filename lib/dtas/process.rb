@@ -1,10 +1,9 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'shellwords'
 require 'io/wait'
-module DTAS::Process
+module DTAS::Process # :nodoc:
   PIDS = {}
 
   def self.reaper

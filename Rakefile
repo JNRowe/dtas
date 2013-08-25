@@ -44,7 +44,7 @@ require 'hoe'
 Hoe.plugin :git
 include Rake::DSL
 
-Hoe.spec('dtas') do |p|
+h = Hoe.spec('dtas') do |p|
   developer 'Eric Wong', 'e@80x24.org'
 
   self.readme_file = 'README'
@@ -52,12 +52,16 @@ Hoe.spec('dtas') do |p|
   self.urls = %w(http://dtas.80x24.org/)
   self.summary = x = File.readlines("README")[0].split(/\s+/)[1].chomp
   self.description = self.paragraphs_of("README", 1)
+  # no public APIs, no HTML, either
+  self.need_rdoc = false
+  self.extra_rdoc_files = []
   license "GPLv3+"
 end
 
-task :publish_docs do
+task :rsync_docs do
   dest = "80x24.org:/srv/dtas/"
-  system("rsync", "--files-from=.document", "-av", "#{Dir.pwd}/", dest)
+  system("rsync --chmod=Fugo=r --files-from=.rsync_doc -av ./ #{dest}")
+  system("rsync --chmod=Fugo=r -av ./Documentation/*.txt #{dest}")
 end
 
 task :coverage do
@@ -70,4 +74,24 @@ task :coverage do
   _, status = Process.waitpid2(pid)
   require './test/covshow'
   exit status.exitstatus
+end
+
+base = "dtas-#{h.version}"
+task tarball: "pkg/#{base}" do
+  Dir.chdir("pkg") do
+    tgz = "#{base}.tar.gz"
+    tmp = "#{tmp}.#$$"
+    cmd = "tar cf - #{base} | gzip -9 > #{tmp}"
+    system(cmd) or abort "#{cmd}: #$?"
+    File.rename(tmp, tgz)
+  end
+end
+
+task dist: [ :tarball, :package ] do
+  Dir.chdir("pkg") do
+    %w(dtas-linux dtas-mpris).each do |gem|
+      cmd = "gem build ../#{gem}.gemspec"
+      system(cmd) or abort "#{cmd}: #$?"
+    end
+  end
 end

@@ -1,10 +1,9 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../process'
 
-module DTAS::Source::Mp3
+module DTAS::Source::Mp3 # :nodoc:
   include DTAS::Process
   # we use dBFS = 1.0 as scale (not 32768)
   def __mp3gain_peak(str)

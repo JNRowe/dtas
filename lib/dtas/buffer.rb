@@ -1,10 +1,9 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
-class DTAS::Buffer
+class DTAS::Buffer # :nodoc:
   begin
     raise LoadError, "no splice with _DTAS_POSIX" if ENV["_DTAS_POSIX"]
     require 'io/splice' # splice is only in Linux for now...

@@ -1,11 +1,10 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'socket'
 require 'io/wait'
 
-class DTAS::UNIXAccepted
+class DTAS::UNIXAccepted # :nodoc:
   attr_reader :to_io
 
   def initialize(sock)

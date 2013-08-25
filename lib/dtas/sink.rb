@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'yaml'
@@ -12,7 +11,7 @@ require_relative 'serialize'
 require_relative 'writable_iter'
 
 # this is a sink (endpoint, audio enters but never leaves)
-class DTAS::Sink
+class DTAS::Sink # :nodoc:
   attr_accessor :prio    # any Integer
   attr_accessor :active  # boolean
   attr_accessor :name

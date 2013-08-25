@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'dtas'
@@ -7,7 +6,7 @@ require 'socket'
 require 'io/wait'
 require 'shellwords'
 
-class DTAS::UNIXClient
+class DTAS::UNIXClient # :nodoc:
   attr_reader :to_io
 
   def self.default_path

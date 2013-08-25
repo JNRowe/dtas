@@ -1,10 +1,9 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'yaml'
 require 'tempfile'
-class DTAS::StateFile
+class DTAS::StateFile # :nodoc:
   def initialize(path, do_fsync = false)
     @path = path
     @do_fsync = do_fsync

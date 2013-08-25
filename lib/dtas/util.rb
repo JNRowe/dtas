@@ -1,11 +1,10 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
 # in case we need to convert DB values to a linear scale
-module DTAS::Util
+module DTAS::Util # :nodoc:
   def db_to_linear(val)
     Math.exp(val * Math.log(10) * 0.05)
   end

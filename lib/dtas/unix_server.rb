@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'socket'
@@ -15,7 +14,7 @@ require_relative 'unix_accepted'
 # but IO.select can be just as fast (or faster) with few descriptors and
 # is obviously more portable.
 
-class DTAS::UNIXServer
+class DTAS::UNIXServer # :nodoc:
   attr_reader :to_io
 
   def close

@@ -1,5 +1,4 @@
 # -*- encoding: binary -*-
-# :stopdoc:
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'io/wait'
@@ -8,7 +7,7 @@ require 'io/splice'
 require_relative '../../dtas'
 require_relative '../pipe'
 
-module DTAS::Buffer::Splice
+module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_SIZE = File.read("/proc/sys/fs/pipe-max-size").to_i
   DEVNULL = File.open("/dev/null", "r+")
