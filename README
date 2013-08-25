@@ -35,7 +35,7 @@ Users of dtas-player will also be interested in the following scripts:
 * dtas-ps - process viewer for dtas-player
 * dtas-enq - enqueue files/commands for dtas-player
 * dtas-sinkedit - edit sinks (playback targets) for dtas-player
-* dtas-play-xover-delay - alternative sink for dtas-player
+* dtas-xdelay - alternative sink for dtas-player
 
 Coming:
 
