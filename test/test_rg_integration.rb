@@ -103,7 +103,7 @@ class TestRgIntegration < Minitest::Unit::TestCase
     s = client_socket
     s.req_ok("rg mode=album_gain")
     pluck, _ = tmp_pluck
-    cmd = DTAS::Source::SOURCE_DEFAULTS["command"]
+    cmd = DTAS::Source::Sox::SOX_DEFAULTS["command"]
     fifo = tmpfifo
     s.req_ok("source ed command='env > #{fifo}; #{cmd}'")
     s.req_ok("sink ed default command='cat >/dev/null' active=true")

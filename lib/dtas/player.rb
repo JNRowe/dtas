@@ -5,7 +5,8 @@ require 'yaml'
 require 'shellwords'
 require_relative '../dtas'
 require_relative 'source'
-require_relative 'source/command'
+require_relative 'source/sox'
+require_relative 'source/cmd'
 require_relative 'sink'
 require_relative 'unix_server'
 require_relative 'buffer'
@@ -304,17 +305,17 @@ class DTAS::Player # :nodoc:
 
       case source_spec
       when String
-        @current = DTAS::Source.new(source_spec)
+        @current = DTAS::Source::Sox.new(source_spec)
         echo(%W(file #{@current.infile}))
       when Array
-        @current = DTAS::Source.new(*source_spec)
+        @current = DTAS::Source::Sox.new(*source_spec)
         echo(%W(file #{@current.infile} #{@current.offset_samples}s))
       else
-        @current = DTAS::Source::Command.new(source_spec["command"])
+        @current = DTAS::Source::Cmd.new(source_spec["command"])
         echo(%W(command #{@current.command_string}))
       end
 
-      if DTAS::Source === @current
+      if DTAS::Source::Sox === @current
         @current.command = @srccmd if @srccmd
         @current.env = @srcenv.dup unless @srcenv.empty?
       end

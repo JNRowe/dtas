@@ -3,7 +3,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../process'
 
-module DTAS::Source::Mp3 # :nodoc:
+module DTAS::Source::Mp3gain # :nodoc:
   include DTAS::Process
   # we use dBFS = 1.0 as scale (not 32768)
   def __mp3gain_peak(str)

@@ -204,7 +204,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       # this offset in the @current.format (not player @format)
       @queue.unshift([ @current.infile, "#{__current_decoded_samples}s" ])
     else
-      # DTAS::Source::Command (hash), just rerun it
+      # DTAS::Source::Cmd (hash), just rerun it
       @queue.unshift(@current.to_hsh)
     end
     # We also want to hard drop the buffer so we do not get repeated audio.
@@ -424,7 +424,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     case msg.shift
     when "cat"
       io.emit({
-        "command" => @srccmd || DTAS::Source::SOURCE_DEFAULTS["command"],
+        "command" => @srccmd || DTAS::Source::Sox::SOX_DEFAULTS["command"],
         "env" => @srcenv,
       }.to_yaml)
     when "ed"

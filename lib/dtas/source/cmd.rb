@@ -6,7 +6,7 @@ require_relative '../source'
 require_relative '../command'
 require_relative '../serialize'
 
-class DTAS::Source::Command # :nodoc:
+class DTAS::Source::Cmd # :nodoc:
   require_relative '../source/common'
 
   include DTAS::Command
