@@ -6,6 +6,20 @@ if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
   File.open(manifest, "a") do |fp|
     fp.puts "NEWS"
     fp.puts "lib/dtas/version.rb"
+
+    if system("make -C Documentation")
+      require 'fileutils'
+      FileUtils.rm_rf 'man'
+      if system("make -C Documentation install-man")
+        `git ls-files -o man`.split(/\n/).each do |man|
+          fp.puts man
+        end
+      else
+        warn "failed to install manpages for distribution"
+      end
+    else
+      warn "failed to build manpages for distribution"
+    end
   end
   File.open("NEWS", "w") do |fp|
     `git tag -l`.split(/\n/).each do |tag|

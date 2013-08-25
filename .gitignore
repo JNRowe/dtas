@@ -5,3 +5,5 @@
 /coverage.dump
 *.tar.gz
 *.log
+/man
+*.gem

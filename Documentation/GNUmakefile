@@ -23,7 +23,9 @@ man: $(man1) $(man7)
 
 install-man: man
 	mkdir -p ../man/man1
+	mkdir -p ../man/man7
 	install -m 644 $(man1) ../man/man1
+	install -m 644 $(man7) ../man/man7
 
 %.1: %.1.txt
 	$(pandoc) -s -t man < $< > $@+ && mv $@+ $@
