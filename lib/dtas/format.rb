@@ -113,7 +113,7 @@ class DTAS::Format # :nodoc:
   end
 
   def valid_type?(type)
-    !!(type =~ %r{\A[us](?:8|16|24|32)\z} || type =~ %r{\Af?:(32|64)})
+    !!(type =~ %r{\A[us](?:8|16|24|32)\z} || type =~ %r{\Af(?:32|64)\z})
   end
 
   def valid_endian?(endian)

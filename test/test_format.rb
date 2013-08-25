@@ -44,4 +44,14 @@ class TestFormat < Minitest::Unit::TestCase
     fmt.type = "s16"
     assert_equal 2, fmt.bytes_per_sample
   end
+
+  def test_valid_type
+    fmt = DTAS::Format.new
+    %w(s16 s24 s32 f32 f64).each do |t|
+      assert fmt.valid_type?(t)
+    end
+    %w(flac wav wtf).each do |t|
+      refute fmt.valid_type?(t)
+    end
+  end
 end
