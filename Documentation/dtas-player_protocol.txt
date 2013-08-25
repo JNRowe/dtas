@@ -8,7 +8,7 @@ dtas-player_protocol - protocol for controling dtas-player
 # DESCRIPTION
 
 This gives a specification of the dtas-player protocol over a local Unix
-SOCK_SEQPACKET or SOCK_DGRAM socket.  The dtas-player protocol should NOT be
+SOCK_SEQPACKET socket.  The dtas-player protocol should NOT be
 considered stable at this point and compatibility will break.
 
 Inspiration is taken from MPRIS and MPRIS 2.0 specifications (e.g.

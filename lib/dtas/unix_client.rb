@@ -14,15 +14,7 @@ class DTAS::UNIXClient # :nodoc:
   end
 
   def initialize(path = self.class.default_path)
-    @to_io = begin
-      raise if ENV["_DTAS_NOSEQPACKET"]
-      Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
-    rescue
-      warn("get your operating system developers to support " \
-           "SOCK_SEQPACKET for AF_UNIX sockets")
-      warn("falling back to SOCK_DGRAM, reliability possibly compromised")
-      Socket.new(:AF_UNIX, :SOCK_DGRAM, 0)
-    end
+    @to_io = Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
     @to_io.connect(Socket.pack_sockaddr_un(path))
   end
 
