@@ -16,7 +16,6 @@ class DTAS::Sink # :nodoc:
   attr_accessor :active  # boolean
   attr_accessor :name
   attr_accessor :nonblock
-  attr_accessor :respawn
 
   include DTAS::Command
   include DTAS::Process
@@ -30,7 +29,6 @@ class DTAS::Sink # :nodoc:
     "nonblock" => false,
     "pipe_size" => nil,
     "active" => false,
-    "respawn" => false,
   })
 
   DEVFD_RE = %r{/dev/fd/([a-zA-Z]\w*)\b}

@@ -235,17 +235,16 @@ class DTAS::Player # :nodoc:
       warn("#{sink.name} died unexpectedly: #{status.inspect}")
       deleted.each { |t| drop_target(t) }
       __current_drop unless @targets[0]
+      return # sink stays dead if it died unexpectedly
     end
 
     return unless sink.active
 
-    if @queue[0] && !@paused
+    if (@current || @queue[0]) && !@paused
       # we get here if source/sinks are all killed in restart_pipeline
       __sink_activate(sink)
-      next_source(@queue.shift)
+      next_source(@queue.shift) unless @current
     end
-  ensure
-    sink.respawn = false
   end
 
   # returns a wait_ctl arg for self

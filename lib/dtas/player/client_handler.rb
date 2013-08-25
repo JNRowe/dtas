@@ -91,7 +91,6 @@ module DTAS::Player::ClientHandler # :nodoc:
         # do not reactivate it until we've reaped it
         if sink.pid
           drop_sink(sink)
-          sink.respawn = true
         else
           __sink_activate(sink)
         end
@@ -375,7 +374,6 @@ module DTAS::Player::ClientHandler # :nodoc:
   def restart_pipeline
     return if @paused
     __current_requeue
-    @sinks.each_value { |sink| sink.respawn = sink.active }
     @targets.each { |t| drop_target(t) }.clear
   end
 
