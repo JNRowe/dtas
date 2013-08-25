@@ -39,6 +39,18 @@ Key bindings are inspired partially by mplayer(1)
 DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
 This defaults to ~/.dtas/player.sock
 
+# CAVEATS
+
+Increasing timer resolution increases the number of CPU wakeups and
+power consumption.   This defeats the efforts of dtas-player
+configurations which use large buffers (especially in the sink) to
+reduce wakeups and power consumption.
+
+In rare cases (or poorly-configured systems), increased wakeups from
+dtas-console will also increase contention with the sound card,
+negatively affecting audio quality even if CPU utilization is not
+a problem.
+
 # SEE ALSO
 
 dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), dtas-sinkedit(1),
