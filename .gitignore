@@ -7,3 +7,4 @@
 *.log
 /man
 *.gem
+*.gz

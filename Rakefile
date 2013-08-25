@@ -59,9 +59,20 @@ h = Hoe.spec('dtas') do |p|
 end
 
 task :rsync_docs do
-  dest = "80x24.org:/srv/dtas/"
-  system("rsync --chmod=Fugo=r --files-from=.rsync_doc -av ./ #{dest}")
-  system("rsync --chmod=Fugo=r -av ./Documentation/*.txt #{dest}")
+  dest = ENV["RSYNC_DEST"] || "80x24.org:/srv/dtas/"
+  top = %w(INSTALL NEWS README COPYING)
+  files = []
+  Dir['Documentation/*.txt'].to_a.concat(top).each do |txt|
+    gz = "#{txt}.gz"
+    tmp = "#{gz}.#$$"
+    sh("gzip -9 < #{txt} > #{tmp}")
+    st = File.stat(txt)
+    File.utime(st.atime, st.mtime, tmp) # make nginx gzip_static happy
+    File.rename(tmp, gz)
+    files << txt
+    files << gz
+  end
+  sh("rsync --chmod=Fugo=r -av #{files.join(' ')} #{dest}")
 end
 
 task :coverage do
@@ -81,8 +92,7 @@ task tarball: "pkg/#{base}" do
   Dir.chdir("pkg") do
     tgz = "#{base}.tar.gz"
     tmp = "#{tmp}.#$$"
-    cmd = "tar cf - #{base} | gzip -9 > #{tmp}"
-    system(cmd) or abort "#{cmd}: #$?"
+    sh "tar cf - #{base} | gzip -9 > #{tmp}"
     File.rename(tmp, tgz)
   end
 end
@@ -90,8 +100,7 @@ end
 task dist: [ :tarball, :package ] do
   Dir.chdir("pkg") do
     %w(dtas-linux dtas-mpris).each do |gem|
-      cmd = "gem build ../#{gem}.gemspec"
-      system(cmd) or abort "#{cmd}: #$?"
+      sh "gem build ../#{gem}.gemspec"
     end
   end
 end
