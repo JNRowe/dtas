@@ -6,7 +6,11 @@ require_relative '../source'
 require_relative '../replaygain'
 require_relative 'file'
 
-module DTAS::Source::AvFfCommon
+# Common code for libav (avconv/avprobe) and ffmpeg (and ffprobe)
+# TODO: newer versions of both *probes support JSON, which will be easier to
+# parse.  However, the packaged libav version in Debian 7.0 does not
+# support JSON, so we have an ugly parser...
+module DTAS::Source::AvFfCommon # :nodoc:
   include DTAS::Source::File
   AStream = Struct.new(:duration, :channels, :rate)
   AV_FF_TRYORDER = 1
