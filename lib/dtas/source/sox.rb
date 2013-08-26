@@ -16,6 +16,22 @@ class DTAS::Source::Sox # :nodoc:
     "tryorder" => 0,
   )
 
+  # we use this to be less noisy when seeking a file
+  @last_failed = nil
+  def self.try_to_fail_harder(infile, s, cmd)
+    msg = nil
+    case s
+    when %r{\A0\s*\z} then msg = "detected zero samples"
+    when Process::Status then msg = "failed with #{s.exitstatus}"
+    end
+    if msg
+      return if @last_failed == infile
+      @last_failed = infile
+      return warn("`#{Shellwords.join(cmd)}' #{msg}")
+    end
+    true
+  end
+
   def initialize
     command_init(SOX_DEFAULTS)
   end
@@ -25,12 +41,7 @@ class DTAS::Source::Sox # :nodoc:
     cmd = %W(soxi -s #{infile})
     s = qx(@env, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
-    case s
-    when %r{\A0\s*\z}
-      return warn "`#{Shellwords.join(cmd)}' detected zero samples"
-    when Process::Status
-      return warn "`#{Shellwords.join(cmd)}' failed with #{s.exitstatus}"
-    end
+    self.class.try_to_fail_harder(infile, s, cmd) or return
     source_file_dup(infile, offset)
   end
 
@@ -70,21 +81,11 @@ class DTAS::Source::Sox # :nodoc:
     tmp = {}
     case @infile
     when String
-      err = ""
-      cmd = %W(soxi -a #@infile)
-      begin
-        qx(@env, cmd, err_str: err).split(/\n/).each do |line|
-          key, value = line.split(/=/, 2)
-          key && value or next
-          # TODO: multi-line/multi-value/repeated tags
-          tmp[key.upcase] = value
-        end
-      rescue => e
-        if /FAIL formats: no handler for file extension/ =~ err
-          warn("#{Shellwords.escape(cmd)}: #{err}")
-        else
-          warn("#{e.message} (#{e.class})")
-        end
+      qx(@env, %W(soxi -a #@infile)).split(/\n/).each do |line|
+        key, value = line.split(/=/, 2)
+        key && value or next
+        # TODO: multi-line/multi-value/repeated tags
+        tmp[key.upcase] = value
       end
     end
     tmp
