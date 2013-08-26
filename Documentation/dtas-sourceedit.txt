@@ -7,7 +7,7 @@ dtas-sourceedit - edit parameters of a source decoder
 
 # SYNOPSYS
 
-dtas-sourceedit {sox | av}
+dtas-sourceedit {sox | av | ff}
 
 # DESCRIPTION
 
@@ -23,6 +23,10 @@ Invoking dtas-sourceedit will spawn your favorite text editor on "sox":
 To change the way dtas-player calls avconv (part of libav):
 
 	$ dtas-sourceedit av
+
+To change the way dtas-player calls ffmpeg (lightly-tested):
+
+	$ dtas-sourceedit ff
 
 # ENVIRONMENT
 

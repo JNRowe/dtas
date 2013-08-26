@@ -191,11 +191,11 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
 
   def test_source_ed
     s = client_socket
-    assert_equal "sox av", s.req("source ls")
+    assert_equal "sox av ff", s.req("source ls")
     s.req_ok("source ed av tryorder=-1")
-    assert_equal "av sox", s.req("source ls")
+    assert_equal "av sox ff", s.req("source ls")
     s.req_ok("source ed av tryorder=")
-    assert_equal "sox av", s.req("source ls")
+    assert_equal "sox av ff", s.req("source ls")
 
     s.req_ok("source ed sox command=true")
     sox = YAML.load(s.req("source cat sox"))

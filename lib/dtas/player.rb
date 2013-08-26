@@ -7,6 +7,7 @@ require_relative '../dtas'
 require_relative 'source'
 require_relative 'source/sox'
 require_relative 'source/av'
+require_relative 'source/ff'
 require_relative 'source/cmd'
 require_relative 'sink'
 require_relative 'unix_server'
@@ -41,6 +42,7 @@ class DTAS::Player # :nodoc:
     @source_map = {
       "sox" => DTAS::Source::Sox.new,
       "av" => DTAS::Source::Av.new,
+      "ff" => DTAS::Source::Ff.new,
     }
     source_map_reload
   end
