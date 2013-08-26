@@ -344,10 +344,10 @@ class DTAS::Player # :nodoc:
 
       case source_spec
       when String
-        @current = try_file(source_spec)
+        @current = try_file(source_spec) or return
         echo(%W(file #{@current.infile}))
       when Array
-        @current = try_file(*source_spec)
+        @current = try_file(*source_spec) or return
         echo(%W(file #{@current.infile} #{@current.offset_samples}s))
       else
         @current = DTAS::Source::Cmd.new(source_spec["command"])
