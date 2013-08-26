@@ -52,7 +52,6 @@ Coming:
 * MPRIS/MPRIS 2.0 bridge for partial dtas-player control
 * tracklist support in dtas-player (maybe?)
 * whatever command-line tools come to mind...
-* native ffmpeg/avconv/gst support in dtas-player
 * better error handling, many bugfixes, etc...
 * better documentation
 
