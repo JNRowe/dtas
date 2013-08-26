@@ -13,27 +13,25 @@ class DTAS::Source::Sox # :nodoc:
 
   SOX_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" => 'exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX',
-    "comments" => nil,
   )
 
-
-  def self.try(infile, offset = nil)
-    err = ""
-    DTAS::Process.qx(%W(soxi #{infile}), err_str: err)
-    return if err =~ /soxi FAIL formats:/
-    new(infile, offset)
-  rescue
+  def initialize
+    command_init(SOX_DEFAULTS)
   end
 
-  def initialize(infile, offset = nil)
-    command_init(SOX_DEFAULTS)
-    source_file_init(infile, offset)
+  def try(infile, offset = nil)
+    err = ""
+    qx(@env, %W(soxi #{infile}), err_str: err, no_raise: true)
+    return if err =~ /soxi FAIL formats:/
+    rv = dup
+    rv.source_file_init(infile, offset)
+    rv
   end
 
   def precision
-    qx(%W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
+    qx(@env, %W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
   rescue # fallback to parsing the whole output
-    s = qx(%W(soxi #@infile), err: "/dev/null")
+    s = qx(@env, %W(soxi #@infile), err: "/dev/null")
     s =~ /Precision\s+:\s*(\d+)-bit/
     v = $1.to_i
     return v if v > 0
@@ -44,9 +42,9 @@ class DTAS::Source::Sox # :nodoc:
     @format ||= begin
       fmt = DTAS::Format.new
       path = @infile
-      fmt.channels = qx(%W(soxi -c #{path})).to_i
-      fmt.type = qx(%W(soxi -t #{path})).strip
-      fmt.rate = qx(%W(soxi -r #{path})).to_i
+      fmt.channels = qx(@env, %W(soxi -c #{path})).to_i
+      fmt.type = qx(@env, %W(soxi -t #{path})).strip
+      fmt.rate = qx(@env, %W(soxi -r #{path})).to_i
       fmt.bits ||= precision
       fmt
     end
@@ -55,7 +53,7 @@ class DTAS::Source::Sox # :nodoc:
   # This is the number of samples according to the samples in the source
   # file itself, not the decoded output
   def samples
-    @samples ||= qx(%W(soxi -s #@infile)).to_i
+    @samples ||= qx(@env, %W(soxi -s #@infile)).to_i
   rescue => e
     warn e.message
     0
@@ -69,7 +67,7 @@ class DTAS::Source::Sox # :nodoc:
       err = ""
       cmd = %W(soxi -a #@infile)
       begin
-        qx(cmd, err_str: err).split(/\n/).each do |line|
+        qx(@env, cmd, err_str: err).split(/\n/).each do |line|
           key, value = line.split(/=/, 2)
           key && value or next
           # TODO: multi-line/multi-value/repeated tags
@@ -88,15 +86,15 @@ class DTAS::Source::Sox # :nodoc:
 
   def spawn(player_format, rg_state, opts)
     raise "BUG: #{self.inspect}#spawn called twice" if @to_io
-    e = player_format.to_env
+    e = @env.merge!(player_format.to_env)
     e["INFILE"] = @infile
 
     # make sure these are visible to the "current" command...
-    @env["TRIMFX"] = @offset ? "trim #@offset" : nil
-    @env["RGFX"] = rg_state.effect(self) || nil
+    e["TRIMFX"] = @offset ? "trim #@offset" : nil
+    e["RGFX"] = rg_state.effect(self) || nil
     e.merge!(@rg.to_env) if @rg
 
-    @pid = dtas_spawn(e.merge!(@env), command_string, opts)
+    @pid = dtas_spawn(e, command_string, opts)
   end
 
   def to_hsh

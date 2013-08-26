@@ -33,7 +33,7 @@ class TestSourceAv < Minitest::Unit::TestCase
 
     x(%W(metaflac --set-tag=FOO=BAR #{tmp.path}))
     x(%W(metaflac --add-replay-gain #{tmp.path}))
-    source = DTAS::Source::Av.new(tmp.path)
+    source = DTAS::Source::Av.new.try(tmp.path)
     assert_equal source.comments["FOO"], "BAR", source.inspect
     rg = source.replaygain
     assert_kind_of DTAS::ReplayGain, rg
@@ -60,7 +60,7 @@ class TestSourceAv < Minitest::Unit::TestCase
       end
     end
 
-    source = DTAS::Source::Av.new(a.path)
+    source = DTAS::Source::Av.new.try(a.path)
     rg = source.replaygain
     assert_kind_of DTAS::ReplayGain, rg
     assert_in_delta 0.0, rg.track_peak.to_f, 0.00000001
@@ -71,31 +71,31 @@ class TestSourceAv < Minitest::Unit::TestCase
 
   def test_offset
     tmp = new_file('flac') or return
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 5s))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 5s))
     assert_equal 5, source.offset_samples
 
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 1:00:00.5))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 1:00:00.5))
     expect = 1 * 60 * 60 * 44100 + (44100/2)
     assert_equal expect, source.offset_samples
 
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 1:10.5))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 1:10.5))
     expect = 1 * 60 * 44100 + (10 * 44100) + (44100/2)
     assert_equal expect, source.offset_samples
 
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 10.03))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 10.03))
     expect = (10 * 44100) + (44100 * 3/100.0)
     assert_equal expect, source.offset_samples
   end
 
   def test_offset_us
     tmp = new_file('flac') or return
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 441s))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 441s))
     assert_equal 10000.0, source.offset_us
 
-    source = DTAS::Source::Av.new(*%W(#{tmp.path} 22050s))
+    source = DTAS::Source::Av.new.try(*%W(#{tmp.path} 22050s))
     assert_equal 500000.0, source.offset_us
 
-    source = DTAS::Source::Av.new(tmp.path, '1')
+    source = DTAS::Source::Av.new.try(tmp.path, '1')
     assert_equal 1000000.0, source.offset_us
   end
 end

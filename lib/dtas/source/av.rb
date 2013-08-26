@@ -17,38 +17,36 @@ class DTAS::Source::Av # :nodoc:
     "command" =>
       'avconv -v error $SSPOS -i "$INFILE" $AMAP -f sox - |' \
       'sox -p $SOXFMT - $RGFX',
-    "comments" => nil,
   )
 
   attr_reader :precision # always 32
   attr_reader :format
 
-  def self.try(infile, offset = nil)
-    err = ""
-    DTAS::Process.qx(%W(avprobe #{infile}), err_str: err)
-    return if err =~ /Unable to find a suitable output format for/
-    new(infile, offset)
-  rescue
-  end
-
-  def initialize(infile, offset = nil)
+  def initialize
     command_init(AV_DEFAULTS)
-    source_file_init(infile, offset)
     @precision = 32 # this still goes through sox, which is 32-bit
-    do_avprobe
   end
 
-  def do_avprobe
+  def try(infile, offset = nil)
+    rv = dup
+    rv.source_file_init(infile, offset)
+    rv.av_ok? or return
+    rv
+  end
+
+  def av_ok?
     @duration = nil
     @format = DTAS::Format.new
     @format.bits = @precision
     @comments = {}
-    err = ""
-    s = qx(%W(avprobe -show_streams -show_format #@infile), err_str: err)
     @astreams = []
+    cmd = %W(avprobe -show_streams -show_format #@infile)
+    err = ""
+    s = qx(@env, cmd, err_str: err, no_raise: true)
+    return false if Process::Status === s
+    return false if err =~ /Unable to find a suitable output format for/
     s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}m) do |_|
       stream = $1
-      # XXX what to do about multiple streams?
       if stream =~ /^codec_type=audio$/
         as = AStream.new
         index = nil
@@ -56,6 +54,9 @@ class DTAS::Source::Av # :nodoc:
         stream =~ /^duration=([\d\.]+)\s*$/m and as.duration = $1.to_f
         stream =~ /^channels=(\d)\s*$/m and as.channels = $1.to_i
         stream =~ /^sample_rate=([\d\.]+)\s*$/m and as.rate = $1.to_i
+        index or raise "BUG: no audio index from #{Shellwords.join(cmd)}"
+
+        # some streams have zero channels
         @astreams[index] = as if as.channels > 0 && as.rate > 0
       end
     end
@@ -65,6 +66,7 @@ class DTAS::Source::Av # :nodoc:
       # TODO: multi-line/multi-value/repeated tags
       f.gsub!(/^TAG:([^=]+)=(.*)$/i) { |_| @comments[$1.upcase] = $2 }
     end
+    ! @astreams.empty?
   end
 
   def sspos(offset)
@@ -73,40 +75,54 @@ class DTAS::Source::Av # :nodoc:
     sprintf("-ss %0.9g", samples / @format.rate)
   end
 
+  def select_astream(as)
+    @format.channels = as.channels
+    @format.rate = as.rate
+
+    # favor the duration of the stream we're playing instead of
+    # duration we got from [FORMAT].  However, some streams may not have
+    # a duration and only have it in [FORMAT]
+    @duration = as.duration if as.duration
+  end
+
+  def amap_fallback
+    @astreams.each_with_index do |as, index|
+      as or next
+      select_astream(as)
+      warn "no suitable audio stream in #@infile, trying stream=#{index}"
+      return "-map 0:#{i}"
+    end
+    raise "BUG: no audio stream in #@infile"
+  end
+
   def spawn(player_format, rg_state, opts)
     raise "BUG: #{self.inspect}#spawn called twice" if @to_io
     amap = nil
-    found_as = nil
 
     # try to find an audio stream which matches our channel count
     # we need to set @format for sspos() down below
-    @astreams.each_with_index do |as, index|
+    @astreams.each_with_index do |as, i|
       if as && as.channels == player_format.channels
-        @format.channels = as.channels
-        @format.rate = as.rate
-        found_as = as
-        amap = "-map 0:#{index}"
+        select_astream(as)
+        amap = "-map 0:#{i}"
       end
     end
-    unless found_as
-      first_as = @astreams.compact[0]
-      if first_as
-        @format.channels = found_as.channels
-        @format.rate = found_as.rate
-      end
-    end
-    e = player_format.to_env
+
+    # fall back to the first audio stream
+    # we must call select_astream before sspos
+    amap ||= amap_fallback
+
+    e = @env.merge!(player_format.to_env)
+
+    # make sure these are visible to the source command...
     e["INFILE"] = @infile
     e["AMAP"] = amap
-
-    # make sure these are visible to the "current" command...
-    @env["SSPOS"] = @offset ? sspos(@offset) : nil
-    @env["RGFX"] = rg_state.effect(self) || nil
+    e["SSPOS"] = @offset ? sspos(@offset) : nil
+    e["RGFX"] = rg_state.effect(self) || nil
     e.merge!(@rg.to_env) if @rg
 
-    @pid = dtas_spawn(e.merge!(@env), command_string, opts)
+    @pid = dtas_spawn(e, command_string, opts)
   end
-
 
   # This is the number of samples according to the samples in the source
   # file itself, not the decoded output

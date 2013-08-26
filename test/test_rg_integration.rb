@@ -41,7 +41,7 @@ class TestRgIntegration < Minitest::Unit::TestCase
       end while cur["current_offset"] == 0 && sleep(0.01)
     end
 
-    assert_nil cur["current"]["env"]["RGFX"]
+    assert_empty cur["current"]["env"]["RGFX"]
 
     assert_equal DTAS::Format.new.rate * len, cur["current_expect"]
 

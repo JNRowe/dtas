@@ -85,7 +85,4 @@ module DTAS::Process # :nodoc:
     raise RuntimeError,
           "`#{Shellwords.join(Array(cmd))}' failed: #{status.inspect}"
   end
-
-  # XXX only for DTAS::Source::{Sox,Av}.try
-  module_function :qx
 end

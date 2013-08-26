@@ -26,7 +26,7 @@ class DTAS::Player # :nodoc:
     @state_file = nil
     @socket = nil
     @srv = nil
-    @queue = [] # sources
+    @queue = [] # files for sources, or commands
     @paused = false
     @format = DTAS::Format.new
     @srccmd = nil
@@ -40,6 +40,7 @@ class DTAS::Player # :nodoc:
     @sink_buf = DTAS::Buffer.new
     @current = nil
     @watchers = {}
+    @sources = [ DTAS::Source::Sox.new, DTAS::Source::Av.new ]
   end
 
   def echo(msg)
@@ -298,14 +299,14 @@ class DTAS::Player # :nodoc:
   end
 
   def try_file(*args)
-    [ DTAS::Source::Sox, DTAS::Source::Av ].each do |klass|
-      rv = klass.try(*args) and return rv
+    @sources.each do |src|
+      rv = src.try(*args) and return rv
     end
 
     # keep going down the list until we find something
     while source_spec = @queue.shift
-      [ DTAS::Source::Sox, DTAS::Source::Av ].each do |klass|
-        rv = klass.try(*source_spec) and return rv
+      @sources.each do |src|
+        rv = src.try(*source_spec) and return rv
       end
     end
     echo "idle"

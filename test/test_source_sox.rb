@@ -31,7 +31,7 @@ class TestSource < Minitest::Unit::TestCase
     return if `which metaflac`.strip.size == 0
     tmp = new_file('flac') or return
 
-    source = DTAS::Source::Sox.new(tmp.path)
+    source = DTAS::Source::Sox.new.try(tmp.path)
     x(%W(metaflac --set-tag=FOO=BAR #{tmp.path}))
     x(%W(metaflac --add-replay-gain #{tmp.path}))
     assert_equal source.comments["FOO"], "BAR"
@@ -48,7 +48,7 @@ class TestSource < Minitest::Unit::TestCase
     a = new_file('mp3') or return
     b = new_file('mp3') or return
 
-    source = DTAS::Source::Sox.new(a.path)
+    source = DTAS::Source::Sox.new.try(a.path)
 
     # redirect stdout to /dev/null temporarily, mp3gain is noisy
     File.open("/dev/null", "w") do |null|
@@ -72,31 +72,31 @@ class TestSource < Minitest::Unit::TestCase
 
   def test_offset
     tmp = new_file('sox') or return
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 5s))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 5s))
     assert_equal 5, source.offset_samples
 
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 1:00:00.5))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 1:00:00.5))
     expect = 1 * 60 * 60 * 44100 + (44100/2)
     assert_equal expect, source.offset_samples
 
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 1:10.5))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 1:10.5))
     expect = 1 * 60 * 44100 + (10 * 44100) + (44100/2)
     assert_equal expect, source.offset_samples
 
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 10.03))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 10.03))
     expect = (10 * 44100) + (44100 * 3/100.0)
     assert_equal expect, source.offset_samples
   end
 
   def test_offset_us
     tmp = new_file('sox') or return
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 441s))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 441s))
     assert_equal 10000.0, source.offset_us
 
-    source = DTAS::Source::Sox.new(*%W(#{tmp.path} 22050s))
+    source = DTAS::Source::Sox.new.try(*%W(#{tmp.path} 22050s))
     assert_equal 500000.0, source.offset_us
 
-    source = DTAS::Source::Sox.new(tmp.path, '1')
+    source = DTAS::Source::Sox.new.try(tmp.path, '1')
     assert_equal 1000000.0, source.offset_us
   end
 
@@ -106,7 +106,7 @@ class TestSource < Minitest::Unit::TestCase
       cmd = %W(sox -r 96000 -b 24 -c 2 -n #{tmp.path} trim 0 1)
       system(*cmd)
       assert $?.success?, "#{cmd.inspect} failed: #$?"
-      fmt = DTAS::Source::Sox.new(tmp.path).format
+      fmt = DTAS::Source::Sox.new.try(tmp.path).format
       assert_equal 96000, fmt.rate
       assert_equal 2, fmt.channels
       tmp.unlink
