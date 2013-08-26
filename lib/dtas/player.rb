@@ -346,19 +346,20 @@ class DTAS::Player # :nodoc:
 
       case source_spec
       when String
-        @current = try_file(source_spec) or return
-        echo(%W(file #{@current.infile}))
+        pending = try_file(source_spec) or return
+        echo(%W(file #{pending.infile}))
       when Array
-        @current = try_file(*source_spec) or return
-        echo(%W(file #{@current.infile} #{@current.offset_samples}s))
+        pending = try_file(*source_spec) or return
+        echo(%W(file #{pending.infile} #{pending.offset_samples}s))
       else
-        @current = DTAS::Source::Cmd.new(source_spec["command"])
-        echo(%W(command #{@current.command_string}))
+        pending = DTAS::Source::Cmd.new(source_spec["command"])
+        echo(%W(command #{pending.command_string}))
       end
 
       dst = @sink_buf
-      @current.dst_assoc(dst)
-      @current.spawn(@format, @rg, out: dst.wr, in: "/dev/null")
+      pending.dst_assoc(dst)
+      pending.spawn(@format, @rg, out: dst.wr, in: "/dev/null")
+      @current = pending
       @srv.wait_ctl(dst, :wait_readable)
     else
       stop_sinks if @sink_buf.inflight == 0
