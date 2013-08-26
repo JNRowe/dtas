@@ -2,20 +2,16 @@
 # -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-require 'tempfile'
-require 'yaml'
-require 'dtas/unix_client'
-require 'dtas/disclaimer'
-editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
-c = DTAS::UNIXClient.new
-usage = "#$0 <sox|av>"
+require 'dtas/edit_client'
+include DTAS::EditClient
+c = client_socket
+sources = c.req('source ls') || "(unknown)"
+usage = "Usage: #{DTAS_PROGNAME} SOURCENAME\n" \
+        "available SOURCENAME values: #{sources}"
 ARGV.size <= 1 or abort usage
 name = ARGV[0] || "sox"
 
-tmp = Tempfile.new(%w(dtas-sourceedit .yml))
-tmp.sync = true
-tmp.binmode
-
+tmp = tmpyaml
 buf = c.req(%W(source cat #{name}))
 abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
@@ -27,22 +23,11 @@ tmp.rewind
 source = YAML.load(tmp.read)
 
 cmd = %W(source ed #{name})
-if env = source["env"]
-  env.each do |k,v|
-    cmd << (v.nil? ? "env##{k}" : "env.#{k}=#{v}")
-  end
-end
+update_cmd_env(cmd, orig, source)
 
-# remove deleted env
-if orig_env = orig["env"]
-  env ||= {}
-  deleted_keys = orig_env.keys - env.keys
-  deleted_keys.each { |k| cmd << "env##{k}" }
-end
-
-%w(command).each do |field|
-  value = source[field]
-  cmd << "#{field}=#{value}"
+# nil OK
+%w(tryorder command).each do |field|
+  cmd << "#{field}=#{source[field]}"
 end
 
 c.req_ok(cmd)

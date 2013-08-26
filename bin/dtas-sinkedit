@@ -2,20 +2,16 @@
 # -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-require 'dtas/unix_client'
-require 'dtas/disclaimer'
-require 'tempfile'
-require 'yaml'
-editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
-c = DTAS::UNIXClient.new
-usage = "#$0 SINKNAME"
+require 'dtas/edit_client'
+include DTAS::EditClient
+c = client_socket
+sinks = c.req('sink ls') || "(unknown)"
+usage = "Usage: #{DTAS_PROGNAME} SINKNAME\n" \
+        "available SINKNAME values: #{sinks}"
 ARGV.size == 1 or abort usage
 name = ARGV[0]
 
-tmp = Tempfile.new(%w(dtas-sinkedit .yml))
-tmp.sync = true
-tmp.binmode
-
+tmp = tmpyaml
 buf = c.req(%W(sink cat #{name}))
 abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
@@ -27,32 +23,20 @@ tmp.rewind
 sink = YAML.load(tmp.read)
 
 cmd = %W(sink ed #{name})
-if env = sink["env"]
-  env.each do |k,v|
-    cmd << (v.nil? ? "env##{k}" : "env.#{k}=#{v}")
-  end
-end
+update_cmd_env(cmd, orig, sink)
 
-# remove deleted env
-if orig_env = orig["env"]
-  env ||= {}
-  deleted_keys = orig_env.keys - env.keys
-  deleted_keys.each { |k| cmd << "env##{k}" }
-end
-
+# both of these default to false
 %w(nonblock active).each do |field|
-  if sink.key?(field)
-    cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
-  end
+  cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
 end
 
 %w(prio pipe_size).each do |field|
   value = sink[field] and cmd << "#{field}=#{value}"
 end
 
+# nil OK
 %w(command).each do |field|
-  value = sink[field]
-  cmd << "#{field}=#{value}"
+  cmd << "#{field}=#{sink[field]}"
 end
 
 c.req_ok(cmd)
