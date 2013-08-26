@@ -40,10 +40,10 @@ Debian users can install sox, mp3gain, and flac dependencies easily:
 
   Grab the latest tarball from our HTTP site:
 
-  http://dtas.80x24.org/2013/dtas-0.0.0.tar.gz
+  http://dtas.80x24.org/2013/dtas-0.1.I.tar.gz
 
-  $ tar zxvf dtas-0.0.0.tar.gz
-  $ cd dtas-0.0.0
+  $ tar zxvf dtas-0.1.I.tar.gz
+  $ cd dtas-0.1.I
   $ ruby setup.rb
 
   GNU/Linux users may optionally install "io_splice" and
