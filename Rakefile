@@ -22,8 +22,8 @@ if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
     end
   end
   File.open("NEWS", "w") do |fp|
-    `git tag -l`.split(/\n/).each do |tag|
-      %r{\Av([\d\.]+)} =~ tag or next
+    `git tag -l`.split(/\n/).reverse.each do |tag|
+      %r{\Av(.+)} =~ tag or next
       version = $1
       header, subject, body = `git cat-file tag #{tag}`.split(/\n\n/, 3)
       header = header.split(/\n/)
