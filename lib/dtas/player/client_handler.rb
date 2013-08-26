@@ -91,6 +91,9 @@ module DTAS::Player::ClientHandler # :nodoc:
         # do not reactivate it until we've reaped it
         if sink.pid
           drop_sink(sink)
+
+          # we must restart @current if there's a moment we're target-less:
+          __current_requeue unless @targets[0]
         else
           __sink_activate(sink)
         end
@@ -102,6 +105,10 @@ module DTAS::Player::ClientHandler # :nodoc:
     # readability again, since we new sinks should be writable, and
     # we've stopped waiting on killed sinks
     @srv.wait_ctl(@sink_buf, :wait_readable)
+  end
+
+  def __sink_snapshot(sink)
+    [ sink.command, sink.env, sink.pipe_size ].inspect
   end
 
   # returns a wait_ctl arg
@@ -123,6 +130,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
       sink.name = name
       active_before = sink.active
+      before = __sink_snapshot(sink)
 
       # multiple changes may be made at once
       msg[2..-1].each do |kv|
@@ -149,11 +157,13 @@ module DTAS::Player::ClientHandler # :nodoc:
       end
 
       @sinks[name] = new_sink if new_sink # no errors? it's a new sink!
+      after = __sink_snapshot(sink)
 
       # start or stop a sink if its active= flag changed.  Additionally,
       # account for a crashed-but-marked-active sink.  The user may have
       # fixed the command to not crash it.
-      if (active_before != sink.active) || (sink.active && !sink.pid)
+      if (active_before != sink.active) ||
+         (sink.active && (!sink.pid || before != after))
         __sink_switch(sink)
       end
       io.emit("OK")
@@ -298,7 +308,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit(tmp.to_yaml)
   end
 
-  def __buf_reset(buf)
+  def __buf_reset(buf) # buf is always @sink_buf for now
     @srv.wait_ctl(buf, :ignore)
     buf.buf_reset
     @srv.wait_ctl(buf, :wait_readable)
