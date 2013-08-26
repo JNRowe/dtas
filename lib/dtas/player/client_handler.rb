@@ -419,28 +419,39 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def source_handler(io, msg)
-    case msg.shift
+    map = @source_map
+    op = msg.shift
+    if op == "ls"
+      s = map.keys.sort { |a,b| map[a].tryorder <=> map[b].tryorder }
+      return io.emit(s.join(' '))
+    end
+
+    name = msg.shift
+    src = map[name] or return io.emit("ERR non-existent source name")
+    case op
     when "cat"
-      io.emit({
-        "command" => @srccmd || DTAS::Source::Sox::SOX_DEFAULTS["command"],
-        "env" => @srcenv,
-      }.to_yaml)
+      io.emit(src.to_source_cat.to_yaml)
     when "ed"
-      before = [ @srccmd, @srcenv ].inspect
+      before = src.to_state_hash
+      sd = src.source_defaults
       msg.each do |kv|
         k, v = kv.split(/=/, 2)
         case k
         when "command"
-          @srccmd = v.empty? ? nil : v
+          src.command = v.empty? ? sd[k] : v
         when %r{\Aenv\.([^=]+)\z}
-          @srcenv[$1] = v
+          src.env[$1] = v
         when %r{\Aenv#([^=]+)\z}
           v == nil or return io.emit("ERR unset env has no value")
-          @srcenv.delete($1)
+          src.env.delete($1)
+        when "tryorder"
+          rv = set_int(io, kv, v, true) { |i| src.tryorder = i || sd[k] }
+          rv == true or return rv
+          source_map_reload
         end
       end
-      after = [ @srccmd, @srcenv ].inspect
-      __current_requeue if before != after
+      after = src.to_state_hash
+      __current_requeue if before != after && @current.class == before.class
       io.emit("OK")
     else
       io.emit("ERR unknown source op")

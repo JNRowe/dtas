@@ -10,6 +10,7 @@ require_relative '../process'
 module DTAS::Source::File # :nodoc:
   attr_reader :infile
   attr_reader :offset
+  attr_accessor :tryorder
   require_relative 'common' # dtas/source/common
   require_relative 'mp3gain'
   include DTAS::Command
@@ -17,9 +18,17 @@ module DTAS::Source::File # :nodoc:
   include DTAS::Source::Common
   include DTAS::Source::Mp3gain
 
-  FILE_SIVS = %w(infile comments command env)
+  FILE_SIVS = %w(infile comments command env) # for the "current" command
+  SRC_SIVS = %w(command env tryorder)
 
-  def source_file_init(infile, offset)
+  def source_file_dup(infile, offset)
+    rv = dup
+    rv.__file_init(infile, offset)
+    rv
+  end
+
+  def __file_init(infile, offset)
+    @env = @env.dup
     @format = nil
     @infile = infile
     @offset = offset
@@ -68,4 +77,18 @@ module DTAS::Source::File # :nodoc:
             DTAS::ReplayGain.new(mp3gain_comments)
   end
 
+  def to_source_cat
+    ivars_to_hash(SRC_SIVS)
+  end
+
+  def load!(src_hsh)
+    SRC_SIVS.each do |field|
+      val = src_hsh[field] and instance_variable_set("@#{field}", val)
+    end
+  end
+
+  def to_state_hash
+    defaults = source_defaults # see dtas/source/{av,sox}.rb
+    to_source_cat.delete_if { |k,v| v == defaults[k] }
+  end
 end

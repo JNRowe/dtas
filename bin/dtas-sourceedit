@@ -8,15 +8,15 @@ require 'dtas/unix_client'
 require 'dtas/disclaimer'
 editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
 c = DTAS::UNIXClient.new
-usage = $0
-ARGV.size == 0 or abort usage
-name = ARGV[0]
+usage = "#$0 <sox|av>"
+ARGV.size <= 1 or abort usage
+name = ARGV[0] || "sox"
 
 tmp = Tempfile.new(%w(dtas-sourceedit .yml))
 tmp.sync = true
 tmp.binmode
 
-buf = c.req(%W(source cat))
+buf = c.req(%W(source cat #{name}))
 abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
 
@@ -26,7 +26,7 @@ system(cmd) or abort "#{cmd} failed: #$?"
 tmp.rewind
 source = YAML.load(tmp.read)
 
-cmd = %W(source ed)
+cmd = %W(source ed #{name})
 if env = source["env"]
   env.each do |k,v|
     cmd << (v.nil? ? "env##{k}" : "env.#{k}=#{v}")

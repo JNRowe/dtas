@@ -188,4 +188,21 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
 
     assert_equal "/", s.req("pwd")
   end
+
+  def test_source_ed
+    s = client_socket
+    assert_equal "sox av", s.req("source ls")
+    s.req_ok("source ed av tryorder=-1")
+    assert_equal "av sox", s.req("source ls")
+    s.req_ok("source ed av tryorder=")
+    assert_equal "sox av", s.req("source ls")
+
+    s.req_ok("source ed sox command=true")
+    sox = YAML.load(s.req("source cat sox"))
+    assert_equal "true", sox["command"]
+
+    s.req_ok("source ed sox command=")
+    sox = YAML.load(s.req("source cat sox"))
+    assert_equal DTAS::Source::Sox::SOX_DEFAULTS["command"], sox["command"]
+  end
 end

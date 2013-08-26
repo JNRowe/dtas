@@ -3,23 +3,26 @@
 
 # NAME
 
-dtas-sourceedit - edit the command and environment of the decoder
+dtas-sourceedit - edit parameters of a source decoder
 
 # SYNOPSYS
 
-dtas-sourceedit
+dtas-sourceedit {sox | av}
 
 # DESCRIPTION
 
-dtas-sourceedit spawns an editor to allow editing of a sink as a YAML file.
-See dtas-player_protocol(7) for details on SINKARGS.
+dtas-sourceedit spawns an editor to allow editing of a source as a YAML file.
+See dtas-player_protocol(7) for details on SOURCEARGS.
 
 # EXAMPLES
 
-Invoking dtas-sourceedit will spawn your favorite text editor on a
-given SINKNAME:
+Invoking dtas-sourceedit will spawn your favorite text editor on "sox":
 
-	$ dtas-sourceedit
+	$ dtas-sourceedit sox
+
+To change the way dtas-player calls avconv (part of libav):
+
+	$ dtas-sourceedit av
 
 # ENVIRONMENT
 

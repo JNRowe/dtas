@@ -17,6 +17,7 @@ class DTAS::Source::Av # :nodoc:
     "command" =>
       'avconv -v error $SSPOS -i "$INFILE" $AMAP -f sox - |' \
       'sox -p $SOXFMT - $RGFX',
+    "tryorder" => 1,
   )
 
   attr_reader :precision # always 32
@@ -28,8 +29,7 @@ class DTAS::Source::Av # :nodoc:
   end
 
   def try(infile, offset = nil)
-    rv = dup
-    rv.source_file_init(infile, offset)
+    rv = source_file_dup(infile, offset)
     rv.av_ok? or return
     rv
   end
@@ -132,5 +132,9 @@ class DTAS::Source::Av # :nodoc:
 
   def to_hsh
     to_hash.delete_if { |k,v| v == AV_DEFAULTS[k] }
+  end
+
+  def source_defaults
+    AV_DEFAULTS
   end
 end

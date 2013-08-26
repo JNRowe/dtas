@@ -33,6 +33,7 @@ dtas-sinkedit(1), and dtas-enq(1) also implement this protocol.
 - ENVVALUE - must be a suitable environment variable (setenv(3))
 - COMMAND, this may be quoted string passed to sh -c "",
            variable/argument expansion will be performed by the shell
+- SOURCENAME - "sox" or "av", more backends may be supported in the future
 - FILENAME - an expanded pathname relative to / is recommended since
              dtas-player and the client may run in different directories
 
@@ -167,14 +168,15 @@ For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
     + nonblock=BOOLEAN - drop audio data to avoid holding back other sinks
     + pipe_size=UNSIGNED - set the size of the pipe for the sink (Linux-only)
 
-* source cat - dump the current source command and env in YAML
+* source SOURCENAME cat - dump the current source command and env in YAML
 
-* source ed SOURCEARGS - edit the source (decoder) command and environment.
+* source ed SOURCENAME SOURCEARGS - edit the source parameters.
   This changes here will immediately restart the source process.
   See the code for dtas-sourceedit(1) for an example of using this.
     + command=COMMAND - change the command-line used to decode audio
     + env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the source process
     + env#ENVNAME - unset ENVNAME in the source process (only)
+    + tryorder=INTEGER - lower values are tried first
 
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open

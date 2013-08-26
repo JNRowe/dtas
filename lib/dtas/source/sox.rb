@@ -13,6 +13,7 @@ class DTAS::Source::Sox # :nodoc:
 
   SOX_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" => 'exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX',
+    "tryorder" => 0,
   )
 
   def initialize
@@ -23,9 +24,7 @@ class DTAS::Source::Sox # :nodoc:
     err = ""
     qx(@env, %W(soxi #{infile}), err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
-    rv = dup
-    rv.source_file_init(infile, offset)
-    rv
+    source_file_dup(infile, offset)
   end
 
   def precision
@@ -99,5 +98,9 @@ class DTAS::Source::Sox # :nodoc:
 
   def to_hsh
     to_hash.delete_if { |k,v| v == SOX_DEFAULTS[k] }
+  end
+
+  def source_defaults
+    SOX_DEFAULTS
   end
 end

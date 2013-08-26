@@ -105,7 +105,7 @@ class TestRgIntegration < Minitest::Unit::TestCase
     pluck, _ = tmp_pluck
     cmd = DTAS::Source::Sox::SOX_DEFAULTS["command"]
     fifo = tmpfifo
-    s.req_ok("source ed command='env > #{fifo}; #{cmd}'")
+    s.req_ok("source ed sox command='env > #{fifo}; #{cmd}'")
     s.req_ok("sink ed default command='cat >/dev/null' active=true")
     s.req_ok(%W(enq #{pluck.path}))
 

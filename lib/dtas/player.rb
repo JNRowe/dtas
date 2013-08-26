@@ -29,8 +29,6 @@ class DTAS::Player # :nodoc:
     @queue = [] # files for sources, or commands
     @paused = false
     @format = DTAS::Format.new
-    @srccmd = nil
-    @srcenv = {}
 
     @sinks = {} # { user-defined name => sink }
     @targets = [] # order matters
@@ -40,7 +38,15 @@ class DTAS::Player # :nodoc:
     @sink_buf = DTAS::Buffer.new
     @current = nil
     @watchers = {}
-    @sources = [ DTAS::Source::Sox.new, DTAS::Source::Av.new ]
+    @source_map = {
+      "sox" => DTAS::Source::Sox.new,
+      "av" => DTAS::Source::Av.new,
+    }
+    source_map_reload
+  end
+
+  def source_map_reload
+    @sources = @source_map.values.sort_by { |src| src.tryorder }
   end
 
   def echo(msg)
@@ -60,13 +66,16 @@ class DTAS::Player # :nodoc:
     $stdout.write(msg << "\n")
   end
 
+  # used for state file
   def to_hsh
     rv = {}
     rv["socket"] = @socket
     rv["paused"] = @paused if @paused
-    src = rv["source"] = {}
-    src["command"] = @srccmd if @srccmd
-    src["env"] = @srcenv if @srcenv.size > 0
+    src_map = rv["source"] = {}
+    @source_map.each do |name, src|
+      src_hsh = src.to_state_hash
+      src_map[name] = src_hsh unless src_hsh.empty?
+    end
 
     # Arrays
     rv["queue"] = @queue
@@ -109,8 +118,22 @@ class DTAS::Player # :nodoc:
         instance_variable_set("@#{k}", v)
       end
       if v = hash["source"]
-        @srccmd = v["command"]
-        e = v["env"] and @srcenv = e
+        # compatibility with 0.0.0, which was sox-only
+        # we'll drop this after 1.0.0, or when we support a source decoder
+        # named "command" or "env" :P
+        sox_cmd, sox_env = v["command"], v["env"]
+        if sox_cmd || sox_env
+          sox = @source_map["sox"]
+          sox.command = sox_cmd if sox_cmd
+          sox.env = sox_env if sox_env
+        end
+
+        # new style: name = "av" or "sox" or whatever else we may support
+        @source_map.each do |name, src|
+          src_hsh = v[name] or next
+          src.load!(src_hsh)
+        end
+        source_map_reload
       end
 
       if v = hash["format"]
@@ -329,12 +352,6 @@ class DTAS::Player # :nodoc:
       else
         @current = DTAS::Source::Cmd.new(source_spec["command"])
         echo(%W(command #{@current.command_string}))
-      end
-
-      # FIXME, support Av overrides
-      if DTAS::Source::Sox === @current
-        @current.command = @srccmd if @srccmd
-        @current.env = @srcenv.dup unless @srcenv.empty?
       end
 
       dst = @sink_buf
