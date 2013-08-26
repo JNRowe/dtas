@@ -22,9 +22,9 @@ if File.exist?(".git")
 end
 
 vn = vn.sub!(/\Av/, "")
-new_ruby_version = "#{CONSTANT} = '#{vn}'\n"
+new_ruby_version = "#{CONSTANT} = '#{vn}' # :nodoc:\n"
 cur_ruby_version = File.read(RVF) rescue nil
 if new_ruby_version != cur_ruby_version
-  File.open(RVF, "w") { |fp| fp.write("# :enddoc:\n#{new_ruby_version}") }
+  File.open(RVF, "w") { |fp| fp.write(new_ruby_version) }
 end
 puts vn if $0 == __FILE__
