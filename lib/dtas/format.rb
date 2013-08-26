@@ -64,7 +64,7 @@ class DTAS::Format # :nodoc:
   end
 
   def inspect
-    "<#{self.class}(#{xs(to_sox_arg)})>"
+    "<#{self.class}(#{Shellwords.join(to_sox_arg)})>"
   end
 
   def to_hsh

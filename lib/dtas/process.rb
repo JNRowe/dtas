@@ -18,12 +18,6 @@ module DTAS::Process # :nodoc:
     end while true
   end
 
-  # a convienient way to display commands so it's easy to
-  # read, copy and paste to a shell
-  def xs(cmd)
-    cmd.map { |w| Shellwords.escape(w) }.join(' ')
-  end
-
   # for long-running processes (sox/play/ecasound filters)
   def dtas_spawn(env, cmd, opts)
     opts = { close_others: true, pgroup: true }.merge!(opts)
@@ -87,10 +81,9 @@ module DTAS::Process # :nodoc:
     r.close
     _, status = Process.waitpid2(pid)
     return res if status.success?
-    raise RuntimeError, "`#{xs(cmd)}' failed: #{status.inspect}"
+    raise RuntimeError, "`#{Shellwords.join(cmd)}' failed: #{status.inspect}"
   end
 
   # XXX only for DTAS::Source::{Sox,Av}.try
   module_function :qx
-  module_function :xs
 end

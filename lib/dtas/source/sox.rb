@@ -77,7 +77,7 @@ class DTAS::Source::Sox # :nodoc:
         end
       rescue => e
         if /FAIL formats: no handler for file extension/ =~ err
-          warn("#{xs(cmd)}: #{err}")
+          warn("#{Shellwords.escape(cmd)}: #{err}")
         else
           warn("#{e.message} (#{e.class})")
         end
