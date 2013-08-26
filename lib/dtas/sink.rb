@@ -15,6 +15,7 @@ class DTAS::Sink # :nodoc:
   attr_accessor :prio    # any Integer
   attr_accessor :active  # boolean
   attr_accessor :name
+  attr_accessor :pipe_size
   attr_accessor :nonblock
 
   include DTAS::Command
