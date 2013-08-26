@@ -22,8 +22,15 @@ class DTAS::Source::Sox # :nodoc:
 
   def try(infile, offset = nil)
     err = ""
-    qx(@env, %W(soxi #{infile}), err_str: err, no_raise: true)
+    cmd = %W(soxi -s #{infile})
+    s = qx(@env, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
+    case s
+    when %r{\A0\s*\z}
+      return warn "`#{Shellwords.join(cmd)}' detected zero samples"
+    when Process::Status
+      return warn "`#{Shellwords.join(cmd)}' failed with #{s.exitstatus}"
+    end
     source_file_dup(infile, offset)
   end
 
