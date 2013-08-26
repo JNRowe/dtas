@@ -199,7 +199,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def __current_requeue
-    return unless @current && @current.pid
+    return unless @current
 
     # no need to requeue if we're already due to die
     return if @current.requeued
@@ -341,7 +341,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   def do_play
     # no echo, next_source will echo on new track
     @paused = false
-    return if @current && @current.pid
+    return if @current
     next_source(@queue.shift)
   end
 
@@ -350,7 +350,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def do_seek(io, offset)
-    if @current && @current.pid
+    if @current
       if @current.respond_to?(:infile)
         begin
           if offset.sub!(/\A\+/, '')
