@@ -98,4 +98,5 @@ class TestSourceAv < Minitest::Unit::TestCase
     source = DTAS::Source::Av.new.try(tmp.path, '1')
     assert_equal 1000000.0, source.offset_us
   end
-end
+end unless `which avconv 2>/dev/null` =~ /avconv/ &&
+           `which avprobe 2>/dev/null` =~ /avprobe/
