@@ -46,7 +46,8 @@ module DTAS::Process # :nodoc:
     r, w = IO.pipe
     opts = opts.merge(out: w)
     r.binmode
-    if err = opts[:err]
+    no_raise = opts.delete(:no_raise)
+    if err_str = opts.delete(:err_str)
       re, we = IO.pipe
       re.binmode
       opts[:err] = we
@@ -57,16 +58,15 @@ module DTAS::Process # :nodoc:
       retry
     end
     w.close
-    if err
+    if err_str
       we.close
       res = ""
-      want = { r => res, re => err }
+      want = { r => res, re => err_str }
       begin
         readable = IO.select(want.keys) or next
         readable[0].each do |io|
-          bytes = io.nread
           begin
-            want[io] << io.read_nonblock(bytes > 0 ? bytes : 11)
+            want[io] << io.read_nonblock(2000)
           rescue Errno::EAGAIN
             # spurious wakeup, bytes may be zero
           rescue EOFError
@@ -76,12 +76,14 @@ module DTAS::Process # :nodoc:
       end until want.empty?
       re.close
     else
-      res = r.read
+      res = r.read # read until EOF
     end
     r.close
     _, status = Process.waitpid2(pid)
     return res if status.success?
-    raise RuntimeError, "`#{Shellwords.join(cmd)}' failed: #{status.inspect}"
+    return status if no_raise
+    raise RuntimeError,
+          "`#{Shellwords.join(Array(cmd))}' failed: #{status.inspect}"
   end
 
   # XXX only for DTAS::Source::{Sox,Av}.try

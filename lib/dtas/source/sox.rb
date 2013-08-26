@@ -19,7 +19,7 @@ class DTAS::Source::Sox # :nodoc:
 
   def self.try(infile, offset = nil)
     err = ""
-    DTAS::Process.qx(%W(soxi #{infile}), err: err)
+    DTAS::Process.qx(%W(soxi #{infile}), err_str: err)
     return if err =~ /soxi FAIL formats:/
     new(infile, offset)
   rescue
@@ -69,7 +69,7 @@ class DTAS::Source::Sox # :nodoc:
       err = ""
       cmd = %W(soxi -a #@infile)
       begin
-        qx(cmd, err: err).split(/\n/).each do |line|
+        qx(cmd, err_str: err).split(/\n/).each do |line|
           key, value = line.split(/=/, 2)
           key && value or next
           # TODO: multi-line/multi-value/repeated tags

@@ -25,7 +25,7 @@ class DTAS::Source::Av # :nodoc:
 
   def self.try(infile, offset = nil)
     err = ""
-    DTAS::Process.qx(%W(avprobe #{infile}), err: err)
+    DTAS::Process.qx(%W(avprobe #{infile}), err_str: err)
     return if err =~ /Unable to find a suitable output format for/
     new(infile, offset)
   rescue
@@ -44,7 +44,7 @@ class DTAS::Source::Av # :nodoc:
     @format.bits = @precision
     @comments = {}
     err = ""
-    s = qx(%W(avprobe -show_streams -show_format #@infile), err: err)
+    s = qx(%W(avprobe -show_streams -show_format #@infile), err_str: err)
     @astreams = []
     s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}m) do |_|
       stream = $1
