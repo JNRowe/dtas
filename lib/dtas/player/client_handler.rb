@@ -461,7 +461,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         end
       end
       after = src.to_state_hash
-      __current_requeue if before != after && @current.class == before.class
+      __current_requeue if before != after && @current.class == src.class
       io.emit("OK")
     else
       io.emit("ERR unknown source op")
