@@ -70,6 +70,8 @@ For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
 
 # COMMANDS
 
+Commands here should be alphabetized according to `LC_ALL=C sort'
+
 * cd - change the current working directory of the player
 
 * clear - clear current queue (current track/command continues running)
@@ -187,7 +189,7 @@ For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
     + nonblock=BOOLEAN - drop audio data to avoid holding back other sinks
     + pipe_size=UNSIGNED - set the size of the pipe for the sink (Linux-only)
 
-* source SOURCENAME cat - dump the current source command and env in YAML
+* source cat SOURCENAME - dump the current source command and env in YAML
 
 * source ed SOURCENAME SOURCEARGS - edit the source parameters.
   This changes here will immediately restart the source process.
@@ -196,6 +198,10 @@ For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
     + env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the source process
     + env#ENVNAME - unset ENVNAME in the source process (only)
     + tryorder=INTEGER - lower values are tried first
+    PENDING: tryorder here is wrong and may be removed or changed.
+    We need to account for at least two variables input file:
+        1. input type (flac/opus/mp3/etc)
+        2. transport protocol (local FS/http/ftp/sftp/etc)
 
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open
