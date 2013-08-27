@@ -13,9 +13,12 @@ ones += dtas-player
 ones += dtas-xdelay
 ones += dtas-sinkedit
 ones += dtas-sourceedit
+sevens =
+sevens += dtas-player_protocol
+sevens += dtas-player_sink_examples
 
 man1 := $(addsuffix .1, $(ones))
-man7 := $(addsuffix .7,dtas-player_protocol)
+man7 := $(addsuffix .7, $(sevens))
 
 all:: man
 

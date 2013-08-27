@@ -1,0 +1,20 @@
+% dtas-player_sink_examples(7) dtas user manual
+
+# NAME
+
+dtas-player_sink_examples - sink examples for dtas-player
+
+# SYNOPSIS
+
+dtas-ctl sink ed SINKNAME command='...'
+dtas-sinkedit SINKNAME
+
+# EXAMPLES
+
+Warning: the following example will likely expose your Icecast source
+password to any local users on the system.
+
+    # set HOST/PORT/PASS via env or directly in the command
+    ---
+    name: oggfwd
+    command: sox $SOXFMT - -t ogg - | oggfwd $HOST $PORT $PASS /dtas.ogg
