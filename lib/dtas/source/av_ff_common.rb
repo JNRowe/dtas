@@ -118,6 +118,8 @@ module DTAS::Source::AvFfCommon # :nodoc:
   # file itself, not the decoded output
   def samples
     @samples ||= (@duration * @format.rate).round
+  rescue
+    0
   end
 
   def to_hsh
