@@ -7,6 +7,25 @@ dtas-player_protocol - protocol for controling dtas-player
 
 # DESCRIPTION
 
+NOTE - NOTE - NOTE - NOTE - NOTE - NOTE - NOTE - NOTE
+
+I'm considering a heavy revamp of this protocol.  The "OK" responses for
+a lot of commands may not be necessary since this is Unix sockets and
+not TCP, and I may move away from a request-response model and towards
+an entirely listen/notification model.  I have little experience in
+non-TCP-based application protocols, so this is an area of
+experimentation for me.
+
+This must stay over Unix sockets because filesystem permissions are
+needed to enforce code execution permissions.  dtas-player is really a
+shell in disguise, after all.
+
+Protocol feedback greatly appreciated email me at
+
+normalperson@yhbt.net
+
+*********************************************************
+
 This gives a specification of the dtas-player protocol over a local Unix
 SOCK_SEQPACKET socket.  The dtas-player protocol should NOT be
 considered stable at this point and compatibility will break.
