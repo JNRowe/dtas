@@ -1,36 +1,35 @@
 all::
 
+INSTALL = install
 PANDOC = pandoc
 PANDOC_OPTS = -f markdown --email-obfuscation=none
 pandoc = $(PANDOC) $(PANDOC_OPTS)
 
-ones =
-ones += dtas-console
-ones += dtas-ctl
-ones += dtas-enq
-ones += dtas-msinkctl
-ones += dtas-player
-ones += dtas-xdelay
-ones += dtas-sinkedit
-ones += dtas-sourceedit
-sevens =
-sevens += dtas-player_protocol
-sevens += dtas-player_sink_examples
+m1 =
+m1 += dtas-console
+m1 += dtas-ctl
+m1 += dtas-enq
+m1 += dtas-msinkctl
+m1 += dtas-player
+m1 += dtas-xdelay
+m1 += dtas-sinkedit
+m1 += dtas-sourceedit
 
-man1 := $(addsuffix .1, $(ones))
-man7 := $(addsuffix .7, $(sevens))
+m7 =
+m7 += dtas-player_protocol
+m7 += dtas-player_sink_examples
+
+man1 := $(addsuffix .1, $(m1))
+man7 := $(addsuffix .7, $(m7))
 
 all:: man
 
 man: $(man1) $(man7)
 
-prefix?=$(HOME)
-mandir?=$(prefix)/share/man
-man1dir=$(mandir)/man1
-man5dir=$(mandir)/man5
-man7dir=$(mandir)/man7
-
-INSTALL = install
+prefix ?= $(HOME)
+mandir ?= $(prefix)/share/man
+man1dir = $(mandir)/man1
+man7dir = $(mandir)/man7
 
 gem-man: man
 	$(INSTALL) -d -m 755 ../man
