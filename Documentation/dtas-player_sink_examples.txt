@@ -11,6 +11,7 @@ dtas-sinkedit SINKNAME
 
 # EXAMPLES
 
+To use oggfwd(1) and Icecast, the following sink works.
 Warning: the following example will likely expose your Icecast source
 password to any local users on the system.
 
@@ -18,3 +19,28 @@ password to any local users on the system.
     ---
     name: oggfwd
     command: sox $SOXFMT - -t ogg - | oggfwd $HOST $PORT $PASS /dtas.ogg
+
+Alternatively, if you have play(1) installed on any remote host and
+a slow connection using Ogg-Vorbis:
+
+    # Long lines in YAML can be broken up and the subsequent lines
+    # indented with by spaces
+    ---
+    name: ssh-remote
+    command: sox $SOXFMT - -t ogg - |
+      ssh $HOST env AUDIODEV=... play -q -t ogg -
+
+    # Note the use of env(1), as the "env" parameter for the sink may not be
+    # passed via ssh to the remote $HOST depending on the ssh_config(5)
+    # configuration.
+
+If you have a fast connection, there is no need to encode using
+Ogg-Vorbis.  Alternatively, you may also use "flac" instead of "ogg" in
+the above Ogg-Vorbis example.
+
+    ---
+    name: ssh-remote
+    command: ssh $HOST env AUDIODEV=... play -q $SOXFMT -
+
+# SEE ALSO
+sox(1), play(1), oggfwd(1), ssh(1), ssh_config(5), env(1)
