@@ -62,6 +62,11 @@ task :rsync_docs do
   dest = ENV["RSYNC_DEST"] || "80x24.org:/srv/dtas/"
   top = %w(INSTALL NEWS README COPYING)
   files = []
+
+  # git-set-file-times is distributed with rsync,
+  # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
+  sh("git", "set-file-times", "Documentation")
+
   Dir['Documentation/*.txt'].to_a.concat(top).each do |txt|
     gz = "#{txt}.gz"
     tmp = "#{gz}.#$$"
