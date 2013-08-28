@@ -6,14 +6,17 @@
 # Note: no idea what I'm doing, especially w.r.t. curses
 require 'dtas/unix_client'
 require 'dtas/rg_state'
+require 'dtas/sigevent'
 require 'curses'
 require 'yaml'
 
+se = DTAS::Sigevent.new
+trap(:WINCH) { se.signal }
 w = DTAS::UNIXClient.new
 w.req_ok('watch')
 c = DTAS::UNIXClient.new
 cur = YAML.load(c.req('current'))
-readable = [ w, $stdin ]
+readable = [ se, w, $stdin ]
 
 # current rg mode
 rg_mode = DTAS::RGState::RG_MODE.keys.unshift("off")
@@ -146,6 +149,9 @@ begin
     r = IO.select(readable, nil, nil, current ? interval : nil) or next
     r[0].each do |io|
       case io
+      when se
+        se.readable_iter {} # noop, just consume the event
+        Curses.clear
       when w
         event = w.res_wait
         events << "#{Time.now.strftime(tfmt)} #{event}"
