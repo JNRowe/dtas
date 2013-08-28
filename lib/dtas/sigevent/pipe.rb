@@ -1,5 +1,5 @@
 # -*- encoding: binary -*-
-# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net>
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io

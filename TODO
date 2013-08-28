@@ -2,3 +2,8 @@
   Obviously we can't have untrusted users executing arbitrary commands
 
 * tests for bin/*
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

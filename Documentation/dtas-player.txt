@@ -104,6 +104,11 @@ exist in the source file:
 ~/.dtas/player_state.yml is a human-readable YAML file used to preserve
 state across restarts of dtas-player.
 
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
 # SEE ALSO
 
 dtas-player_protocol(7), dtas-ctl(1), dtas-enq(1), dtas-sourceedit(1),

@@ -206,3 +206,8 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open
   another client socket to issue non-watch commands.
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

@@ -19,6 +19,11 @@ Use with the metaflac(1) is required.
 
 VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
 
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
 # SEE ALSO
 
 metaflac(1)

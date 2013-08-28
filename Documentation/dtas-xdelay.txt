@@ -52,6 +52,11 @@ The author of this knows little about signal processing and is just
 parroting things he's learned on the sox documentation and mailing list.
 Corrections greatly appreciated (email Eric Wong e@80x24.org)
 
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
 # SEE ALSO
 
 dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), sox(1)

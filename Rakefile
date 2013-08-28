@@ -1,3 +1,5 @@
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 load "./GIT-VERSION-GEN"
 manifest = "Manifest.txt"
 gitidx = File.stat(".git/index") rescue nil
@@ -31,12 +33,16 @@ if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
       time = Time.at(tagger.split(/ /)[-2].to_i).utc
       date = time.strftime("%Y-%m-%d")
 
-      fp.write("=== #{version} / #{date}\n\n#{subject}\n\n#{body}")
+      fp.write("# #{version} / #{date}\n\n#{subject}\n\n#{body}")
     end
     fp.flush
     if fp.size <= 5
       fp.puts "Unreleased"
     end
+
+    fp.write("\n# COPYRIGHT\n")
+    fp.puts "Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors"
+    fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
   end
 end
 
@@ -96,7 +102,7 @@ base = "dtas-#{h.version}"
 task tarball: "pkg/#{base}" do
   Dir.chdir("pkg") do
     tgz = "#{base}.tar.gz"
-    tmp = "#{tmp}.#$$"
+    tmp = "#{tgz}.#$$"
     sh "tar cf - #{base} | gzip -9 > #{tmp}"
     File.rename(tmp, tgz)
   end

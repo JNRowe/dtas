@@ -1,4 +1,4 @@
-= dtas - duct tape audio suite for *nix
+# dtas - duct tape audio suite for *nix
 
 Free Software command-line tools for audio playback, mastering, and
 whatever else related to audio.  dtas follows the worse-is-better
@@ -55,7 +55,7 @@ Coming:
 * better error handling, many bugfixes, etc...
 * better documentation
 
-== Source code
+## Source code
 
   git clone git://80x24.org/dtas
 
@@ -66,16 +66,16 @@ with git(7)) and send them via email.
 
 See http://www.git-scm.com/ for more information on git.
 
-== Contact
+## Contact
 
 Feedback (results, bug reports, patches, pull-requests) via plain-text
 email is very much appreciated.
 
-Please send plain-text email to Eric Wong <normalperson@yhbt.net>,
+Please send plain-text email to Eric Wong <normalperson@yhbt.net>.
 HTML will not be read.  dtas is for GUI-phobes, by GUI-phobes.
 Public mailing list coming soon.
 
-== License
+## Copyright
 
 dtas is copyrighted Free Software by all contributors, see logs
 in revision control for names and email addresses of all of them.

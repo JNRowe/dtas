@@ -11,3 +11,8 @@ and ecasound(1).
 
   Consult SoX documentation and mailing lists for getting play(1) to work,
   first.
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

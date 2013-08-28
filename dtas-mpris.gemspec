@@ -1,4 +1,7 @@
 # -*- encoding: binary -*-
+# Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.
+# License: GPLv2 or later <http://www.gnu.org/licenses/gpl-2.0.txt>
+# This is GPLv2+ instead of GPLv3+ because ruby-dbus is LGPLv2.1 (only)
 Gem::Specification.new do |s|
   s.name = %q{dtas-mpris}
   s.version = '0.0.0'

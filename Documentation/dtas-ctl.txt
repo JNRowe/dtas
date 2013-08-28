@@ -58,6 +58,11 @@ of $SOXFMT (see dtas-player_protocol(7)).
 DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
 This defaults to ~/.dtas/player.sock
 
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
 # SEE ALSO
 
 dtas-player(1), dtas-player_protocol(7), dtas-enq(1), dtas-sinkedit(1),

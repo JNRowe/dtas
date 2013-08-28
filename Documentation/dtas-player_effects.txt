@@ -43,3 +43,8 @@ They are applied in the order described.
   - rate
   - dither
   - remix (static channel mappings)
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

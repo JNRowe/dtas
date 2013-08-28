@@ -17,37 +17,42 @@ Debian users can install sox, mp3gain, and flac dependencies easily:
 
   apt-get install sox libsox-fmt-all mp3gain flac
 
-= installing dtas RubyGem on GNU/Linux (Linux kernel 2.6.32+)
+# installing dtas RubyGem on GNU/Linux (Linux kernel 2.6.32+)
 
-  Be sure to have Ruby development headers and a working C compiler.
-  This will pull in the io_splice and sleepy_penguin RubyGems for minor
-  speedups.  If you cannot be bothered to have a development
-  environment, just use "gem install dtas"
+Be sure to have Ruby development headers and a working C compiler.
+This will pull in the io_splice and sleepy_penguin RubyGems for minor
+speedups.  If you cannot be bothered to have a development
+environment, just use "gem install dtas"
 
-    gem install dtas-linux
+        gem install dtas-linux
 
-  This should pull in the "io_splice" and "sleepy_penguin" RubyGems
+This should pull in the "io_splice" and "sleepy_penguin" RubyGems
 
-  For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
+For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
-    gem update dtas
+        gem update dtas
 
-= installing the dtas RubyGem on non-GNU/Linux or old GNU/Linux systems
+# installing the dtas RubyGem on non-GNU/Linux or old GNU/Linux systems
 
-  gem install dtas
+        gem install dtas
 
-= installing dtas via tarball and setup.rb
+# installing dtas via tarball and setup.rb
 
-  Grab the latest tarball from our HTTP site:
+Grab the latest tarball from our HTTP site:
 
-  http://dtas.80x24.org/2013/dtas-0.1.I.tar.gz
+        http://dtas.80x24.org/2013/dtas-0.1.I.tar.gz
 
-  $ tar zxvf dtas-0.1.I.tar.gz
-  $ cd dtas-0.1.I
-  $ ruby setup.rb
+        $ tar zxvf dtas-0.1.I.tar.gz
+        $ cd dtas-0.1.I
+        $ ruby setup.rb
 
-  GNU/Linux users may optionally install "io_splice" and
-  "sleepy_penguin" packages:
+GNU/Linux users may optionally install "io_splice" and
+"sleepy_penguin" packages:
 
-  io_splice - http://bogomips.org/ruby_io_splice/
-  sleepy_penguin - http://bogomips.org/sleepy_penguin/
+    * io_splice - http://bogomips.org/ruby_io_splice/
+    * sleepy_penguin - http://bogomips.org/sleepy_penguin/
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
