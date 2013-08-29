@@ -1,4 +1,3 @@
-# -*- encoding: binary -*-
 #
 # setup.rb
 #

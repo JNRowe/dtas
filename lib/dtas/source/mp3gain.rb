@@ -1,4 +1,3 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../process'
@@ -15,7 +14,7 @@ module DTAS::Source::Mp3gain # :nodoc:
     tmp = {}
     case @infile
     when String
-      @infile =~ /\.mp[g23]\z/i or return
+      @infile =~ /\.mp[g23]\z/in or return
       qx(%W(mp3gain -s c #@infile)).split(/\n/).each do |line|
         case line
         when /^Recommended "(Track|Album)" dB change:\s*(\S+)/

@@ -1,16 +1,15 @@
 #!/usr/bin/env ruby
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'tempfile'
-require 'shellwords'
+require 'dtas/xs'
 usage = "Usage: #$0 FILENAME"
 editor = ENV["VISUAL"] || ENV["EDITOR"] || "vi"
 ARGV.size > 0 or abort usage
+include DTAS::XS
 
 def err_msg(cmd, status)
-  err_cmd = cmd.map { |f| Shellwords.escape(f) }.join(' ')
-  "E: #{err_cmd} failed: #{status.inspect}"
+  "E: #{xs(cmd)} failed: #{status.inspect}"
 end
 
 def x!(*cmd)
@@ -52,7 +51,7 @@ ARGV.each do |file|
     # avoid an expensive update if the user didn't change anything
     current = File.binread(tmp.path)
     if current == original
-      $stderr.puts "tags for #{Shellwords.escape(file)} unchanged" if $DEBUG
+      $stderr.puts "tags for #{xs(Array(file))} unchanged" if $DEBUG
       next
     end
 
@@ -68,7 +67,7 @@ ARGV.each do |file|
       warn err_msg(cmd, $?)
       warn "E: restoring original from backup"
       x!(*%W(metaflac --import-cuesheet-from=#{backup.path} #{file}))
-      warn "E: backup cuesheet restored, #{Shellwords.escape(file)} unchanged"
+      warn "E: backup cuesheet restored, #{xs(Array(file))} unchanged"
       exit(false)
     end
   ensure

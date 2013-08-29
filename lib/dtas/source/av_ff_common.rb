@@ -1,9 +1,9 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../../dtas'
 require_relative '../source'
 require_relative '../replaygain'
+require_relative '../xs'
 require_relative 'file'
 
 # Common code for libav (avconv/avprobe) and ffmpeg (and ffprobe)
@@ -12,6 +12,7 @@ require_relative 'file'
 # support JSON, so we have an ugly parser...
 module DTAS::Source::AvFfCommon # :nodoc:
   include DTAS::Source::File
+  include DTAS::XS
   AStream = Struct.new(:duration, :channels, :rate)
   AV_FF_TRYORDER = 1
 
@@ -35,16 +36,16 @@ module DTAS::Source::AvFfCommon # :nodoc:
     s = qx(@env, cmd, err_str: err, no_raise: true)
     return false if Process::Status === s
     return false if err =~ /Unable to find a suitable output format for/
-    s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}m) do |_|
+    s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn) do |_|
       stream = $1
       if stream =~ /^codec_type=audio$/
         as = AStream.new
         index = nil
-        stream =~ /^index=(\d+)\s*$/m and index = $1.to_i
-        stream =~ /^duration=([\d\.]+)\s*$/m and as.duration = $1.to_f
-        stream =~ /^channels=(\d)\s*$/m and as.channels = $1.to_i
-        stream =~ /^sample_rate=([\d\.]+)\s*$/m and as.rate = $1.to_i
-        index or raise "BUG: no audio index from #{Shellwords.join(cmd)}"
+        stream =~ /^index=(\d+)\s*$/nm and index = $1.to_i
+        stream =~ /^duration=([\d\.]+)\s*$/nm and as.duration = $1.to_f
+        stream =~ /^channels=(\d)\s*$/nm and as.channels = $1.to_i
+        stream =~ /^sample_rate=([\d\.]+)\s*$/nm and as.rate = $1.to_i
+        index or raise "BUG: no audio index from #{xs(cmd)}"
 
         # some streams have zero channels
         @astreams[index] = as if as.channels > 0 && as.rate > 0
@@ -52,9 +53,9 @@ module DTAS::Source::AvFfCommon # :nodoc:
     end
     s.scan(%r{^\[FORMAT\]\n(.*?)\n\[/FORMAT\]\n}m) do |_|
       f = $1
-      f =~ /^duration=([\d\.]+)\s*$/m and @duration = $1.to_f
+      f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
-      f.gsub!(/^TAG:([^=]+)=(.*)$/i) { |_| @comments[$1.upcase] = $2 }
+      f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase] = $2 }
     end
     ! @astreams.empty?
   end

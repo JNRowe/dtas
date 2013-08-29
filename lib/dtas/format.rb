@@ -1,4 +1,3 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 # class represents an audio format (type/bits/channels/sample rate/...)
@@ -9,6 +8,7 @@ require_relative 'serialize'
 class DTAS::Format # :nodoc:
   include DTAS::Process
   include DTAS::Serialize
+
   NATIVE_ENDIAN = [1].pack("l") == [1].pack("l>") ? "big" : "little"
 
   attr_accessor :type # s32, f32, f64 ... any point in others?
@@ -61,10 +61,6 @@ class DTAS::Format # :nodoc:
 
   def to_eca_arg
     %W(-f #{@type}_#{endian2},#@channels,#@rate)
-  end
-
-  def inspect
-    "<#{self.class}(#{Shellwords.join(to_sox_arg)})>"
   end
 
   def to_hsh

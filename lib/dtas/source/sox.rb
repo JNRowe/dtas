@@ -1,15 +1,16 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../../dtas'
 require_relative '../source'
 require_relative '../replaygain'
+require_relative '../xs'
 
 # this is usually one input file
 class DTAS::Source::Sox # :nodoc:
   require_relative 'file'
 
   include DTAS::Source::File
+  include DTAS::XS
 
   SOX_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" => 'exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX',
@@ -27,7 +28,7 @@ class DTAS::Source::Sox # :nodoc:
     if msg
       return if @last_failed == infile
       @last_failed = infile
-      return warn("`#{Shellwords.join(cmd)}' #{msg}")
+      return warn("`#{xs(cmd)}' #{msg}")
     end
     true
   end
@@ -49,7 +50,7 @@ class DTAS::Source::Sox # :nodoc:
     qx(@env, %W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
   rescue # fallback to parsing the whole output
     s = qx(@env, %W(soxi #@infile), err: "/dev/null")
-    s =~ /Precision\s+:\s*(\d+)-bit/
+    s =~ /Precision\s+:\s*(\d+)-bit/n
     v = $1.to_i
     return v if v > 0
     raise TypeError, "could not determine precision for #@infile"
@@ -81,8 +82,8 @@ class DTAS::Source::Sox # :nodoc:
     tmp = {}
     case @infile
     when String
-      qx(@env, %W(soxi -a #@infile)).split(/\n/).each do |line|
-        key, value = line.split(/=/, 2)
+      qx(@env, %W(soxi -a #@infile)).split(/\n/n).each do |line|
+        key, value = line.split(/=/n, 2)
         key && value or next
         # TODO: multi-line/multi-value/repeated tags
         tmp[key.upcase] = value

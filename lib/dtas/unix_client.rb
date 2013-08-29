@@ -1,13 +1,15 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-require 'dtas'
+require_relative '../dtas'
+require_relative 'xs'
 require 'socket'
 require 'io/wait'
 require 'shellwords'
 
 class DTAS::UNIXClient # :nodoc:
   attr_reader :to_io
+
+  include DTAS::XS
 
   def self.default_path
     (ENV["DTAS_PLAYER_SOCK"] || File.expand_path("~/.dtas/player.sock")).b
@@ -19,7 +21,7 @@ class DTAS::UNIXClient # :nodoc:
   end
 
   def req_start(args)
-    args = Shellwords.join(args) if Array === args
+    args = xs(args) if Array === args
     @to_io.send(args, Socket::MSG_EOR)
   end
 

@@ -1,9 +1,9 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'yaml'
 require 'shellwords'
 require_relative '../dtas'
+require_relative 'xs'
 require_relative 'source'
 require_relative 'source/sox'
 require_relative 'source/av'
@@ -18,6 +18,7 @@ require_relative 'state_file'
 
 class DTAS::Player # :nodoc:
   require_relative 'player/client_handler'
+  include DTAS::XS
   include DTAS::Player::ClientHandler
   attr_accessor :state_file
   attr_accessor :socket
@@ -52,7 +53,7 @@ class DTAS::Player # :nodoc:
   end
 
   def echo(msg)
-    msg = Shellwords.join(msg) if Array === msg
+    msg = xs(Array(msg))
     @watchers.delete_if do |io, _|
       if io.closed?
         true

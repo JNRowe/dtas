@@ -1,11 +1,12 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-require 'shellwords'
 require 'io/wait'
 require_relative '../dtas'
+require_relative 'xs'
+
 module DTAS::Process # :nodoc:
   PIDS = {}
+  include DTAS::XS
 
   def self.reaper
     begin
@@ -60,7 +61,7 @@ module DTAS::Process # :nodoc:
     w.close
     if err_str
       we.close
-      res = ""
+      res = "".b
       want = { r => res, re => err_str }
       begin
         readable = IO.select(want.keys) or next
@@ -82,7 +83,6 @@ module DTAS::Process # :nodoc:
     _, status = Process.waitpid2(pid)
     return res if status.success?
     return status if no_raise
-    raise RuntimeError,
-          "`#{Shellwords.join(Array(cmd))}' failed: #{status.inspect}"
+    raise RuntimeError, "`#{xs(Array(cmd))}' failed: #{status.inspect}"
   end
 end

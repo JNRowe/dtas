@@ -1,7 +1,8 @@
-# -*- encoding: binary -*-
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require_relative '../xs'
 module DTAS::Player::ClientHandler # :nodoc:
+  include DTAS::XS
 
   # returns true on success, wait_ctl arg on error
   def set_bool(io, kv, v)
@@ -116,7 +117,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     name = msg[1]
     case msg[0]
     when "ls"
-      io.emit(Shellwords.join(@sinks.keys.sort))
+      io.emit(xs(@sinks.keys.sort))
     when "rm"
       sink = @sinks.delete(name) or return io.emit("ERR #{name} not found")
       drop_sink(sink)
