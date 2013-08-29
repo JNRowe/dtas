@@ -74,8 +74,10 @@ class DTAS::RGState # :nodoc:
   # tag slips into the queue
   def rg_fallback_effect(reason)
     @fallback_gain or return
+    val = @fallback_gain + @preamp
+    return if val.abs < @gain_threshold
     warn(reason) if $DEBUG
-    "vol #{@fallback_gain + @preamp}dB"
+    "vol #{val}dB"
   end
 
   # returns an array (for command-line argument) for the effect needed
