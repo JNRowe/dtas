@@ -77,6 +77,9 @@ Public mailing list coming soon.
 
 ## Copyright
 
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
 dtas is copyrighted Free Software by all contributors, see logs
 in revision control for names and email addresses of all of them.
 
@@ -92,11 +95,6 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, see https://www.gnu.org/licenses/gpl-3.0.txt
-
-dtas is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
 
 Note: The GPL does not and can not apply to external commands run by
 dtas scripts, so users _may_ run any non-Free Software you want via dtas

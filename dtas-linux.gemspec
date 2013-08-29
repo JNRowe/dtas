@@ -1,4 +1,6 @@
-# -*- encoding: binary -*-
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+#
 # this just declares dependencies to make gem installation a little easier
 # for Linux users
 Gem::Specification.new do |s|
