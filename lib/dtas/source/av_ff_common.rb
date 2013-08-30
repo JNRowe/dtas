@@ -81,7 +81,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
       as or next
       select_astream(as)
       warn "no suitable audio stream in #@infile, trying stream=#{index}"
-      return "-map 0:#{i}"
+      return "-map 0:#{index}"
     end
     raise "BUG: no audio stream in #@infile"
   end
