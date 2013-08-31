@@ -5,22 +5,33 @@ require 'dtas/edit_client'
 include DTAS::EditClient
 c = client_socket
 sources = c.req('source ls') || "(unknown)"
-usage = "Usage: #{DTAS_PROGNAME} SOURCENAME\n" \
+usage = "Usage: #{DTAS_PROGNAME} [-n|--dry-run][-V|--verbose] SOURCENAME\n" \
         "available SOURCENAME values: #{sources}"
+
+# use a real option parser if we have anything more complex
+dry_run = !!(ARGV.delete('-n') || ARGV.delete('--dry-run'))
+verbose = !!(ARGV.delete('-V') || ARGV.delete('--verbose'))
+
 ARGV.size <= 1 or abort usage
 name = ARGV[0] || "sox"
 
-tmp = tmpyaml
+st_in = $stdin.stat
+
 buf = c.req(%W(source cat #{name}))
 abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
 
-tmp.write(buf << DTAS_DISCLAIMER)
-cmd = "#{editor} #{tmp.path}"
-system(cmd) or abort "#{cmd} failed: #$?"
-tmp.rewind
-source = YAML.load(tmp.read)
+if st_in.file? || st_in.pipe?
+  tmp = $stdin
+else
+  tmp = tmpyaml
+  tmp.write(buf << DTAS_DISCLAIMER)
+  cmd = "#{editor} #{tmp.path}"
+  system(cmd) or abort "#{cmd} failed: #$?"
+  tmp.rewind
+end
 
+source = YAML.load(tmp.read)
 cmd = %W(source ed #{name})
 update_cmd_env(cmd, orig, source)
 
@@ -29,4 +40,8 @@ update_cmd_env(cmd, orig, source)
   cmd << "#{field}=#{source[field]}"
 end
 
-c.req_ok(cmd)
+if verbose || dry_run
+  warn Shellwords.join(cmd)
+end
+
+c.req_ok(cmd) unless dry_run

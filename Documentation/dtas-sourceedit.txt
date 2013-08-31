@@ -12,13 +12,21 @@ dtas-sourceedit {sox | av | ff}
 # DESCRIPTION
 
 dtas-sourceedit spawns an editor to allow editing of a source as a YAML file.
-See dtas-player_protocol(7) for details on SOURCEARGS.
+See dtas-player_protocol(7) for details on SOURCEARGS.  If standard input is
+a pipe or file, it is parsed as YAML and fed to the dtas-player(1) instance
+non-interactively.  This is useful for loading various profiles from the
+filesystem.
 
 # EXAMPLES
 
 Invoking dtas-sourceedit will spawn your favorite text editor on "sox":
 
 	$ dtas-sourceedit sox
+
+To load an existing YAML profile for sox.  saved.yml could be the output
+of a previous "dtas-ctl source cat sox" invocation:
+
+	$ dtas-sourceedit sox < saved.yml
 
 To change the way dtas-player calls avconv (part of libav):
 
