@@ -41,7 +41,8 @@ if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
     end
 
     fp.write("\n# COPYRIGHT\n")
-    fp.puts "Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors"
+    bdfl = 'Eric Wong <normalperson@yhbt.net>'
+    fp.puts "Copyright (C) 2013, #{bdfl} and all contributors"
     fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
   end
 end
