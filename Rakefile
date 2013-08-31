@@ -70,6 +70,7 @@ task :rsync_docs do
   files = []
 
   # git-set-file-times is distributed with rsync,
+  # Also available at: http://yhbt.net/git-set-file-times
   # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
   sh("git", "set-file-times", "Documentation")
 
