@@ -11,7 +11,7 @@ class DTAS::Source::Ff  # :nodoc:
 
   FF_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" =>
-      'ffmpeg -v error $SSPOS -i "$INFILE" $AMAP -f sox - |' \
+      'ffmpeg -v error $SSPOS $PROBE -i "$INFILE" $AMAP -f sox - |' \
       'sox -p $SOXFMT - $RGFX',
 
     # I haven't tested this much since av is in Debian stable and ff is not

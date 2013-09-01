@@ -25,39 +25,80 @@ module DTAS::Source::AvFfCommon # :nodoc:
     rv
   end
 
+  def __parse_astream(cmd, stream)
+    stream =~ /^codec_type=audio$/ or return
+    as = AStream.new
+    index = nil
+    stream =~ /^index=(\d+)\s*$/nm and index = $1.to_i
+    stream =~ /^duration=([\d\.]+)\s*$/nm and as.duration = $1.to_f
+    stream =~ /^channels=(\d)\s*$/nm and as.channels = $1.to_i
+    stream =~ /^sample_rate=([\d\.]+)\s*$/nm and as.rate = $1.to_i
+    index or raise "BUG: no audio index from #{xs(cmd)}"
+    yield(index, as)
+  end
+
+  def probe_ok?(status, err_str)
+    return false if Process::Status === status
+    return false if err_str =~ /Unable to find a suitable output format for/
+    true
+  end
+
   def av_ff_ok?
     @duration = nil
     @format = DTAS::Format.new
     @format.bits = 32 # always, since we still use the "sox" format
     @comments = {}
     @astreams = []
-    cmd = %W(#@av_ff_probe -show_streams -show_format #@infile)
-    err = ""
-    s = qx(@env, cmd, err_str: err, no_raise: true)
-    return false if Process::Status === s
-    return false if err =~ /Unable to find a suitable output format for/
-    s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn) do |_|
-      stream = $1
-      if stream =~ /^codec_type=audio$/
-        as = AStream.new
-        index = nil
-        stream =~ /^index=(\d+)\s*$/nm and index = $1.to_i
-        stream =~ /^duration=([\d\.]+)\s*$/nm and as.duration = $1.to_f
-        stream =~ /^channels=(\d)\s*$/nm and as.channels = $1.to_i
-        stream =~ /^sample_rate=([\d\.]+)\s*$/nm and as.rate = $1.to_i
-        index or raise "BUG: no audio index from #{xs(cmd)}"
 
-        # some streams have zero channels
-        @astreams[index] = as if as.channels > 0 && as.rate > 0
+    # needed for VOB and other formats which scatter metadata all over the
+    # place and
+    @probe_harder = nil
+    incomplete = []
+    prev_cmd = []
+
+    begin # loop
+      cmd = %W(#@av_ff_probe)
+
+      # using the max known duration as a analyzeduration seems to work
+      # for the few VOBs I've tested, but seeking is still broken.
+      max_duration = 0
+      incomplete.each do |as|
+        as && as.duration or next
+        max_duration = as.duration if as.duration > max_duration
       end
-    end
+      if max_duration > 0
+        usec = max_duration.round * 1000000
+        usec = "2G" if usec >= 0x7fffffff # limited to INT_MAX :<
+        @probe_harder = %W(-analyzeduration #{usec} -probesize 2G)
+        cmd.concat(@probe_harder)
+      end
+      cmd.concat(%W(-show_streams -show_format #@infile))
+      break if cmd == prev_cmd
+
+      err = ""
+      s = qx(@env, cmd, err_str: err, no_raise: true)
+      return false unless probe_ok?(s, err)
+      s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn) do |_|
+        __parse_astream(cmd, $1) do |index, as|
+          # incomplete streams may have zero channels
+          if as.channels > 0 && as.rate > 0
+            @astreams[index] = as
+            incomplete[index] = nil
+          else
+            incomplete[index] = as
+          end
+        end
+      end
+      prev_cmd = cmd
+    end while incomplete.compact[0]
+
     s.scan(%r{^\[FORMAT\]\n(.*?)\n\[/FORMAT\]\n}m) do |_|
       f = $1
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
       f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase] = $2 }
     end
-    ! @astreams.empty?
+    ! @astreams.compact.empty?
   end
 
   def sspos(offset)
@@ -105,6 +146,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
 
     e = @env.merge!(player_format.to_env)
 
+    e["PROBE"] = @probe_harder ? @probe_harder.join(' ') : nil
     # make sure these are visible to the source command...
     e["INFILE"] = @infile
     e["AMAP"] = amap
