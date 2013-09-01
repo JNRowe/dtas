@@ -13,38 +13,38 @@ mp3gain is required if you use ReplayGain with MP3s
 If you only intend to use dtas-cueedit, you will need metaflac(1) from
 the FLAC package.
 
-Debian users can install sox, mp3gain, and flac dependencies easily:
+Debian 7 users can install dependencies easily:
 
-  apt-get install sox libsox-fmt-all mp3gain flac
+    sudo apt-get install sox libsox-fmt-all mp3gain flac ruby-dev
 
 # installing dtas RubyGem on GNU/Linux (Linux kernel 2.6.32+)
 
 Be sure to have Ruby development headers and a working C compiler.
 This will pull in the io_splice and sleepy_penguin RubyGems for minor
 speedups.  If you cannot be bothered to have a development
-environment, just use "gem install dtas"
+environment, just use "gem install dtas".
 
-        gem install dtas-linux
+    sudo gem install dtas-linux
 
 This should pull in the "io_splice" and "sleepy_penguin" RubyGems
 
 For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
-        gem update dtas
+    sudo gem update dtas
 
 # installing the dtas RubyGem on non-GNU/Linux or old GNU/Linux systems
 
-        gem install dtas
+    sudo gem install dtas
 
 # installing dtas via tarball and setup.rb
 
 Grab the latest tarball from our HTTP site:
 
-        http://dtas.80x24.org/2013/dtas-0.1.I.tar.gz
+    http://dtas.80x24.org/2013/dtas-0.3.0.tar.gz
 
-        $ tar zxvf dtas-0.1.I.tar.gz
-        $ cd dtas-0.1.I
-        $ ruby setup.rb
+    $ tar zxvf dtas-0.3.0.tar.gz
+    $ cd dtas-0.3.0
+    $ sudo ruby setup.rb
 
 GNU/Linux users may optionally install "io_splice" and
 "sleepy_penguin" packages:
