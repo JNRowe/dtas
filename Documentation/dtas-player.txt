@@ -53,10 +53,13 @@ created and playing the audio.
 
 # TROUBLESHOOTING
 
+## Audio playback does not start
+
 The most common problem with dtas-player is the play(1) command
-(distributed with SoX) not using the correct audio device.  Ensuring the
-play(1) command works with dtas-player is important.  See the play(1)
-documentation for details.
+(distributed with SoX) not using the correct audio device/driver.
+Ensuring the play(1) command works with dtas-player is important.
+Consult SoX documentation and mailing lists for getting play(1) to work,
+first.
 
 Once you find the correct AUDIODEV/AUDIODRIVER environment variables,
 you may set them via dtas-ctl(1):
@@ -65,20 +68,18 @@ To play audio on my favorite USB DAC directly to ALSA, I use:
 
     $ dtas-ctl sink ed default env.AUDIODEV=hw:DAC env.AUDIODRIVER=alsa
 
+## Seeking/playing audio from large video containers (e.g. VOB) fails
+
+This is a problem with large VOBs.  We recommend breaking up the
+VOB into smaller files or using avconv(1) or ffmpeg(1) to extract
+the desired audio stream.
+
+      avconv -analyzeduration 2G -probesize 2G \
+        -i input.vob -vn -sn -c:a copy -map 0:$STREAM_NR output.ext
+
 # ADVANCED EXAMPLES
 
-To configure a dumper sink (in addition to the "default" sink).  Note
-the use of $SOXFMT, this will be automatically expanded to match the
-internal format of the player.  The internal format of the player is
-described in dtas-player_protocol(7).
-
-    $ dtas-ctl sink ed dumper command='sox $SOXFMT - /tmp/dump.sox'
-
-Non-"default" sinks are not active by default, but may be made active.
-
-    $ dtas-ctl sink ed dumper active=true
-
-Changing it again to "active=false" will deactivate the sink.
+See dtas_player-sink_examples(7) for more sink examples.
 
 # ENVIRONMENT
 
@@ -112,4 +113,4 @@ License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 # SEE ALSO
 
 dtas-player_protocol(7), dtas-ctl(1), dtas-enq(1), dtas-sourceedit(1),
-dtas-sinkedit(1), sox(1), play(1), screen(1), tmux(1)
+dtas-sinkedit(1), sox(1), play(1), avconv(1), ffmpeg(1), screen(1), tmux(1)

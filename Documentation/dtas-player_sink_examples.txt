@@ -11,6 +11,8 @@ dtas-sinkedit SINKNAME
 
 # EXAMPLES
 
+## Streaming Ogg-Vorbis to Icecast
+
 To use oggfwd(1) and Icecast, the following sink works.
 Warning: the following example will likely expose your Icecast source
 password to any local users on the system.
@@ -19,6 +21,8 @@ password to any local users on the system.
     ---
     name: oggfwd
     command: sox $SOXFMT - -t ogg - | oggfwd $HOST $PORT $PASS /dtas.ogg
+
+## Stream to a remote host via ssh
 
 Alternatively, if you have play(1) installed on any remote host and
 a slow connection using Ogg-Vorbis:
@@ -41,6 +45,21 @@ the above Ogg-Vorbis example.
     ---
     name: ssh-remote
     command: ssh $HOST env AUDIODEV=... play -q $SOXFMT -
+
+## Dump audio to a file during playback
+
+To configure a dumper sink (in addition to the "default" sink).  Note
+the use of $SOXFMT, this will be automatically expanded to match the
+internal format of the player.  The internal format of the player is
+described in dtas-player_protocol(7).
+
+    $ dtas-ctl sink ed dumper command='sox $SOXFMT - /tmp/dump.sox'
+
+Non-"default" sinks are not active by default, but may be made active.
+
+    $ dtas-ctl sink ed dumper active=true
+
+Changing it again to "active=false" will deactivate the sink.
 
 # COPYRIGHT
 
