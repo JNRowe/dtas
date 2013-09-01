@@ -73,6 +73,7 @@ when "sox"
   args.unshift "sox"
   args.concat(%W(-t#{out_type} -c#{out_channels} -r#{out_rate} -))
 when "play"
+  args.unshift "-q"
   args.unshift "play"
 else
   abort "BUG: bad cmd=#{cmd.inspect}"
