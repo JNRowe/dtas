@@ -203,6 +203,14 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
         1. input type (flac/opus/mp3/etc)
         2. transport protocol (local FS/http/ftp/sftp/etc)
 
+* state dump [FILENAME]
+  Immediately dump the state of the player.  If a FILENAME is specified,
+  the state is written to that file.  Otherwise, the default state file
+  (configured via DTAS_PLAYER_STATE environment variable, defaulting
+  to ~/.dtas/player_state.yml) is written to.  This does not use fsync(2),
+  users requiring fsync should open(2) that file and fsync(2) it
+  themselves if necessary.
+
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open
   another client socket to issue non-watch commands.

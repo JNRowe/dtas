@@ -188,6 +188,24 @@ class TestPlayerIntegration < Minitest::Unit::TestCase
     assert_equal "/", s.req("pwd")
   end
 
+  def test_state_file
+    state = Tempfile.new(%w(state .yml))
+    state_path = state.path
+    state.close!
+    s = client_socket
+    s.req_ok(%W(state dump #{state_path}))
+    hash = YAML.load(IO.binread(state_path))
+    assert_equal @sock_path, hash["socket"]
+    assert_equal "default", hash["sinks"][0]["name"]
+
+    assert_equal "", IO.binread(@state_tmp.path)
+    s.req_ok(%W(state dump))
+    orig = YAML.load(IO.binread(@state_tmp.path))
+    assert_equal orig, hash
+  ensure
+    File.unlink(state_path)
+  end
+
   def test_source_ed
     s = client_socket
     assert_equal "sox av ff", s.req("source ls")

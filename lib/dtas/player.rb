@@ -212,6 +212,8 @@ class DTAS::Player # :nodoc:
       io.emit("OK")
     when "source"
       source_handler(io, msg)
+    when "state"
+      state_file_handler(io, msg)
     when "cd"
       chdir_handler(io, msg)
     when "pwd"

@@ -479,5 +479,26 @@ module DTAS::Player::ClientHandler # :nodoc:
     # echo(%W(cd msg[0])) # should we broadcast this?
     io.emit("OK")
   end
+
+  def state_file_handler(io, msg)
+    case msg.shift
+    when "dump"
+      dest = msg.shift
+      if dest
+        sf = DTAS::StateFile.new(dest, false)
+      elsif @state_file
+        sf = @state_file
+        dest = sf.path
+      else
+        return io.emit("ERR no state file configured")
+      end
+      begin
+        sf.dump(self)
+      rescue => e
+        return io.emit("ERR dumping to #{xs(Array(dest))} #{e.message}")
+      end
+    end
+    io.emit("OK")
+  end
 end
 # :startdoc:

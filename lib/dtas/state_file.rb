@@ -3,6 +3,8 @@
 require 'yaml'
 require 'tempfile'
 class DTAS::StateFile # :nodoc:
+  attr_reader :path
+
   def initialize(path, do_fsync = false)
     @path = path
     @do_fsync = do_fsync
