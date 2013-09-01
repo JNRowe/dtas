@@ -207,6 +207,12 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   It is recommended clients issue no further commands and open
   another client socket to issue non-watch commands.
 
+# CONTACT
+
+All feedback welcome via plain-text mail to <dtas-all@nongnu.org>\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\

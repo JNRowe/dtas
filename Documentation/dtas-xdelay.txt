@@ -52,6 +52,12 @@ The author of this knows little about signal processing and is just
 parroting things he's learned on the sox documentation and mailing list.
 Corrections greatly appreciated (email Eric Wong e@80x24.org)
 
+# CONTACT
+
+All feedback welcome via plain-text mail to <dtas-all@nongnu.org>\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\

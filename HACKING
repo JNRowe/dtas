@@ -11,6 +11,15 @@ serialization (dtas-player)
 * we avoid serializing default values to make the state file shorter and
   more suitable for human viewing and editing.
 
+# CONTACT
+
+We use git(7) and develop dtas on a public mailing list like git
+developers do.  Please send patches via git-send-email(1) to the public
+mailing list at <dtas-all@nongnu.org>.  Pull requests should be
+formatted using git-request-pull(1).\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\

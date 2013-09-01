@@ -19,6 +19,12 @@ Use with the metaflac(1) is required.
 
 VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
 
+# CONTACT
+
+All feedback welcome via plain-text mail to <dtas-all@nongnu.org>\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\

@@ -24,6 +24,12 @@ newly enqueued files in the order given.
 DTAS_PLAYER_SOCK - the path to the dtas-player listen socket.
 This defaults to ~/.dtas/player.sock
 
+# CONTACT
+
+All feedback welcome via plain-text mail to <dtas-all@nongnu.org>\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
