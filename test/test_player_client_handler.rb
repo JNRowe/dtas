@@ -82,4 +82,16 @@ class TestPlayerClientHandler < Minitest::Unit::TestCase
     sink_handler(@io, %W(ls))
     assert_equal expect, Shellwords.split(@io[0])
   end
+
+  def test_env
+    env_handler(@io, [])
+    res = @io[0]
+    result = {}
+    Shellwords.split(res).each do |kv|
+      k, v = kv.split(/=/, 2)
+      result[k] = v
+    end
+    expect = ENV.to_hash
+    assert_equal expect, result
+  end
 end

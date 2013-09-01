@@ -416,6 +416,14 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def env_handler(io, msg)
+    if msg.empty?
+      # this may fail for large envs due to SEQPACKET size restrictions
+      # do we care?
+      env = ENV.map do |k,v|
+        "#{Shellwords.escape(k)}=#{Shellwords.escape(v)}"
+      end.join(' ')
+      return io.emit(env)
+    end
     msg.each do |kv|
       case kv
       when %r{\A([^=]+)=(.*)\z}
