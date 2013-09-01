@@ -61,10 +61,15 @@ Non-"default" sinks are not active by default, but may be made active.
 
 Changing it again to "active=false" will deactivate the sink.
 
+## Apply a short delay to low frequencies to improve time-alignment
+
+See dtas-xdelay(1).
+
 # COPYRIGHT
 
 Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO
+dtas-ctl(1), dtas-sinkedit(1), dtas-xdelay(1),
 sox(1), play(1), oggfwd(1), ssh(1), ssh_config(5), env(1)
