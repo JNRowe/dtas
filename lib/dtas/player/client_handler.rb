@@ -385,7 +385,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   def restart_pipeline
     return if @paused
     __current_requeue
-    @targets.each { |t| drop_target(t) }.clear
+    stop_sinks
   end
 
   def format_handler(io, msg)
