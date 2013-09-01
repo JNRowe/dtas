@@ -26,7 +26,10 @@ else
   player.socket = sock
 end
 
-at_exit { player.close }
+at_exit do
+  player.close
+  Process.waitall
+end
 player.bind
 trap(:INT) { exit }
 trap(:TERM) { exit }

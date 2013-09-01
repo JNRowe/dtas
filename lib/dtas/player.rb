@@ -419,6 +419,7 @@ class DTAS::Player # :nodoc:
     end while true
   ensure
     __current_requeue
+    stop_sinks
     trap(:CHLD, old_chld)
     sev.close if sev
     # for state file
