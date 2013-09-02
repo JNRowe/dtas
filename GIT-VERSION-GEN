@@ -3,7 +3,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 CONSTANT = "DTAS::VERSION"
 RVF = "lib/dtas/version.rb"
-DEF_VER = "v0.2.0"
+DEF_VER = "v0.3.0"
 vn = DEF_VER
 
 # First see if there is a version file (included in release tarballs),
