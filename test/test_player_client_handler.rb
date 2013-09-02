@@ -83,7 +83,7 @@ class TestPlayerClientHandler < Minitest::Unit::TestCase
     assert_equal expect, Shellwords.split(@io[0])
   end
 
-  def test_env
+  def test_env_dump
     env_handler(@io, [])
     res = @io[0]
     result = {}
