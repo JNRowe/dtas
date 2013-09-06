@@ -39,6 +39,8 @@ tfmt = update_tfmt(prec_step[prec_nr])
 events = []
 interval = 1.0 / 10 ** prec_nr
 
+pause = nil
+
 def show_events(lineno, screen, events)
   Curses.setpos(lineno += 1, 0)
   Curses.clrtoeol
@@ -132,7 +134,7 @@ begin
     else
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr(cur['paused'] ? 'paused' : 'idle')
+      Curses.addstr(cur['paused'] ? "paused #{pause}" : 'idle')
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
     end
@@ -153,6 +155,12 @@ begin
         Curses.clear
       when w
         event = w.res_wait
+        case event
+        when "pause"
+          pause = current['infile'] || current['command']
+        when %r{\Afile }
+          pause = nil
+        end
         events << "#{Time.now.strftime(tfmt)} #{event}"
         # something happened, refresh current
         # we could be more intelligent here, maybe, but too much work.
