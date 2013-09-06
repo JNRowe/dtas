@@ -11,6 +11,7 @@ class DTAS::Source::Sox # :nodoc:
 
   include DTAS::Source::File
   include DTAS::XS
+  extend DTAS::XS
 
   SOX_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" => 'exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX',
