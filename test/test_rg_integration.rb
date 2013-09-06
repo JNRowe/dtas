@@ -7,14 +7,14 @@ class TestRgIntegration < Minitest::Unit::TestCase
   def tmp_pluck(len = 5)
     pluck = Tempfile.open(%w(pluck .flac))
     cmd = %W(sox -R -n -r44100 -c2 -C0 #{pluck.path} synth #{len} pluck)
-    assert system(*cmd), cmd
+    assert system(*cmd), cmd.inspect
     cmd = %W(metaflac
              --set-tag=REPLAYGAIN_TRACK_GAIN=-2
              --set-tag=REPLAYGAIN_ALBUM_GAIN=-3.0
              --set-tag=REPLAYGAIN_TRACK_PEAK=0.666
              --set-tag=REPLAYGAIN_ALBUM_PEAK=0.999
              #{pluck.path})
-    assert system(*cmd), cmd
+    assert system(*cmd), cmd.inspect
     [ pluck, len ]
   end
 

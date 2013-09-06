@@ -92,7 +92,7 @@ module PlayerIntegration
   def tmp_noise(len = 5)
     noise = Tempfile.open(%w(junk .sox))
     cmd = %W(sox -R -n -r44100 -c2 #{noise.path} synth #{len} pluck)
-    assert system(*cmd), cmd
+    assert system(*cmd), cmd.inspect
     [ noise, len ]
   end
 
