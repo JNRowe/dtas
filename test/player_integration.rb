@@ -74,8 +74,10 @@ module PlayerIntegration
   end
 
   def teardown
-    Process.kill(:TERM, @pid) if @pid
-    Process.waitall
+    if @pid
+      Process.kill(:TERM, @pid)
+      Process.waitpid2(@pid)
+    end
     refute File.exist?(@sock_path)
     @state_tmp.close!
     @out.close! if @out
