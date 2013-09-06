@@ -50,12 +50,17 @@ Testcase = Minitest.const_defined?(:Test) ? Minitest::Test
            : Minitest::Unit::TestCase
 
 FIFOS = []
-at_exit { FIFOS.each { |(pid,path)| File.unlink(path) if $$ == pid } }
 def tmpfifo
   tmp = Tempfile.new(%w(dtas-test .fifo))
   path = tmp.path
   tmp.close!
   assert system(*%W(mkfifo #{path})), "mkfifo #{path}"
+
+  if FIFOS.empty?
+    at_exit do
+      FIFOS.each { |(pid,path)| File.unlink(path) if $$ == pid }
+    end
+  end
   FIFOS << [ $$, path ]
   path
 end
