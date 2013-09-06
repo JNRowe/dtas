@@ -46,6 +46,9 @@ gem 'minitest'
 require 'minitest/autorun'
 require "tempfile"
 
+Testcase = Minitest.const_defined?(:Test) ? Minitest::Test
+           : Minitest::Unit::TestCase
+
 FIFOS = []
 at_exit { FIFOS.each { |(pid,path)| File.unlink(path) if $$ == pid } }
 def tmpfifo

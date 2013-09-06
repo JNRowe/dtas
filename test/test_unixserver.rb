@@ -5,7 +5,7 @@ require 'tempfile'
 require 'dtas/unix_server'
 require 'stringio'
 
-class TestUNIXServer < Minitest::Unit::TestCase
+class TestUNIXServer < Testcase
   def setup
     @tmp = Tempfile.new(%w(dtas-unix_server-test .sock))
     File.unlink(@tmp.path)

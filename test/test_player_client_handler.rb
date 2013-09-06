@@ -3,7 +3,7 @@
 require './test/helper'
 require 'dtas/player'
 
-class TestPlayerClientHandler < Minitest::Unit::TestCase
+class TestPlayerClientHandler < Testcase
   class MockIO < Array
     alias emit push
   end

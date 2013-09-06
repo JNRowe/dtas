@@ -3,7 +3,7 @@
 begin
   require 'io/splice'
   require './test/player_integration'
-  class TestSinkPipeSizeIntegration < Minitest::Unit::TestCase
+  class TestSinkPipeSizeIntegration < Testcase
     include PlayerIntegration
 
     def test_sink_pipe_size_integration

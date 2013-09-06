@@ -1,7 +1,7 @@
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require './test/player_integration'
-class TestRgIntegration < Minitest::Unit::TestCase
+class TestRgIntegration < Testcase
   include PlayerIntegration
 
   def tmp_pluck(len = 5)

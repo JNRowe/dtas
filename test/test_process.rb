@@ -2,7 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require './test/helper'
 require 'dtas/process'
-class TestProcess < Minitest::Unit::TestCase
+class TestProcess < Testcase
   include DTAS::Process
 
   def test_encoding

@@ -4,7 +4,7 @@ require './test/helper'
 require 'tempfile'
 require 'dtas/player'
 
-class TestPlayer < Minitest::Unit::TestCase
+class TestPlayer < Testcase
   def setup
     @player = nil
     tmp = Tempfile.new(%w(dtas-player-test .sock))

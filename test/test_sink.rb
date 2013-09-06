@@ -4,7 +4,7 @@ require './test/helper'
 require 'dtas/sink'
 require 'yaml'
 
-class TestSink < Minitest::Unit::TestCase
+class TestSink < Testcase
   def test_serialize_reload
     sink = DTAS::Sink.new
     sink.name = "DAC"

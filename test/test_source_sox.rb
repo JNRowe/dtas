@@ -4,7 +4,7 @@ require './test/helper'
 require 'dtas/source/sox'
 require 'tempfile'
 
-class TestSource < Minitest::Unit::TestCase
+class TestSource < Testcase
   def teardown
     @tempfiles.each { |tmp| tmp.close! }
   end

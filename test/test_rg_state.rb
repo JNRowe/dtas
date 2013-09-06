@@ -3,7 +3,7 @@
 require './test/helper'
 require 'dtas/rg_state'
 
-class TestRGState < Minitest::Unit::TestCase
+class TestRGState < Testcase
 
   def test_rg_state
     rg = DTAS::RGState.new

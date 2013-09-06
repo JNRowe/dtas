@@ -4,7 +4,7 @@ require './test/helper'
 require 'tempfile'
 require 'dtas/format'
 
-class TestFormat < Minitest::Unit::TestCase
+class TestFormat < Testcase
   def test_initialize
     fmt = DTAS::Format.new
     assert_equal %w(-ts32 -c2 -r44100), fmt.to_sox_arg

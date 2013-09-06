@@ -3,7 +3,7 @@
 require './test/helper'
 require 'dtas/util'
 
-class TestUtil < Minitest::Unit::TestCase
+class TestUtil < Testcase
   include DTAS::Util
   def test_util
     orig = 6.0

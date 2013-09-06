@@ -4,7 +4,7 @@ require './test/helper'
 require 'stringio'
 require 'dtas/buffer'
 
-class TestBuffer < Minitest::Unit::TestCase
+class TestBuffer < Testcase
   def teardown
     @to_close.each { |io| io.close unless io.closed? }
   end
