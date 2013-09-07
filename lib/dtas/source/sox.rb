@@ -41,7 +41,7 @@ class DTAS::Source::Sox # :nodoc:
   def try(infile, offset = nil)
     err = ""
     cmd = %W(soxi -s #{infile})
-    s = qx(@env, cmd, err_str: err, no_raise: true)
+    s = qx(@env.dup, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
     self.class.try_to_fail_harder(infile, s, cmd) or return
     source_file_dup(infile, offset)

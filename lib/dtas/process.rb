@@ -19,12 +19,33 @@ module DTAS::Process # :nodoc:
     end while true
   end
 
+  # expand common shell constructs based on environment variables
+  # this is order-dependent, but Ruby 1.9+ hashes are already order-dependent
+  def env_expand(env, opts)
+    env = env.dup
+    if false == opts.delete(:expand)
+      env.each do |key, val|
+        Numeric === val and env[key] = val.to_s
+      end
+    else
+      env.each do |key, val|
+        case val
+        when Numeric # stringify numeric values to simplify users' lives
+          env[key] = val.to_s
+        when /[\`\$]/ # perform variable/command expansion
+          tmp = env.dup
+          tmp.delete(key)
+          val = qx(tmp, "echo #{val}", expand: false)
+          env[key] = val.chomp
+        end
+      end
+    end
+  end
+
   # for long-running processes (sox/play/ecasound filters)
   def dtas_spawn(env, cmd, opts)
     opts = { close_others: true, pgroup: true }.merge!(opts)
-
-    # stringify env, integer values are easier to type unquoted as strings
-    env.each { |k,v| env[k] = v.to_s }
+    env = env_expand(env, opts)
 
     pid = begin
       Process.spawn(env, cmd, opts)
@@ -53,6 +74,7 @@ module DTAS::Process # :nodoc:
       re.binmode
       opts[:err] = we
     end
+    env = env_expand(env, opts)
     pid = begin
       Process.spawn(env, *cmd, opts)
     rescue Errno::EINTR # Ruby bug?

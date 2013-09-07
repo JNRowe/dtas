@@ -40,7 +40,7 @@ class TestRgIntegration < Testcase
       end while cur["current_offset"] == 0 && sleep(0.01)
     end
 
-    assert_empty cur["current"]["env"]["RGFX"]
+    assert_nil cur["current"]["env"]["RGFX"]
 
     assert_equal DTAS::Format.new.rate * len, cur["current_expect"]
 
@@ -119,7 +119,6 @@ class TestRgIntegration < Testcase
       "REPLAYGAIN_ALBUM_GAIN" => "-3.0",
       "REPLAYGAIN_TRACK_PEAK" => "0.666",
       "REPLAYGAIN_ALBUM_PEAK" => "0.999",
-      "REPLAYGAIN_REFERENCE_LOUDNESS" => nil
     }
     assert_equal expect, rg
   end
