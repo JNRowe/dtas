@@ -1,0 +1,17 @@
+# To the extent possible under law, Eric Wong has waived all copyright and
+# related or neighboring rights to this example.
+---
+infile: foo.flac
+env:
+  PATH: /usr/local/bin:/usr/bin:/bin
+  SOX_OPTS: -R
+comments:
+  ARTIST: John Smith
+  ALBUM: Hello World
+  YEAR: 2013
+track_start: 1 # 0 for pregap/intro tracks
+cdda_align: true
+tracks:
+  - t 0:04 "track one"
+  - t 0:05 "track two"
+  - stop 1:00
