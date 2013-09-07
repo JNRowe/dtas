@@ -234,7 +234,7 @@ class DTAS::SplitFX # :nodoc:
     # taking into account CDDA alignment
     if time.sub!(/\.(\d+)\z/, "")
       s = "0.#$1".to_f * @infmt.rate / 75
-      frac = s.to_i * 75
+      frac = s.round * 75
     end
 
     # feed the rest to the normal function
