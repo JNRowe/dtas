@@ -58,7 +58,7 @@ def tmpfifo
 
   if FIFOS.empty?
     at_exit do
-      FIFOS.each { |(pid,path)| File.unlink(path) if $$ == pid }
+      FIFOS.each { |(pid,_path)| File.unlink(_path) if $$ == pid }
     end
   end
   FIFOS << [ $$, path ]
