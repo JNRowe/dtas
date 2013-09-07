@@ -1,10 +1,12 @@
 # To the extent possible under law, Eric Wong has waived all copyright and
 # related or neighboring rights to this example.
+# Note: be sure to update test/test_splitfx.rb if you change this,
+# test_splitfx.rb relies on this.
 ---
 infile: foo.flac
 env:
-  PATH: /usr/local/bin:/usr/bin:/bin
-  SOX_OPTS: -R
+  PATH: $PATH
+  SOX_OPTS: $SOX_OPTS -R
 comments:
   ARTIST: John Smith
   ALBUM: Hello World
@@ -13,5 +15,5 @@ track_start: 1 # 0 for pregap/intro tracks
 cdda_align: true
 tracks:
   - t 0:04 "track one"
-  - t 0:05 "track two"
-  - stop 1:00
+  - t 0:10 "track two"
+  - stop 24

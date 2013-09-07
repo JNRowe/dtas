@@ -1,6 +1,8 @@
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 $stdout.sync = $stderr.sync = Thread.abort_on_exception = true
+require 'thread'
+WAIT_ALL_MTX = Mutex.new
 
 # fork-aware coverage data gatherer, see also test/covshow.rb
 if ENV["COVERAGE"]

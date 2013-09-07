@@ -120,7 +120,7 @@ class DTAS::SplitFX # :nodoc:
     { command: CMD, format: DTAS::Format.load(fmt) }
   end
 
-  def spawn(target, t, dryrun = false)
+  def spawn(target, t, opts)
     target = @targets[target] || generic_target(target)
     outfmt = target[:format]
     env = outfmt.to_env
@@ -156,12 +156,14 @@ class DTAS::SplitFX # :nodoc:
       qx(env, "printf %s \"#{arg}\"")
     end
     echo = "echo #{xs(tmp)}"
-    if dryrun
+    if opts[:dryrun]
       command = echo
     else
-      system(echo)
+      system(echo) unless opts[:silent]
     end
-    [ dtas_spawn(env, command, {}), comments ]
+
+    # pgroup: false so Ctrl-C on command-line will immediately stop everything
+    [ dtas_spawn(env, command, pgroup: false), comments ]
   end
 
   def load_tracks!(hash)
@@ -245,14 +247,14 @@ class DTAS::SplitFX # :nodoc:
     @infmt.hhmmss_to_samples(time)
   end
 
-  def run(target, jobs = 1, dryrun = false)
+  def run(target, opts = {})
     fails = []
     tracks = @tracks.dup
     pids = {}
-    jobs ||= tracks.size # jobs == nil => everything at once
+    jobs = opts[:jobs] || tracks.size # jobs == nil => everything at once
     jobs.times.each do
       t = tracks.shift or break
-      pid, tmp = spawn(target, t, dryrun)
+      pid, tmp = spawn(target, t, opts)
       pids[pid] = [ t, tmp ]
     end
 
@@ -261,7 +263,7 @@ class DTAS::SplitFX # :nodoc:
       done = pids.delete(pid)
       if status.success?
         if t = tracks.shift
-          pid, tmp = spawn(target, t, dryrun)
+          pid, tmp = spawn(target, t, opts)
           pids[pid] = [ t, tmp ]
         end
         puts "DONE #{done[0].inspect}" if $DEBUG
