@@ -13,7 +13,7 @@ test_units := $(wildcard test/test_*.rb)
 test: test-unit
 test-unit: $(test_units)
 $(test_units):
-	$(RUBY) -I $(lib) $@ $(RUBY_TEST_OPTS)
+	$(RUBY) -w -I $(lib) $@ $(RUBY_TEST_OPTS)
 
 check-warnings:
 	@(for i in $$(git ls-files '*.rb'| grep -v '^setup\.rb$$'); \
