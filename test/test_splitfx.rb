@@ -6,8 +6,6 @@ require 'thread'
 require_relative 'helper'
 
 class TestSplitfx < Testcase
-  parallelize_me!
-
   def test_t2s
     sfx = DTAS::SplitFX.new
     sfx.instance_eval do
