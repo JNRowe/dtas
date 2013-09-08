@@ -21,9 +21,6 @@ class DTAS::Pipe < IO # :nodoc:
   unless method_defined?(:pipe_size=)
     def pipe_size=(_)
     end
-
-    def pipe_size
-    end
   end
 end
 

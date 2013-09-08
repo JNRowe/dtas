@@ -118,6 +118,8 @@ class TestBuffer < Testcase
     assert_equal :wait_readable, buf.broadcast([a[1], b[1]])
     assert_equal 5, buf.bytes_xfer
 
+    return unless b[1].respond_to?(:pipe_size)
+
     b[1].nonblock = true
     b[1].write('*' * b[1].pipe_size)
     buf.wr.write "BYE"
@@ -175,7 +177,7 @@ class TestBuffer < Testcase
     buf.wr.write "HELLO"
     assert_equal tmp, buf.broadcast(tmp)
     assert_equal [a[1], b[1]], tmp
-  end
+  end if IO.method_defined?(:pipe_size)
 
   def test_serialize
     buf = new_buffer
