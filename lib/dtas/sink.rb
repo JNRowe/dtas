@@ -7,7 +7,6 @@ require_relative 'process'
 require_relative 'command'
 require_relative 'format'
 require_relative 'serialize'
-require_relative 'writable_iter'
 
 # this is a sink (endpoint, audio enters but never leaves)
 class DTAS::Sink # :nodoc:
@@ -20,7 +19,6 @@ class DTAS::Sink # :nodoc:
   include DTAS::Command
   include DTAS::Process
   include DTAS::Serialize
-  include DTAS::WritableIter
 
   SINK_DEFAULTS = COMMAND_DEFAULTS.merge({
     "name" => nil, # order matters, this is first
@@ -39,7 +37,6 @@ class DTAS::Sink # :nodoc:
 
   def initialize
     command_init(SINK_DEFAULTS)
-    writable_iter_init
     @sink = self
   end
 
