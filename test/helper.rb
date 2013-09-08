@@ -48,8 +48,11 @@ gem 'minitest'
 require 'minitest/autorun'
 require "tempfile"
 
-Testcase = Minitest.const_defined?(:Test) ? Minitest::Test
-           : Minitest::Unit::TestCase
+Testcase = begin
+  Minitest::Test
+rescue NameError
+  Minitest::Unit::TestCase
+end
 
 FIFOS = []
 def tmpfifo
