@@ -567,9 +567,10 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "get"
       res = @tl.get_tracks(msg.map! { |i| i.to_i })
       res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
-      io.emit(res.join(' '))
+      io.emit("#{res.size} #{res.join(' ')}")
     when "tracks"
-      io.emit(@tl.tracks.map! { |i| i.to_s }.join(' '))
+      tracks = @tl.tracks
+      io.emit("#{tracks.size} " << tracks.map! { |i| i.to_s }.join(' '))
     when "goto"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
       offset = msg.shift # may be nil
