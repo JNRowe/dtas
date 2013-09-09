@@ -16,6 +16,7 @@ when "cat"
 when "add-all"
   ARGV.shift
   ARGV.reverse.each do |path|
+    path = File.expand_path(path.b)
     res = c.req(%W(tl add #{path}))
     puts "#{path} #{res}"
   end
@@ -25,6 +26,7 @@ when "add-tail"
   track_ids = track_ids.split(/ /)
   last_id = track_ids.pop
   ARGV.each do |path|
+    path = File.expand_path(path.b)
     req = %W(tl add #{path})
     req << last_id.to_s if last_id
     res = c.req(req)
