@@ -527,7 +527,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         return io.emit("ERR tl add PATH [after_track_id] [true|false]")
       end
       begin
-        @tl.add_track(path, after_track_id, set_as_current)
+        track_id = @tl.add_track(path, after_track_id, set_as_current)
       rescue ArgumentError => e
         return io.emit("ERR #{e.message}")
       end
@@ -537,7 +537,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       if @tl.size == 1 && !(@current || @queue[0] || @paused)
         next_source(path)
       end
-      io.emit("OK")
+      io.emit("#{track_id}")
     when "repeat"
       case msg.shift
       when "true" then @tl.repeat = true

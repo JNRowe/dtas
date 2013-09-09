@@ -87,6 +87,7 @@ class DTAS::Tracklist
       @list.unshift(track)
       @pos = 0 if set_as_current
     end
+    track.object_id
   end
 
   def remove_track(track_id)
