@@ -65,7 +65,7 @@ class DTAS::Tracklist
     @list.map { |t| t.object_id }
   end
 
-  def next_track(repeat_ok = true)
+  def advance_track(repeat_ok = true)
     return if @list.empty?
     next_pos = @goto_pos || @pos + 1
     @goto_pos = nil

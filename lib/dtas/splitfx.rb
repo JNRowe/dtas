@@ -14,8 +14,8 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::XS
 
   class T < Struct.new(:env, :comments, :tstart, :fade_in, :fade_out)
-    def commit(next_track_samples)
-      tlen = next_track_samples - tstart
+    def commit(advance_track_samples)
+      tlen = advance_track_samples - tstart
       trimfx = "trim #{tstart}s #{tlen}s"
       if fade_in
         trimfx << " #{fade_in}"

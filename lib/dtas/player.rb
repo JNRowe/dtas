@@ -260,7 +260,7 @@ class DTAS::Player # :nodoc:
   end
 
   def _next
-    @queue.shift || @tl.next_track
+    @queue.shift || @tl.advance_track
   end
 
   def sink_death(sink, status)
@@ -353,7 +353,7 @@ class DTAS::Player # :nodoc:
 
     # don't get stuck in an infinite loop if @tl.repeat==true and we can't
     # decode anything (FS errors, sox uninstalled, etc...)
-    while path = @tl.next_track(false)
+    while path = @tl.advance_track(false)
       @sources.each do |src|
         rv = src.try(path) and return rv
       end
