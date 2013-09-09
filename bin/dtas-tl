@@ -16,8 +16,20 @@ when "cat"
 when "add-all"
   ARGV.shift
   ARGV.reverse.each do |path|
-    res = c.req_ok("tl add #{path}")
+    res = c.req(%W(tl add #{path}))
     puts "#{path} #{res}"
+  end
+when "add-tail"
+  ARGV.shift
+  track_ids = c.req("tl tracks")
+  track_ids = track_ids.split(/ /)
+  last_id = track_ids.pop
+  ARGV.each do |path|
+    req = %W(tl add #{path})
+    req << last_id.to_s if last_id
+    res = c.req(req)
+    puts "#{path} #{res}"
+    last_id = res if res =~ /\A\d+\z/
   end
 else
   # act like dtas-ctl for now...
