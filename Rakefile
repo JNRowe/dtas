@@ -110,6 +110,13 @@ task tarball: "pkg/#{base}" do
   end
 end
 
+task "pkg/#{base}" => :fix_perms
+
+task :fix_perms do
+  sh "git ls-tree -r HEAD | awk '/^100644 / {print $NF}' | xargs chmod 644"
+  sh "git ls-tree -r HEAD | awk '/^100755 / {print $NF}' | xargs chmod 755"
+end
+
 task dist: [ :tarball, :package ] do
   Dir.chdir("pkg") do
     %w(dtas-linux dtas-mpris).each do |gem|

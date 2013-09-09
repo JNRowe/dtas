@@ -27,4 +27,5 @@ cur_ruby_version = File.read(RVF) rescue nil
 if new_ruby_version != cur_ruby_version
   File.open(RVF, "w") { |fp| fp.write(new_ruby_version) }
 end
+File.chmod(0644, RVF)
 puts vn if $0 == __FILE__
