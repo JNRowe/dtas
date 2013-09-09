@@ -359,7 +359,7 @@ class DTAS::Player # :nodoc:
       end
     end
 
-    echo "idle"
+    player_idle
     nil
   end
 
@@ -388,8 +388,13 @@ class DTAS::Player # :nodoc:
       @srv.wait_ctl(dst, :wait_readable)
     else
       stop_sinks if @sink_buf.inflight == 0
-      echo "idle"
+      player_idle
     end
+  end
+
+  def player_idle
+    @tl.reset
+    echo "idle"
   end
 
   def drop_target(target)

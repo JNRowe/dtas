@@ -35,6 +35,11 @@ class DTAS::Tracklist
     @goto_pos = nil
   end
 
+  def reset
+    @goto_pos = nil
+    @pos = TL_DEFAULTS["pos"]
+  end
+
   def size
     @list.size
   end
