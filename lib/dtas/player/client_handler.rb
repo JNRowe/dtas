@@ -363,8 +363,13 @@ module DTAS::Player::ClientHandler # :nodoc:
         rescue ArgumentError
           return io.emit("ERR bad time format")
         end
-        @queue.unshift([ @current.infile, offset ])
-        __buf_reset(@current.dst) # trigger EPIPE
+        if @current.requeued
+          @queue[0][1] = offset
+        else
+          @queue.unshift([ @current.infile, offset ])
+          @current.requeued = true
+          __buf_reset(@current.dst) # trigger EPIPE
+        end
       else
         return io.emit("ERR unseekable")
       end
