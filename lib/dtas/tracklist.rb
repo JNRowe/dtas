@@ -114,4 +114,10 @@ class DTAS::Tracklist
     @goto_pos = nil
     # noop if track_id is invalid
   end
+
+  def previous!
+    return if @list.empty?
+    prev_idx = @pos - 1
+    @goto_pos = @list[prev_idx] ? prev_idx : nil
+  end
 end

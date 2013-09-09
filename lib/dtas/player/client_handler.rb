@@ -583,6 +583,13 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "current-id"
       path = @tl.cur_track
       io.emit(path ? path.object_id.to_s : "NONE")
+    when "next"
+      _tl_skip
+      io.emit("OK")
+    when "previous"
+      @tl.previous!
+      _tl_skip
+      io.emit("OK")
     end
   end
 end
