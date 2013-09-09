@@ -32,11 +32,11 @@ class DTAS::Tracklist
   def initialize
     TL_DEFAULTS.each { |k,v| instance_variable_set("@#{k}", v) }
     @list = []
-    @goto_pos = nil
+    @goto_off = @goto_pos = nil
   end
 
   def reset
-    @goto_pos = nil
+    @goto_off = @goto_pos = nil
     @pos = TL_DEFAULTS["pos"]
   end
 
@@ -68,7 +68,8 @@ class DTAS::Tracklist
   def advance_track(repeat_ok = true)
     return if @list.empty?
     next_pos = @goto_pos || @pos + 1
-    @goto_pos = nil
+    next_off = @goto_off # nil by default
+    @goto_pos = @goto_off = nil
     if @list[next_pos]
       @pos = next_pos
     elsif @repeat && repeat_ok
@@ -76,7 +77,7 @@ class DTAS::Tracklist
     else
       return
     end
-    @list[next_pos]
+    [ @list[next_pos], next_off ]
   end
 
   def cur_track
@@ -106,9 +107,10 @@ class DTAS::Tracklist
     end
   end
 
-  def go_to(track_id)
+  def go_to(track_id, offset_hhmmss = nil)
     by_track_id = _track_id_map
     if idx = by_track_id[track_id]
+      @goto_off = offset_hhmmss
       return @list[@goto_pos = idx]
     end
     @goto_pos = nil

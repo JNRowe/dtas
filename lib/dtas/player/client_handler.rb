@@ -571,7 +571,8 @@ module DTAS::Player::ClientHandler # :nodoc:
       io.emit(@tl.tracks.map! { |i| i.to_s }.join(' '))
     when "goto"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
-      if @tl.go_to(track_id.to_i)
+      offset = msg.shift # may be nil
+      if @tl.go_to(track_id.to_i, offset)
         _tl_skip
         io.emit("OK")
       else

@@ -353,9 +353,9 @@ class DTAS::Player # :nodoc:
 
     # don't get stuck in an infinite loop if @tl.repeat==true and we can't
     # decode anything (FS errors, sox uninstalled, etc...)
-    while path = @tl.advance_track(false)
+    while path_off = @tl.advance_track(false)
       @sources.each do |src|
-        rv = src.try(path) and return rv
+        rv = src.try(*path_off) and return rv
       end
     end
 

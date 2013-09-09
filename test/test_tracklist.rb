@@ -32,11 +32,11 @@ class TestTracklist < Testcase
     tl = DTAS::Tracklist.new
     tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
     %w(a b c d e f g).each do |t|
-      assert_equal t, tl.advance_track
+      assert_equal t, tl.advance_track[0]
     end
     assert_nil tl.advance_track
     tl.repeat = true
-    assert_equal 'a', tl.advance_track
+    assert_equal 'a', tl.advance_track[0]
   end
 
   def _build_mapping(tl)
@@ -49,9 +49,9 @@ class TestTracklist < Testcase
     tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
     mapping = _build_mapping(tl)
     assert_equal 'f', tl.go_to(mapping['f'])
-    assert_equal 'f', tl.advance_track
+    assert_equal 'f', tl.advance_track[0]
     assert_nil tl.go_to(1 << 128)
-    assert_equal 'g', tl.advance_track
+    assert_equal 'g', tl.advance_track[0]
   end
 
   def test_remove_track
