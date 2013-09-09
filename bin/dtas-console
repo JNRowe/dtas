@@ -157,7 +157,9 @@ begin
         event = w.res_wait
         case event
         when "pause"
-          pause = current['infile'] || current['command']
+          if current
+            pause = current['infile'] || current['command']
+          end
         when %r{\Afile }
           pause = nil
         end
