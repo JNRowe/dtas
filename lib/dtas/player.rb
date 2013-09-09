@@ -432,7 +432,7 @@ class DTAS::Player # :nodoc:
     @srv.wait_ctl(sev, :wait_readable)
     old_chld = trap(:CHLD) { sev.signal }
     create_default_sink
-    next_source(@paused ? nil : (@queue.shift || @tl.cur_track))
+    next_source(@paused ? nil : _next)
     begin
       event_loop_iter
     rescue => e # just in case...
