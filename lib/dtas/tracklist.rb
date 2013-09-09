@@ -6,7 +6,7 @@ require_relative 'serialize'
 # this is inspired by the MPRIS 2.0 TrackList spec
 class DTAS::Tracklist
   include DTAS::Serialize
-  attr_accessor :repeat
+  attr_accessor :repeat # true, false, 1
 
   SIVS = %w(list pos repeat)
   TL_DEFAULTS = {
@@ -67,7 +67,8 @@ class DTAS::Tracklist
 
   def advance_track(repeat_ok = true)
     return if @list.empty?
-    next_pos = @goto_pos || @pos + 1
+    # @repeat == 1 for single track repeat
+    next_pos = @goto_pos || @pos + (@repeat == 1 ? 0 : 1)
     next_off = @goto_off # nil by default
     @goto_pos = @goto_off = nil
     if @list[next_pos]

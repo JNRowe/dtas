@@ -547,6 +547,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       case msg.shift
       when "true" then @tl.repeat = true
       when "false" then @tl.repeat = false
+      when "1" then @tl.repeat = 1
       when nil
         return io.emit("repeat #{@tl.repeat.to_s}")
       end
