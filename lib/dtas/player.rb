@@ -15,6 +15,7 @@ require_relative 'buffer'
 require_relative 'sigevent'
 require_relative 'rg_state'
 require_relative 'state_file'
+require_relative 'tracklist'
 
 class DTAS::Player # :nodoc:
   require_relative 'player/client_handler'
@@ -25,6 +26,7 @@ class DTAS::Player # :nodoc:
   attr_reader :sinks
 
   def initialize
+    @tl = DTAS::Tracklist.new
     @state_file = nil
     @socket = nil
     @srv = nil
@@ -87,6 +89,8 @@ class DTAS::Player # :nodoc:
       rv[k] = instance_variable_get("@#{k}").to_hsh
     end
 
+    rv["tracklist"] = @tl.to_hsh
+
     # no empty hashes or arrays
     rv.delete_if do |k,v|
       case v
@@ -111,6 +115,9 @@ class DTAS::Player # :nodoc:
   def self.load(hash)
     rv = new
     rv.instance_eval do
+      if v = hash["tracklist"]
+        @tl = DTAS::Tracklist.load(v)
+      end
       @rg = DTAS::RGState.load(hash["rg"])
       if v = hash["sink_buf"]
         v = v["buffer_size"]
@@ -218,6 +225,8 @@ class DTAS::Player # :nodoc:
       chdir_handler(io, msg)
     when "pwd"
       io.emit(Dir.pwd)
+    when "tl"
+      tl_handler(io, msg)
     end
   end
 
@@ -242,12 +251,16 @@ class DTAS::Player # :nodoc:
       obj.on_death(status) if obj.respond_to?(:on_death)
       case obj
       when @current
-        next_source(@paused ? nil : @queue.shift)
+        next_source(@paused ? nil : _next)
       when DTAS::Sink # on unexpected sink death
         sink_death(obj, status)
       end
     end
     :wait_readable
+  end
+
+  def _next
+    @queue.shift || @tl.next_track
   end
 
   def sink_death(sink, status)
@@ -272,7 +285,7 @@ class DTAS::Player # :nodoc:
     if (@current || @queue[0]) && !@paused
       # we get here if source/sinks are all killed in restart_pipeline
       __sink_activate(sink)
-      next_source(@queue.shift) unless @current
+      next_source(_next) unless @current
     end
   end
 
@@ -337,6 +350,15 @@ class DTAS::Player # :nodoc:
         rv = src.try(*source_spec) and return rv
       end
     end
+
+    # don't get stuck in an infinite loop if @tl.repeat==true and we can't
+    # decode anything (FS errors, sox uninstalled, etc...)
+    while path = @tl.next_track(false)
+      @sources.each do |src|
+        rv = src.try(path) and return rv
+      end
+    end
+
     echo "idle"
     nil
   end
@@ -410,7 +432,7 @@ class DTAS::Player # :nodoc:
     @srv.wait_ctl(sev, :wait_readable)
     old_chld = trap(:CHLD) { sev.signal }
     create_default_sink
-    next_source(@paused ? nil : @queue.shift)
+    next_source(@paused ? nil : (@queue.shift || @tl.cur_track))
     begin
       event_loop_iter
     rescue => e # just in case...

@@ -343,7 +343,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     # no echo, next_source will echo on new track
     @paused = false
     return if @current
-    next_source(@queue.shift)
+    next_source(_next)
   end
 
   def do_play_pause
@@ -507,6 +507,78 @@ module DTAS::Player::ClientHandler # :nodoc:
       end
     end
     io.emit("OK")
+  end
+
+  def _tl_skip
+    @queue.clear
+    __current_drop
+  end
+
+  def tl_handler(io, msg)
+    case msg.shift
+    when "add"
+      path = msg.shift
+      after_track_id = msg.shift
+      after_track_id = after_track_id.to_i if after_track_id
+      case set_as_current = msg.shift
+      when "true" then set_as_current = true
+      when "false", nil then set_as_current = false
+      else
+        return io.emit("ERR tl add PATH [after_track_id] [true|false]")
+      end
+      begin
+        @tl.add_track(path, after_track_id, set_as_current)
+      rescue ArgumentError => e
+        return io.emit("ERR #{e.message}")
+      end
+      _tl_skip if set_as_current
+
+      # start playing if we're the only track
+      if @tl.size == 1 && !(@current || @queue[0] || @paused)
+        next_source(path)
+      end
+      io.emit("OK")
+    when "repeat"
+      case msg.shift
+      when "true" then @tl.repeat = true
+      when "false" then @tl.repeat = false
+      when nil
+        return io.emit("repeat #{@tl.repeat.to_s}")
+      end
+      io.emit("OK")
+    when "remove"
+      track_id = msg.shift or return io.emit("ERR track_id not specified")
+      track_id = track_id.to_i
+      cur = @tl.cur_track
+
+      # skip if we're removing the currently playing track
+      if cur.object_id == track_id && @current &&
+             @current.respond_to?(:infile) && @current.infile == cur
+        _tl_skip
+      end
+
+      io.emit(@tl.remove_track(track_id) ? "OK" : "MISSING")
+    when "get"
+      res = @tl.get_tracks(msg.map! { |i| i.to_i })
+      res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
+      io.emit(res.join(' '))
+    when "tracks"
+      io.emit(@tl.tracks.map! { |i| i.to_s }.join(' '))
+    when "goto"
+      track_id = msg.shift or return io.emit("ERR track_id not specified")
+      if @tl.go_to(track_id.to_i)
+        _tl_skip
+        io.emit("OK")
+      else
+        io.emit("MISSING")
+      end
+    when "current"
+      path = @tl.cur_track
+      io.emit(path ? path : "NONE")
+    when "current-id"
+      path = @tl.cur_track
+      io.emit(path ? path.object_id.to_s : "NONE")
+    end
   end
 end
 # :startdoc:

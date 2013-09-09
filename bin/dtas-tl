@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'dtas/unix_client'
+require 'yaml'
+require 'shellwords'
+
+c = DTAS::UNIXClient.new
+case cmd = ARGV[0]
+when "cat"
+  track_ids = c.req("tl tracks")
+  # we could get more, but SEQPACKET limits size...
+  track_ids.split(/ /).each do |track_id|
+    puts c.req("tl get #{track_id}")
+  end
+when "add-all"
+  ARGV.shift
+  ARGV.reverse.each do |path|
+    res = c.req_ok("tl add #{path}")
+    puts "#{path} #{res}"
+  end
+else
+  # act like dtas-ctl for now...
+  puts c.req([ "tl", *ARGV ])
+end
