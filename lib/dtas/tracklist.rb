@@ -120,6 +120,10 @@ class DTAS::Tracklist
   def previous!
     return if @list.empty?
     prev_idx = @pos - 1
-    @goto_pos = @list[prev_idx] ? prev_idx : nil
+    if prev_idx < 0
+      # stop playback if nothing to go back to.
+      prev_idx = @repeat ? @list.size - 1 : @list.size
+    end
+    @goto_pos = prev_idx
   end
 end
