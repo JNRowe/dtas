@@ -49,6 +49,7 @@ class TestTracklist < Testcase
     tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
     mapping = _build_mapping(tl)
     assert_equal 'f', tl.go_to(mapping['f'])
+    assert_equal 'f', tl.next_track
     assert_nil tl.go_to(1 << 128)
     assert_equal 'g', tl.next_track
   end

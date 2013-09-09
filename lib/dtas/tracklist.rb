@@ -32,6 +32,7 @@ class DTAS::Tracklist
   def initialize
     TL_DEFAULTS.each { |k,v| instance_variable_set("@#{k}", v) }
     @list = []
+    @goto_pos = nil
   end
 
   def size
@@ -61,7 +62,8 @@ class DTAS::Tracklist
 
   def next_track(repeat_ok = true)
     return if @list.empty?
-    next_pos = @pos + 1
+    next_pos = @goto_pos || @pos + 1
+    @goto_pos = nil
     if @list[next_pos]
       @pos = next_pos
     elsif @repeat && repeat_ok
@@ -102,8 +104,9 @@ class DTAS::Tracklist
   def go_to(track_id)
     by_track_id = _track_id_map
     if idx = by_track_id[track_id]
-      return @list[@pos = idx]
+      return @list[@goto_pos = idx]
     end
+    @goto_pos = nil
     # noop if track_id is invalid
   end
 end
