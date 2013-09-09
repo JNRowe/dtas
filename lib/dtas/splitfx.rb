@@ -38,7 +38,7 @@ class DTAS::SplitFX # :nodoc:
   def initialize
     @env = {}
     @comments = {}
-    @track_first = 1
+    @track_start = 1
     @track_zpad = true
     @t2s = method(:t2s)
     @infile = nil
@@ -76,11 +76,11 @@ class DTAS::SplitFX # :nodoc:
 
     _bool(hash, "cdda_align") { |val| @t2s = method(val ? :t2s : :t2s_cdda) }
 
-    case v = hash["track_first"]
-    when Integer then @track_first = v
+    case v = hash["track_start"]
+    when Integer then @track_start = v
     when nil
     else
-      raise TypeError, "'track_first' must be an integer"
+      raise TypeError, "'track_start' must be an integer"
     end
 
     %w(comments env targets).each do |key|
@@ -103,6 +103,17 @@ class DTAS::SplitFX # :nodoc:
     load_tracks!(hash)
   end
 
+  # FIXME: duplicate from dtas/source/sox
+  def precision
+    qx(@env, %W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
+  rescue # fallback to parsing the whole output
+    s = qx(@env, %W(soxi #@infile), err: "/dev/null")
+    s =~ /Precision\s+:\s*(\d+)-bit/n
+    v = $1.to_i
+    return v if v > 0
+    raise TypeError, "could not determine precision for #@infile"
+  end
+
   def load_input!(hash)
     @infile = hash["infile"] or raise ArgumentError, "'infile' not specified"
     if infmt = hash["infmt"] # rarely needed
@@ -111,18 +122,19 @@ class DTAS::SplitFX # :nodoc:
       @infmt = DTAS::Format.new
       @infmt.channels = qx(@env, %W(soxi -c #@infile)).to_i
       @infmt.rate = qx(@env, %W(soxi -r #@infile)).to_i
+      @infmt.bits ||= precision
       # we don't care for type
     end
   end
 
   def generic_target(target = "flac")
     fmt = { "type" => target }
-    { command: CMD, format: DTAS::Format.load(fmt) }
+    { "command" => CMD, "format" => DTAS::Format.load(fmt) }
   end
 
   def spawn(target, t, opts)
     target = @targets[target] || generic_target(target)
-    outfmt = target[:format]
+    outfmt = target["format"]
     env = outfmt.to_env
 
     # set very high quality resampling if using 24-bit or higher output
@@ -151,7 +163,7 @@ class DTAS::SplitFX # :nodoc:
     env["SUFFIX"] = outfmt.type
     env.merge!(t.env)
 
-    command = target[:command]
+    command = target["command"]
     tmp = Shellwords.split(command).map do |arg|
       qx(env, "printf %s \"#{arg}\"")
     end
@@ -173,14 +185,14 @@ class DTAS::SplitFX # :nodoc:
     fmt = "%d"
     case @track_zpad
     when true
-      max = @track_first - 1 + @tracks.size
+      max = @track_start - 1 + @tracks.size
       fmt = "%0#{max.to_s.size}d"
     when Integer
       fmt = "%0#{@track_zpad}d"
     else
       fmt = "%d"
     end
-    nr = @track_first
+    nr = @track_start
     @tracks.each do |t|
       t.comments["TRACKNUMBER"] = sprintf(fmt, nr)
       nr += 1
