@@ -4,7 +4,7 @@ require_relative '../dtas'
 require_relative 'serialize'
 
 # this is inspired by the MPRIS 2.0 TrackList spec
-class DTAS::Tracklist
+class DTAS::Tracklist # :nodoc:
   include DTAS::Serialize
   attr_accessor :repeat # true, false, 1
 

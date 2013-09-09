@@ -13,7 +13,7 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::Process
   include DTAS::XS
 
-  class T < Struct.new(:env, :comments, :tstart, :fade_in, :fade_out)
+  class T < Struct.new(:env, :comments, :tstart, :fade_in, :fade_out) # :nodoc:
     def commit(advance_track_samples)
       tlen = advance_track_samples - tstart
       trimfx = "trim #{tstart}s #{tlen}s"
