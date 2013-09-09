@@ -317,7 +317,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   def skip_handler(io, msg)
     __current_drop
-    echo("skip")
+    wall("skip")
     io.emit("OK")
   end
 
@@ -334,13 +334,13 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   def do_pause
     return if @paused
-    echo("pause")
+    wall("pause")
     @paused = true
     __current_requeue
   end
 
   def do_play
-    # no echo, next_source will echo on new track
+    # no wall, next_source will wall on new track
     @paused = false
     return if @current
     next_source(_next)
@@ -489,7 +489,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     rescue => e
       return io.emit("ERR chdir: #{e.message}")
     end
-    # echo(%W(cd msg[0])) # should we broadcast this?
+    # wall(%W(cd msg[0])) # should we broadcast this?
     io.emit("OK")
   end
 

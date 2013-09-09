@@ -54,7 +54,7 @@ class DTAS::Player # :nodoc:
     @sources = @source_map.values.sort_by { |src| src.tryorder }
   end
 
-  def echo(msg)
+  def wall(msg)
     msg = xs(Array(msg))
     @watchers.delete_if do |io, _|
       if io.closed?
@@ -197,7 +197,7 @@ class DTAS::Player # :nodoc:
       do_seek(io, msg[0])
     when "clear"
       @queue.clear
-      echo("clear")
+      wall("clear")
       io.emit("OK")
     when "rg"
       rg_handler(io, msg)
@@ -372,13 +372,13 @@ class DTAS::Player # :nodoc:
       case source_spec
       when String
         pending = try_file(source_spec) or return
-        echo(%W(file #{pending.infile}))
+        wall(%W(file #{pending.infile}))
       when Array
         pending = try_file(*source_spec) or return
-        echo(%W(file #{pending.infile} #{pending.offset_samples}s))
+        wall(%W(file #{pending.infile} #{pending.offset_samples}s))
       else
         pending = DTAS::Source::Cmd.new(source_spec["command"])
-        echo(%W(command #{pending.command_string}))
+        wall(%W(command #{pending.command_string}))
       end
 
       dst = @sink_buf
@@ -394,7 +394,7 @@ class DTAS::Player # :nodoc:
 
   def player_idle
     @tl.reset
-    echo "idle"
+    wall("idle")
   end
 
   def drop_target(target)
