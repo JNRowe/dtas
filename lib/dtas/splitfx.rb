@@ -42,7 +42,32 @@ class DTAS::SplitFX # :nodoc:
     @track_zpad = true
     @t2s = method(:t2s)
     @infile = nil
-    @targets = {}
+    @targets = {
+      "flac-cdda" => {
+        "command" => CMD,
+        "format" => {
+          "bits" => 16,
+          "rate" => 44100,
+          "type" => "flac",
+          "channels" => 2,
+        },
+      },
+      "opus" => {
+        "command" => 'sox "$INFILE" $COMMENTS $OUTFMT - ' \
+           '$TRIMFX $RATEFX $DITHERFX | opusenc --music ' \
+           '--raw-bits $BITS_PER_SAMPLE ' \
+           '$OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS ' \
+           '--raw-endianness $ENDIAN_OPUSENC ' \
+           '$OPUSENC_COMMENTS ' \
+           '- $TRACKNUMBER.opus',
+        "format" => {
+          "bits" => 16,
+          "rate" => 48000,
+          "type" => "s16",
+          "channels" => 2,
+        },
+      },
+    }
     @tracks = []
     @infmt = nil # wait until input is assigned
   end

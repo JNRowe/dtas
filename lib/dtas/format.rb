@@ -59,6 +59,16 @@ class DTAS::Format # :nodoc:
     end
   end
 
+  # returns 1 or 0 depending on endianess
+  def endian_opusenc
+    case e = @endian || NATIVE_ENDIAN
+    when "big" then "1"
+    when "little" then "0"
+    else
+      raise"unsupported endian=#{e}"
+    end
+  end
+
   def to_eca_arg
     %W(-f #{@type}_#{endian2},#@channels,#@rate)
   end
@@ -92,6 +102,7 @@ class DTAS::Format # :nodoc:
       "SOXFMT" => to_sox_arg.join(' '),
       "ECAFMT" => to_eca_arg.join(' '),
       "ENDIAN2" => endian2,
+      "ENDIAN_OPUSENC" => endian_opusenc,
     }
     begin # don't set these if we can't get them, SOX_FILETYPE may be enough
       rv["BITS_PER_SAMPLE"] = bits_per_sample.to_s

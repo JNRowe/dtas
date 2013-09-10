@@ -27,12 +27,13 @@ class TestSplitfx < Testcase
         assert system(cmd), cmd.inspect
         sfx.import(hash, {})
         opts = { jobs: nil, silent: true }
-        WAIT_ALL_MTX.synchronize do
-          sfx.run("flac", opts)
-        end
+
+        # ensure default FLAC target works
+        WAIT_ALL_MTX.synchronize { sfx.run("flac", opts) }
         expect = %w(1.flac 2.flac foo.flac)
         assert_equal expect, Dir["*.flac"].sort
 
+        # compare results with expected output
         res_cmd = "sox 1.flac 2.flac -ts32 -c2 -r44100 result.s32"
         res_pid = fork { exec res_cmd }
         exp_cmd = "sox foo.flac -ts32 -c2 -r44100 expect.s32 trim 4"
@@ -43,6 +44,35 @@ class TestSplitfx < Testcase
         assert s.success?, "#{exp_cmd}: #{s.inspect}"
         cmp = "cmp result.s32 expect.s32"
         assert system(cmp), cmp
+
+        # try Ogg Opus, use opusenc/opusdec for now since that's available
+        # in Debian 7.0 (sox.git currently has opusfile support, but that
+        # hasn't made it into Debian, yet)
+        if `which opusenc 2>/dev/null`.size > 0 &&
+           `which opusdec 2>/dev/null`.size > 0
+          err = $stderr.dup
+          begin
+            $stderr.reopen("/dev/null", "a")
+            WAIT_ALL_MTX.synchronize { sfx.run("opus", opts) }
+          ensure
+            $stderr.reopen(err)
+          end
+
+          # ensure opus lengths match flac ones, we decode using opusdec
+          # since sox does not yet have opus support in Debian 7.0
+          %w(1 2).each do |nr|
+            cmd = "opusdec #{nr}.opus #{nr}.wav 2>/dev/null"
+            assert system(cmd), cmd
+            assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
+          end
+        end
+
+        # ensure 16/44.1kHz FLAC works (CDDA-like)
+        File.unlink('1.flac', '2.flac')
+        WAIT_ALL_MTX.synchronize { sfx.run("flac-cdda", opts) }
+        %w(1 2).each do |nr|
+          assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
+        end
       end
     end
   end
