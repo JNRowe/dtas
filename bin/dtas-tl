@@ -28,14 +28,14 @@ when "clear"
   get_track_ids(c).each do |track_id|
     puts "#{track_id} " << c.req("tl remove #{track_id}")
   end
-when "add-all"
+when "addhead"
   ARGV.shift
   ARGV.reverse.each do |path|
     path = File.expand_path(path.b)
     res = c.req(%W(tl add #{path}))
     puts "#{path} #{res}"
   end
-when "add-tail"
+when "addtail"
   ARGV.shift
   track_ids = get_track_ids(c)
   last_id = track_ids.pop
