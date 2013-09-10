@@ -393,7 +393,7 @@ class DTAS::Player # :nodoc:
   end
 
   def player_idle
-    @tl.reset
+    @tl.reset unless @paused
     wall("idle")
   end
 
