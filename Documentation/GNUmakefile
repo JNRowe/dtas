@@ -16,6 +16,7 @@ m1 += dtas-player
 m1 += dtas-xdelay
 m1 += dtas-sinkedit
 m1 += dtas-sourceedit
+m1 += dtas-tl
 
 m7 =
 m7 += dtas-player_protocol

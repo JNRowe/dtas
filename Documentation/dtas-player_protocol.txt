@@ -53,6 +53,9 @@ dtas-sinkedit(1), and dtas-enq(1) also implement this protocol.
 - COMMAND, this may be quoted string passed to sh -c "",
            variable/argument expansion will be performed by the shell
 - SOURCENAME - "sox" or "av", more backends may be supported in the future
+- TIMESTAMP - a time stamp formatted in HH:MM:SS.FRAC (for seeking)
+- TRACKID - a unique unsigned integer in decimal (base-10) representing a
+            track in the tracklist
 - FILENAME - an expanded pathname relative to / is recommended since
              dtas-player and the client may run in different directories
 
@@ -161,7 +164,7 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
     + norm_level=FLOAT (1.0 == dBFS)
       Controls the level to normalize to when using album_norm or track_norm.
 
-* seek [+-]HH:MM:SS.FRAC - seek the current track to a specified time.
+* seek [+-]TIMESTAMP - seek the current track to a specified time.
   This is passed directly as the first argument for the sox(1) "trim"
   command.   See the sox(1) manpage for details.
   Seeking to a relative time is also supported by prefixing the time
@@ -210,6 +213,30 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   to ~/.dtas/player_state.yml) is written to.  This does not use fsync(2),
   users requiring fsync should open(2) that file and fsync(2) it
   themselves if necessary.
+
+* tl add FILENAME [TRACKID [BOOLEAN]] - add files to the tracklist
+  With one arg, adds FILENAME to the head of the tracklist.
+  If TRACKID is specified, FILENAME is added immediately after TRACKID
+  on the existing tracklist.  The final BOOLEAN argument replaces the
+  currently playing track with the newly-added one.
+  Returns the TRACKID of the newly added track
+
+* tl remove TRACKID - remove the track with the given TRACKID from
+  the track list
+
+* tl get [TRACKIDS]
+  returns a list of TRACKIDS mapped to filenames.
+
+* tl goto TRACKID [TIMESTAMP] - plays the given TRACKID
+  An optional timestamp may be added to prevent playing the
+  same part(s) repeated.y
+
+* tl repeat [BOOLEAN|1] - show/or change repeat status of the tracklist.
+  With no args, this will show "true", "false", or "1"
+  If set to "1", dtas-player will repeat the current track.
+
+* tl tracks
+  returns a list of all TRACKIDS in the tracklist
 
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open
