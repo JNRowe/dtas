@@ -124,7 +124,8 @@ class TestPlayerIntegration < Testcase
   def test_sink_env
     s = client_socket
     tmp = Tempfile.new(%w(env .txt))
-    s.req_ok("sink ed default active=true command='echo -$FOO- > #{tmp.path}'")
+    s.req_ok("sink ed default active=true " \
+             "command='echo -$FOO- > #{tmp.path}; cat >/dev/null'")
 
     s.req_ok("sink ed default env.FOO=BAR")
     s.req_ok(["enq-cmd", "echo HI"])
