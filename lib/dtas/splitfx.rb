@@ -13,6 +13,12 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::Process
   include DTAS::XS
 
+  class Skip < Struct.new(:tstart)
+    def commit(_)
+      # noop
+    end
+  end
+
   class T < Struct.new(:env, :comments, :tstart, :fade_in, :fade_out) # :nodoc:
     def commit(advance_track_samples)
       tlen = advance_track_samples - tstart
@@ -218,9 +224,15 @@ class DTAS::SplitFX # :nodoc:
       fmt = "%d"
     end
     nr = @track_start
-    @tracks.each do |t|
-      t.comments["TRACKNUMBER"] = sprintf(fmt, nr)
-      nr += 1
+    @tracks.delete_if do |t|
+      case t
+      when Skip
+        true
+      else
+        t.comments["TRACKNUMBER"] = sprintf(fmt, nr)
+        nr += 1
+        false
+      end
     end
   end
 
@@ -254,6 +266,16 @@ class DTAS::SplitFX # :nodoc:
 
       prev = @tracks.last and prev.commit(t.tstart)
       @tracks << t
+    when "skip"
+      stop_time = argv.shift
+      argv.empty? or raise ArgumentError, "skip does not take extra args"
+      s = Skip.new
+      s.tstart = @t2s.call(stop_time)
+      # s.comments = {}
+      # s.env = {}
+      prev = @tracks.last or raise ArgumentError, "no tracks to skip"
+      prev.commit(s.tstart)
+      @tracks << s
     when "stop"
       stop_time = argv.shift
       argv.empty? or raise ArgumentError, "stop does not take extra args"
