@@ -540,7 +540,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
       # start playing if we're the only track
       if @tl.size == 1 && !(@current || @queue[0] || @paused)
-        next_source(path)
+        next_source(_next)
       end
       io.emit("#{track_id}")
     when "repeat"
