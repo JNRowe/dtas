@@ -159,8 +159,9 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def generic_target(target = "flac")
-    fmt = { "type" => target }
-    { "command" => CMD, "format" => DTAS::Format.load(fmt) }
+    outfmt = @infmt.dup
+    outfmt.type = target
+    { "command" => CMD, "format" => outfmt }
   end
 
   def spawn(target, t, opts)
