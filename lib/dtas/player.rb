@@ -387,12 +387,12 @@ class DTAS::Player # :nodoc:
       @current = pending
       @srv.wait_ctl(dst, :wait_readable)
     else
-      stop_sinks if @sink_buf.inflight == 0
       player_idle
     end
   end
 
   def player_idle
+    stop_sinks if @sink_buf.inflight == 0
     @tl.reset unless @paused
     wall("idle")
   end
