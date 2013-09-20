@@ -47,6 +47,26 @@ when "addtail"
     puts "#{path} #{res}"
     last_id = res if res =~ /\A\d+\z/
   end
+when "reto"
+  fixed = ARGV.delete("-F")
+  ignorecase = ARGV.delete("-i")
+  re = ARGV[1]
+  time = ARGV[2]
+  re = Regexp.quote(re) if fixed
+  re = ignorecase ? %r{#{re}}i : %r{#{re}}
+  get_track_ids(c).each do |track_id|
+    res = c.req("tl get #{track_id}")
+    res.sub!(/\A1 /, '')
+    if re =~ res
+      req = %W(tl goto #{track_id})
+      req << time if time
+      res = c.req(req)
+      puts res
+      exit(res == "OK")
+    end
+  end
+  warn "#{re.inspect} not found"
+  exit 1
 else
   # act like dtas-ctl for now...
   puts c.req([ "tl", *ARGV ])

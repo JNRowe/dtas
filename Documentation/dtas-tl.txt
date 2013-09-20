@@ -28,6 +28,8 @@ client).
 * goto TRACKID [POS] - play TRACKID immediately, optionally seek to POS
 TRACKID may be looked up via cat, and POS should be a timestamp in
 HH:MM:SS.FRAC format.
+* reto REGEXP [POS] - play first track with path matching REGEXP immediately,
+optionally seek to POS.  POS should be a timestamp in HH:MM:SS.FRAC format.
 * next - play the next track in the tracklist
 * previous - play the previous track in the tracklist
 * repeat 1 - repeat the current track
