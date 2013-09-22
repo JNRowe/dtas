@@ -11,6 +11,7 @@ Primary executables available are:
 
 * dtas-player - gapless music player (or pipeline/process manager :P)
 * dtas-cueedit - embedded cuesheet editor (FLAC-only for now)
+* dtas-splitfx - split audio and apply effects to all tracks
 
 The centerpiece is dtas-player, a gapless music player designed to aid
 in writing scripts for sox/ecasound use.  Unlike monolithic music
@@ -38,6 +39,7 @@ Users of dtas-player will also be interested in the following scripts:
 * dtas-sinkedit - edit sinks (playback targets) for dtas-player
 * dtas-sourceedit - edit source (decoder process parameters) for dtas-player
 * dtas-xdelay - alternative sink for dtas-player
+* dtas-tl - command-line helpers for tracklist functionality in dtas-player
 
 All scripts have some documentation in the Documentation/ directory or
 manpages distributed with the gem.  Documentation is also available on
@@ -50,7 +52,6 @@ Familiarity with the Ruby programming language is absolutely NOT required.
 Coming:
 
 * MPRIS/MPRIS 2.0 bridge for partial dtas-player control
-* tracklist support in dtas-player (maybe?)
 * whatever command-line tools come to mind...
 * better error handling, many bugfixes, etc...
 * better documentation
