@@ -73,7 +73,7 @@ task :rsync_docs do
   # git-set-file-times is distributed with rsync,
   # Also available at: http://yhbt.net/git-set-file-times
   # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
-  sh("git", "set-file-times", "Documentation")
+  sh("git", "set-file-times", "Documentation", "examples")
 
   Dir['Documentation/*.txt'].to_a.concat(top).each do |txt|
     gz = "#{txt}.gz"
@@ -86,6 +86,9 @@ task :rsync_docs do
     files << gz
   end
   sh("rsync --chmod=Fugo=r -av #{files.join(' ')} #{dest}")
+
+  examples = `git ls-files examples`.split("\n")
+  sh("rsync --chmod=Fugo=r -av #{examples.join(' ')} #{dest}/examples/")
 end
 
 task :coverage do
