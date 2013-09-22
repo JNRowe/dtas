@@ -58,7 +58,7 @@ class DTAS::SplitFX # :nodoc:
           "channels" => 2,
         },
       },
-      "opus" => {
+      "opusenc" => {
         "command" => 'sox "$INFILE" $COMMENTS $OUTFMT - ' \
            '$TRIMFX $RATEFX $DITHERFX | opusenc --music ' \
            '--raw-bits $BITS_PER_SAMPLE ' \

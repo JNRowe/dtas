@@ -53,7 +53,7 @@ class TestSplitfx < Testcase
           err = $stderr.dup
           begin
             $stderr.reopen("/dev/null", "a")
-            WAIT_ALL_MTX.synchronize { sfx.run("opus", opts) }
+            WAIT_ALL_MTX.synchronize { sfx.run("opusenc", opts) }
           ensure
             $stderr.reopen(err)
           end
