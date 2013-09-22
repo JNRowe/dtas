@@ -40,10 +40,10 @@ For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
 Grab the latest tarball from our HTTP site:
 
-    http://dtas.80x24.org/2013/dtas-0.3.0.tar.gz
+    http://dtas.80x24.org/2013/dtas-0.4.0.tar.gz
 
-    $ tar zxvf dtas-0.3.0.tar.gz
-    $ cd dtas-0.3.0
+    $ tar zxvf dtas-0.4.0.tar.gz
+    $ cd dtas-0.4.0
     $ sudo ruby setup.rb
 
 GNU/Linux users may optionally install "io_splice" and
