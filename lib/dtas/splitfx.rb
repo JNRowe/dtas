@@ -13,7 +13,7 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::Process
   include DTAS::XS
 
-  class Skip < Struct.new(:tstart)
+  class Skip < Struct.new(:tstart) # :nodoc:
     def commit(_)
       # noop
     end
