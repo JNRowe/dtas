@@ -1,0 +1,167 @@
+% dtas-splitfx(1) dtas user manual
+
+# NAME
+
+dtas-splitfx - split audio and apply effects to all tracks
+
+# SYNOPSIS
+
+dtas-splitfx SPLITFX_FILE.yml [OPTIONS] [TARGETS] [ARGS...]
+
+# DESCRIPTION
+
+dtas-splitfx reads as YAML file and can apply effects (including
+resampling/dither), split, tag, and encode files in parallel.
+dtas-splitfx is intended for splitting recordings from vinyl and live
+concerts into separate files.  dtas-splitfx is inspired by cuesheets for
+CD audio and the make(1) build tool.
+
+dtas-splitfx primarily uses sox(1), but it is possible to define targets
+to use ecasound(1), too.
+
+# OPTIONS
+
+-j, \--jobs [JOBS]
+:    Number of jobs to run in parallel.  If no number is specified, all
+     jobs are run in parallel.
+
+-n, \--dry-run
+:    Print, but do not run the commands to be executed
+
+-s, \--quiet, \--silent
+:    Silent operation, commands are not printed as executed
+
+# FILE FORMAT
+
+* infile - string, the pathname of the original audio file
+* env - hash of environment variables to set for all commands
+* comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
+    comments:
+      ARTIST: John Smith
+      ALBUM: Hello World
+      YEAR: 2013
+* track_start - integer, number to start the track count at (default: 1)
+* cdda_align - boolean, enforce sector alignment for audio CDs (default: false)
+* track_zpad - boolean or integer.  Zero-pad the TRACKNUMBER in metadata and
+  filenames.  If an integer, this creates a fixed padding even if the
+  padding is not necessary.  If true, this only pads as needed for the
+  highest-numbered track (default: true)
+* tracks - array, see "TRACKS" section
+* targets - hash, see "TARGETS" section
+
+# TRACKS
+
+Tracks may be defined by a start time, with the stop time defined
+automatically by the start of the next track, stop time, or a skip
+segment.
+
+* t TIME TITLE [fade_in/fade_out=FADE_ARGS] - the start of a new track
+  at TIME with TITLE.  An optional fade_in and fade_out may be specified
+  for the first/last tracks.
+* skip TIME - skip a segment starting at TIME.  "skip" segments are
+  useful for skipping long gaps between tracks (such as flipping vinyl
+  or intermission at concerts)
+* stop TIME - stop the last track  This should be the last directive in
+  the "tracks" array.
+
+An example of the tracks array for a 4 track EP follows:
+
+    tracks:
+      - t  0:21    "This is the first track of an EP" fade_in='t 1'
+      - t  7:11.6  "Second track of side A of an EP"
+      - skip 9:18  # this is where I flip the record, comments are allowed
+      - t  9:41    "3rd track of an EP"
+      - t 13:36.5  "Final track of the EP" fade_out='t 1'
+      - stop 18:11
+
+# FADES
+
+dtas-splitfx automatically sets up fade-in/fade-out effects for sox(1)
+based on track times.  These are to be used in "t" (track) directives in
+the "tracks" array:
+
+* fade_in="[TYPE] LENGTH"
+* fade_out="[TYPE] LENGTH"
+
+TYPE is optional, but LENGTH is required.  See sox(1) for a description
+of the fade type.
+
+# ENVIRONMENT
+
+dtas-splitfx sets several default environment variables for commands to
+use in targets:
+
+* INFILE - this matches the "infile" directive in the YAML file
+* TRIMFX - essential, this supplys the necessary sox(1) trim effect to
+  each track.
+* COMMENTS - expands to --comment-file=PATH for sox(1)
+* OUTFMT - sox(1) arguments for the output format (e.g. "-ts32 -c2 -r44100"
+* SUFFIX - the suffix of the output format without "." (e.g. "flac", "ogg")
+* TRACKNUMBER - the track number, useful for comments and filenames
+* RATEFX - rate effect and arguments for sox(1) resampling
+* DITHERFX - dither effect and arguments for sox(1) dithering
+
+# TARGETS
+
+The default targets will split audio and avoid applying any effects.
+They are named after common audio formats supported by sox(1):
+
+* flac
+* ogg
+* mp3
+* sox
+
+If not specified, "flac" is the default target.
+
+Additional targets supported by default.
+
+* flac-cdda - this encodes the audio to "flac" format while being
+  easily decompressible to a format suitable for being burned to audio CD.
+
+* opusenc - encodes to 16-bit, 48000 Hz Opus format using opusenc(1).
+  This uses sox(1) to dither/resample/apply effects as necessary.
+  This target exists as sox (as of v14.4.1) does not currently have
+  native opus encoding support.
+
+Custom targets may easily be defined to apply effects and gain.  For
+example, the following "flac24" target raises the volume of the left
+channel by 9.5dB and the right one by 8.5dB to compensate for channel
+imbalance in a live concert recording from the audience:
+
+    targets:
+      flac24:
+        command: sox -M
+          "|sox $INFILE -c1 -p $TRIMFX remix 1v1 vol +9.5dB"
+          "|sox $INFILE -c1 -p $TRIMFX remix 2v1 vol +8.5dB"
+          $COMMENTS $OUTFMT
+          bandYYYY-MM-DD.FOO.t0"$TRACKNUMBER.$SUFFIX"
+          $RATEFX $DITHERFX stats
+        format:
+          type: flac
+          bits: 24
+          rate: 48000
+
+For reference, the "opusenc" default target is implemented as follows:
+
+    targets:
+      opusenc:
+        command: sox "$INFILE" $COMMENTS $OUTFMT -
+           $TRIMFX $RATEFX $DITHERFX | opusenc --music
+           --raw-bits $BITS_PER_SAMPLE
+           $OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS
+           --raw-endianness $ENDIAN_OPUSENC
+           $OPUSENC_COMMENTS - $TRACKNUMBER.opus
+        format:
+          bits: 16
+          rate: 48000
+          type: s16
+          channels: 2
+
+# COPYRIGHT
+
+Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
+# SEE ALSO
+
+sox(1), ecasound(1), flac(1), opusenc(1)
