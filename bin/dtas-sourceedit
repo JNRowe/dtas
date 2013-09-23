@@ -22,16 +22,16 @@ abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
 
 if st_in.file? || st_in.pipe?
-  tmp = $stdin
+  buf = $stdin.read
 else
   tmp = tmpyaml
   tmp.write(buf << DTAS_DISCLAIMER)
   cmd = "#{editor} #{tmp.path}"
   system(cmd) or abort "#{cmd} failed: #$?"
-  tmp.rewind
+  buf = File.read(tmp.path)
 end
 
-source = YAML.load(tmp.read)
+source = YAML.load(buf)
 cmd = %W(source ed #{name})
 update_cmd_env(cmd, orig, source)
 

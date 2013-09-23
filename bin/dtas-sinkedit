@@ -18,8 +18,7 @@ orig = YAML.load(buf)
 tmp.write(buf << DTAS_DISCLAIMER)
 cmd = "#{editor} #{tmp.path}"
 system(cmd) or abort "#{cmd} failed: #$?"
-tmp.rewind
-sink = YAML.load(tmp.read)
+sink = YAML.load(File.read(tmp.path))
 
 cmd = %W(sink ed #{name})
 update_cmd_env(cmd, orig, sink)
