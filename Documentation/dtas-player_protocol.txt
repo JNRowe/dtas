@@ -111,20 +111,30 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   Changing this will affect the $SOXFMT and $ECAFMT environments passed
   to source and sink commands.  Changing this implies a "restart"
   Changing rate to 48000 is probably useful if you plan on playing to some
-  laptop sound cards.
+  laptop sound cards.  In all cases where "bypass" is supported, it
+  removes the guarantee of gapless playback as the audio device(s)
+  will likely need to be restarted.
 
-    + channels=UNSIGNED - (default: 2 (stereo)) - number of channels
-      to use internally.  sox will internally invoke the remix effect
-      when decoding.
+
+    + channels=(UNSIGNED|bypass) - (default: 2 (stereo)) - number of
+      channels to use internally.  sox will internally invoke the remix
+      effect when decoding.  This supports the value "bypass" (without
+      quotes) to avoid the automatic remix effect.  Using "bypass" mode
+      removes the guarantee of gapless playback, as the audio device will
+      likely need to be restarted, introducing an audible gap.
     + endian=(big|little|swap) - (default: native) - there is probably no
       point in changing this unless you output over a network sink to
       a machine of different endianess.
-    + bits=UNSIGNED - (default: implied from type) - sample precision (decoded)
+    + bits=(UNSIGNED|bypass) - (default: implied from type) - sample precision
+      (decoded)
       This may be pointless and removed in the future, since the sample
-      precision is implied from type.
-    + rate=UNSIGNED - (default: 44100) - sample rate of audio
+      precision is implied from type.  This supports the value of "bypass"
+      to avoid dither/truncation in later stages.
+    + rate=(UNSIGNED|bypass) - (default: 44100) - sample rate of audio
       Typical values of rate are 44100, 48000, 88200, 96000.  Not all
       DSP effects are compatible with all sampling rates/channels.
+      This supports the value of "bypass" as well to avoid introducing
+      software resamplers into the playback chain.
     + type=(s16|s24|s32|u16|u24|u32|f32|f64) - (default: s32)
       change the raw PCM format.  s32 currently offers the best performance
       when only sox/play are used.  f32 may offer better performance if

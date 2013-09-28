@@ -33,6 +33,7 @@ class DTAS::Player # :nodoc:
     @queue = [] # files for sources, or commands
     @paused = false
     @format = DTAS::Format.new
+    @bypass = [] # %w(rate bits channels) (not worth Hash overhead)
 
     @sinks = {} # { user-defined name => sink }
     @targets = [] # order matters
@@ -55,7 +56,10 @@ class DTAS::Player # :nodoc:
   end
 
   def wall(msg)
-    msg = xs(Array(msg))
+    __wall(xs(Array(msg)))
+  end
+
+  def __wall(msg)
     @watchers.delete_if do |io, _|
       if io.closed?
         true
@@ -84,6 +88,7 @@ class DTAS::Player # :nodoc:
 
     # Arrays
     rv["queue"] = @queue
+    rv["bypass"] = @bypass.sort!
 
     %w(rg sink_buf format).each do |k|
       rv[k] = instance_variable_get("@#{k}").to_hsh
@@ -123,7 +128,7 @@ class DTAS::Player # :nodoc:
         v = v["buffer_size"]
         @sink_buf.buffer_size = v
       end
-      %w(socket queue paused).each do |k|
+      %w(socket queue paused bypass).each do |k|
         v = hash[k] or next
         instance_variable_set("@#{k}", v)
       end
@@ -366,29 +371,44 @@ class DTAS::Player # :nodoc:
   def next_source(source_spec)
     @current = nil
     if source_spec
-      # restart sinks iff we were idle
-      spawn_sinks(source_spec) or return
-
       case source_spec
       when String
         pending = try_file(source_spec) or return
-        wall(%W(file #{pending.infile}))
+        msg = %W(file #{pending.infile})
       when Array
         pending = try_file(*source_spec) or return
-        wall(%W(file #{pending.infile} #{pending.offset_samples}s))
+        msg = %W(file #{pending.infile} #{pending.offset_samples}s)
       else
         pending = DTAS::Source::Cmd.new(source_spec["command"])
-        wall(%W(command #{pending.command_string}))
+        msg = %W(command #{pending.command_string})
       end
+
+      unless @bypass.empty?
+        new_fmt = bypass_match!(@format.dup, pending.format)
+        if new_fmt != @format
+          stop_sinks # we may fail to start below
+          format_update!(new_fmt)
+        end
+      end
+
+      # restart sinks iff we were idle
+      spawn_sinks(source_spec) or return
 
       dst = @sink_buf
       pending.dst_assoc(dst)
       pending.spawn(@format, @rg, out: dst.wr, in: "/dev/null")
       @current = pending
       @srv.wait_ctl(dst, :wait_readable)
+      wall(msg)
     else
       player_idle
     end
+  end
+
+  def format_update!(fmt)
+    ary = fmt.to_hash.inject(%w(format)) { |m,(k,v)| v ? m << "#{k}=#{v}" : m }
+    @format = fmt
+    __wall(ary.join(' ')) # do not escape '='
   end
 
   def player_idle
@@ -456,5 +476,12 @@ class DTAS::Player # :nodoc:
     @srv = @srv.close if @srv
     @sink_buf.close!
     @state_file.dump(self, true) if @state_file
+  end
+
+  def bypass_match!(dst_fmt, src_fmt)
+    @bypass.each do |k|
+      dst_fmt.__send__("#{k}=", src_fmt.__send__(k))
+    end
+    dst_fmt
   end
 end

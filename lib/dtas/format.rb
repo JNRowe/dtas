@@ -81,6 +81,14 @@ class DTAS::Format # :nodoc:
     ivars_to_hash(SIVS)
   end
 
+  def ==(other)
+    a = to_hash
+    b = other.to_hash
+    a["bits"] ||= bits_per_sample
+    b["bits"] ||= other.bits_per_sample
+    a == b
+  end
+
   # for the _decoded_ output
   def bits_per_sample
     return @bits if @bits

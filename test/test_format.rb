@@ -12,6 +12,11 @@ class TestFormat < Testcase
     assert_equal({}, hash)
   end
 
+  def test_equal
+    fmt = DTAS::Format.new
+    assert_equal fmt, fmt.dup
+  end
+
   def test_nonstandard
     fmt = DTAS::Format.new
     fmt.type = "s16"

@@ -295,6 +295,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
     tmp["current_inflight"] = @sink_buf.inflight
     tmp["format"] = @format.to_hash.delete_if { |_,v| v.nil? }
+    tmp["bypass"] = @bypass.sort!
     tmp["paused"] = @paused
     rg = @rg.to_hsh
     tmp["rg"] = rg unless rg.empty?
@@ -402,20 +403,28 @@ module DTAS::Player::ClientHandler # :nodoc:
         new_fmt.valid_type?(v) or return io.emit("ERR invalid file type")
         new_fmt.type = v
       when "channels", "bits", "rate"
-        rv = set_uint(io, kv, v, false) { |u| new_fmt.__send__("#{k}=", u) }
-        rv == true or return rv
+        case v
+        when "bypass"
+          @bypass << k unless @bypass.include?(k)
+        else
+          rv = set_uint(io, kv, v, false) { |u| new_fmt.__send__("#{k}=", u) }
+          rv == true or return rv
+          @bypass.delete(k)
+        end
       when "endian"
         new_fmt.valid_endian?(v) or return io.emit("ERR invalid endian")
         new_fmt.endian = v
       end
     end
 
+    bypass_match!(new_fmt, @current.format) if @current
+
     if new_fmt != @format
       restart_pipeline # calls __current_requeue
 
       # we must assign this after __current_requeue since __current_requeue
       # relies on the old @format for calculation
-      @format = new_fmt
+      format_update!(new_fmt)
     end
     io.emit("OK")
   end
