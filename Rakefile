@@ -1,71 +1,39 @@
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-load "./GIT-VERSION-GEN"
-manifest = "Manifest.txt"
-gitidx = File.stat(".git/index") rescue nil
-if ! File.exist?(manifest) || File.stat(manifest).mtime < gitidx.mtime
-  system("git ls-files > #{manifest}")
-  File.open(manifest, "a") do |fp|
-    fp.puts "NEWS"
-    fp.puts "lib/dtas/version.rb"
-
-    if system("make -C Documentation")
-      require 'fileutils'
-      FileUtils.rm_rf 'man'
-      if system("make -C Documentation gem-man")
-        `git ls-files -o man`.split(/\n/).each do |man|
-          fp.puts man
-        end
-      else
-        warn "failed to install manpages for distribution"
-      end
-    else
-      warn "failed to build manpages for distribution"
-    end
-  end
-  File.open("NEWS", "w") do |fp|
-    `git tag -l`.split(/\n/).reverse.each do |tag|
-      %r{\Av(.+)} =~ tag or next
-      version = $1
-      header, subject, body = `git cat-file tag #{tag}`.split(/\n\n/, 3)
-      header = header.split(/\n/)
-      tagger = header.grep(/\Atagger /)[0]
-      time = Time.at(tagger.split(/ /)[-2].to_i).utc
-      date = time.strftime("%Y-%m-%d")
-
-      fp.write("# #{version} / #{date}\n\n#{subject}\n\n#{body}")
-    end
-    fp.flush
-    if fp.size <= 5
-      fp.puts "Unreleased"
-    end
-
-    fp.write("\n# COPYRIGHT\n")
-    bdfl = 'Eric Wong <normalperson@yhbt.net>'
-    fp.puts "Copyright (C) 2013, #{bdfl} and all contributors"
-    fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
-  end
-end
-
-require 'hoe'
-Hoe.plugin :git
+require 'tempfile'
 include Rake::DSL
-
-h = Hoe.spec('dtas') do |p|
-  developer 'Eric Wong', 'e@80x24.org'
-
-  self.readme_file = 'README'
-  self.history_file = 'NEWS'
-  self.urls = %w(http://dtas.80x24.org/)
-  self.summary = x = File.readlines("README")[0].split(/\s+/)[1].chomp
-  self.description = self.paragraphs_of("README", 1)
-  # no public APIs, no HTML, either
-  self.need_rdoc = false
-  self.extra_rdoc_files = []
-  license "GPLv3+"
+task "NEWS" do
+  latest = nil
+  fp = Tempfile.new("NEWS", ".")
+  fp.sync = true
+  `git tag -l`.split(/\n/).reverse.each do |tag|
+    %r{\Av(.+)} =~ tag or next
+    version = $1
+    header, subject, body = `git cat-file tag #{tag}`.split(/\n\n/, 3)
+    header = header.split(/\n/)
+    tagger = header.grep(/\Atagger /)[0]
+    time = Time.at(tagger.split(/ /)[-2].to_i).utc
+    latest ||= time
+    date = time.strftime("%Y-%m-%d")
+    fp.puts "# #{version} / #{date}\n\n#{subject}"
+    if body && body.strip.size > 0
+      fp.puts "\n\n#{body}"
+    end
+    fp.puts
+  end
+  fp.puts "Unreleased" unless fp.size > 0
+  fp.puts "# COPYRIGHT"
+  bdfl = 'Eric Wong <normalperson@yhbt.net>'
+  fp.puts "Copyright (C) 2013, #{bdfl} and all contributors"
+  fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
+  fp.rewind
+  assert_equal fp.read, File.read("NEWS") rescue nil
+  fp.chmod 0644
+  File.rename(fp.path, "NEWS")
+  fp.close!
 end
 
-task :rsync_docs do
+task rsync_docs: "NEWS" do
   dest = ENV["RSYNC_DEST"] || "80x24.org:/srv/dtas/"
   top = %w(INSTALL NEWS README COPYING)
   files = []
@@ -73,9 +41,9 @@ task :rsync_docs do
   # git-set-file-times is distributed with rsync,
   # Also available at: http://yhbt.net/git-set-file-times
   # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
-  sh("git", "set-file-times", "Documentation", "examples")
+  sh("git", "set-file-times", "Documentation", "examples", *top)
 
-  Dir['Documentation/*.txt'].to_a.concat(top).each do |txt|
+  `git ls-files Documentation/*.txt`.split(/\n/).concat(top).each do |txt|
     gz = "#{txt}.gz"
     tmp = "#{gz}.#$$"
     sh("gzip -9 < #{txt} > #{tmp}")
@@ -89,41 +57,4 @@ task :rsync_docs do
 
   examples = `git ls-files examples`.split("\n")
   sh("rsync --chmod=Fugo=r -av #{examples.join(' ')} #{dest}/examples/")
-end
-
-task :coverage do
-  env = {
-    "COVERAGE" => "1",
-    "RUBYOPT" => "-r./test/helper",
-  }
-  File.open("coverage.dump", "w").close # clear
-  pid = Process.spawn(env, "rake")
-  _, status = Process.waitpid2(pid)
-  require './test/covshow'
-  exit status.exitstatus
-end
-
-base = "dtas-#{h.version}"
-task tarball: "pkg/#{base}" do
-  Dir.chdir("pkg") do
-    tgz = "#{base}.tar.gz"
-    tmp = "#{tgz}.#$$"
-    sh "tar cf - #{base} | gzip -9 > #{tmp}"
-    File.rename(tmp, tgz)
-  end
-end
-
-task "pkg/#{base}" => :fix_perms
-
-task :fix_perms do
-  sh "git ls-tree -r HEAD | awk '/^100644 / {print $NF}' | xargs chmod 644"
-  sh "git ls-tree -r HEAD | awk '/^100755 / {print $NF}' | xargs chmod 755"
-end
-
-task dist: [ :tarball, :package ] do
-  Dir.chdir("pkg") do
-    %w(dtas-linux dtas-mpris).each do |gem|
-      sh "gem build ../#{gem}.gemspec"
-    end
-  end
 end

@@ -1,7 +1,7 @@
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 all::
-
+pkg = dtas
 RUBY = ruby
 GIT-VERSION-FILE: .FORCE-GIT-VERSION-FILE
 	@./GIT-VERSION-GEN
@@ -10,10 +10,9 @@ lib := lib
 
 all:: test
 test_units := $(wildcard test/test_*.rb)
-test: test-unit
-test-unit: $(test_units)
+test: $(test_units)
 $(test_units):
-	$(RUBY) -w -I $(lib) $@ $(RUBY_TEST_OPTS)
+	$(RUBY) -w -I $(lib) $@ -v
 
 check-warnings:
 	@(for i in $$(git ls-files '*.rb'| grep -v '^setup\.rb$$'); \
@@ -26,5 +25,54 @@ coverage:
 	$(MAKE) check
 	$(RUBY) ./test/covshow.rb
 
-.PHONY: all .FORCE-GIT-VERSION-FILE test $(test_units)
-.PHONY: check-warnings
+pkggem := pkg/$(pkg)-$(VERSION).gem
+pkgtgz := pkg/$(pkg)-$(VERSION).tar.gz
+
+fix-perms:
+	git ls-tree -r HEAD | awk '/^100644 / {print $$NF}' | xargs chmod 644
+	git ls-tree -r HEAD | awk '/^100755 / {print $$NF}' | xargs chmod 755
+
+gem: $(pkggem)
+
+install-gem: $(pkggem)
+	gem install $(CURDIR)/$<
+
+$(pkggem): .gem-manifest
+	VERSION=$(VERSION) gem build $(pkg).gemspec
+	mkdir -p pkg
+	mv $(@F) $@
+
+pkg_extra := GIT-VERSION-FILE lib/dtas/version.rb NEWS
+NEWS:
+	rake -s $@
+gem-man:
+	$(MAKE) -C Documentation/ gem-man
+tgz-man:
+	$(MAKE) -C Documentation/ install-man mandir=$(CURDIR)/man
+.PHONY: tgz-man gem-man
+
+.gem-manifest: .manifest gem-man
+	(ls man/*.?; cat .manifest) | LC_ALL=C sort > $@+
+	cmp $@+ $@ || mv $@+ $@; rm -f $@+
+.tgz-manifest: .manifest tgz-man
+	(ls man/*/*; cat .manifest) | LC_ALL=C sort > $@+
+	cmp $@+ $@ || mv $@+ $@; rm -f $@+
+.manifest: NEWS fix-perms
+	rm -rf man
+	(git ls-files; \
+	 for i in $(pkg_extra); do echo $$i; done) | \
+	 LC_ALL=C sort > $@+
+	cmp $@+ $@ || mv $@+ $@; rm -f $@+
+$(pkgtgz): distdir = pkg/$(pkg)-$(VERSION)
+$(pkgtgz): .tgz-manifest
+	@test -n "$(distdir)"
+	$(RM) -r $(distdir)
+	mkdir -p $(distdir)
+	tar cf - $$(cat .tgz-manifest) | (cd $(distdir) && tar xf -)
+	cd pkg && tar cf - $(pkg)-$(VERSION) | gzip -9 > $(@F)+
+	mv $@+ $@
+
+package: $(pkgtgz) $(pkggem)
+
+.PHONY: all .FORCE-GIT-VERSION-FILE test $(test_units) NEWS
+.PHONY: check-warnings fix-perms
