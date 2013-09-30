@@ -605,7 +605,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "next"
       _tl_skip
       io.emit("OK")
-    when "previous"
+    when "prev"
       @tl.previous!
       _tl_skip
       io.emit("OK")

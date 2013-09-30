@@ -31,7 +31,7 @@ HH:MM:SS.FRAC format.
 * reto REGEXP [POS] - play first track with path matching REGEXP immediately,
 optionally seek to POS.  POS should be a timestamp in HH:MM:SS.FRAC format.
 * next - play the next track in the tracklist
-* previous - play the previous track in the tracklist
+* prev - play the previous track in the tracklist
 * repeat 1 - repeat the current track
 * repeat false - disable repeat
 * repeat true - enable repeat of the whole tracklist
@@ -54,7 +54,7 @@ to skip forward in the tracklist
 
 to skip backwards in the tracklist
 
-        $ dtas-tl previous
+        $ dtas-tl prev
 
 # ENVIRONMENT
 
