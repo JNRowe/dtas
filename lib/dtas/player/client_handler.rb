@@ -654,9 +654,8 @@ module DTAS::Player::ClientHandler # :nodoc:
   def cue_handler(io, msg)
     cur = @current
     if cur.respond_to?(:cuebreakpoints)
-      offset = nil
       bp = cur.cuebreakpoints
-      case cmd = msg[0]
+      case msg[0]
       when nil
         tmp = { "infile" => cur.infile, "cue" => bp.map { |ci| ci.to_hash } }
         io.emit(tmp.to_yaml)
