@@ -585,6 +585,9 @@ module DTAS::Player::ClientHandler # :nodoc:
       offset = msg.shift # may be nil
       if @tl.go_to(track_id.to_i, offset)
         _tl_skip
+        if !(@current || @queue[0] || @paused)
+          next_source(_next)
+        end
         io.emit("OK")
       else
         io.emit("MISSING")
