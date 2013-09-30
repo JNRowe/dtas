@@ -351,6 +351,16 @@ module DTAS::Player::ClientHandler # :nodoc:
     @paused ? do_play : do_pause
   end
 
+  def seek_internal(cur, offset)
+    if cur.requeued
+      @queue[0][1] = offset
+    else
+      @queue.unshift([ cur.infile, offset ])
+      cur.requeued = true
+      __buf_reset(cur.dst) # trigger EPIPE
+    end
+  end
+
   def do_seek(io, offset)
     if @current
       if @current.respond_to?(:infile)
@@ -364,13 +374,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         rescue ArgumentError
           return io.emit("ERR bad time format")
         end
-        if @current.requeued
-          @queue[0][1] = offset
-        else
-          @queue.unshift([ @current.infile, offset ])
-          @current.requeued = true
-          __buf_reset(@current.dst) # trigger EPIPE
-        end
+        seek_internal(@current, offset)
       else
         return io.emit("ERR unseekable")
       end
@@ -605,6 +609,67 @@ module DTAS::Player::ClientHandler # :nodoc:
       @tl.previous!
       _tl_skip
       io.emit("OK")
+    end
+  end
+
+  def __bp_prev_next(io, msg, cur, bp)
+    case type = msg[1]
+    when nil, "track"
+      bp.keep_if { |ci| ci.track? }
+    when "pregap"
+      bp.keep_if { |ci| ci.pregap? }
+    when "subindex" # any subindex
+      bp.keep_if { |ci| ci.subindex? }
+    when /\A\d+\z/ # exact subindex match
+      si = type.to_i
+      bp.keep_if { |ci| ci.index == si }
+    when "any" # anything goes
+    else
+      return io.emit("INVALID TYPE")
+    end
+    fmt = cur.format
+    case msg[0]
+    when "next"
+      ds = __current_decoded_samples
+      bp.each do |ci|
+        next if ci.offset_samples(fmt) < ds
+        seek_internal(cur, ci.offset)
+        return io.emit("OK")
+      end
+      # go to the next (real) track if not found
+      __current_drop
+    when "prev"
+      os = cur.offset_samples # where we currently started
+      bp.reverse_each do |ci|
+        next if ci.offset_samples(fmt) >= os
+        seek_internal(cur, ci.offset)
+        return io.emit("OK")
+      end
+      # offset may be nil/zero if we couldn't find a previous breakpoint
+      seek_internal(cur, '0')
+    end
+    io.emit("OK")
+  end
+
+  def cue_handler(io, msg)
+    cur = @current
+    if cur.respond_to?(:cuebreakpoints)
+      offset = nil
+      bp = cur.cuebreakpoints
+      case cmd = msg[0]
+      when nil
+        tmp = { "infile" => cur.infile, "cue" => bp.map { |ci| ci.to_hash } }
+        io.emit(tmp.to_yaml)
+      when "next", "prev"
+        return __bp_prev_next(io, msg, cur, bp)
+      when "goto"
+        index = msg[1] or return io.emit("NOINDEX")
+        ci = bp[index.to_i] or return io.emit("BADINDEX")
+        seek_internal(cur, ci.offset)
+        return io.emit("OK")
+      end
+    else
+      io.emit("NOCUE")
     end
   end
 end

@@ -5,6 +5,7 @@ require_relative '../source'
 require_relative '../command'
 require_relative '../format'
 require_relative '../process'
+require_relative '../cue_index'
 
 module DTAS::Source::File # :nodoc:
   attr_reader :infile
@@ -33,6 +34,7 @@ module DTAS::Source::File # :nodoc:
     @offset = offset
     @comments = nil
     @samples = nil
+    @cuebp = nil
     @rg = nil
   end
 
@@ -89,5 +91,32 @@ module DTAS::Source::File # :nodoc:
   def to_state_hash
     defaults = source_defaults # see dtas/source/{av,sox}.rb
     to_source_cat.delete_if { |k,v| v == defaults[k] }
+  end
+
+  def cuebreakpoints
+    rv = @cuebp and return rv
+    rv = []
+    begin
+      str = qx(@env, %W(metaflac --export-cuesheet-to=- #@infile))
+    rescue
+      return rv
+    end
+    str.scan(/^    INDEX (\d+) (\S+)/) do |m|
+      index = m[0]
+      time = m[1].dup
+      case time
+      when /\A\d+\z/
+        time << "s" # sample count (flac 1.3.0)
+      else # HH:MM:SS:FF
+        # FF/75 CDDA frames per second, convert to fractional seconds
+        time.sub!(/:(\d+)\z/, "")
+        frames = $1.to_f
+        if frames > 0
+          time = sprintf("#{time}.%0.6g", frames / 75.0)
+        end
+      end
+      rv << DTAS::CueIndex.new(index, time)
+    end
+    @cuebp = rv
   end
 end

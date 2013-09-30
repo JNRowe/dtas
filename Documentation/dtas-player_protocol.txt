@@ -80,6 +80,23 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * clear - clear current queue (current track/command continues running)
   PENDING: this may be renamed to "queue clear" or "queue-clear"
 
+* cue - display the index/offsets of the file based on the embedded
+  cue sheet, if any
+
+* cue next - skip to the next section of the track based on the
+  embedded cue sheet.  This may skip to the next track if there is
+  no embedded cue sheet or if playing the last (embedded) track
+
+* cue prev - skip to the previous section of the track based on
+  the embedded cue sheet.  This may just seek to the beginning
+  if there is no embedded cue sheet or if we are playing the first
+  (embedded) track.
+
+* cue goto INTEGER - go to the embedded track with cue index denoted
+  by INTEGER (0 is first track as returned by "cue").  Negative
+  values of INTEGER allows selecting track relative to the last
+  track (-1 is the last track, -2 is the penultimate, and so on).
+
 * current - output information about the currently-playing track/command
   in YAML.  The structure of this is unstable and subject to change.
 

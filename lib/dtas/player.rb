@@ -206,6 +206,8 @@ class DTAS::Player # :nodoc:
       io.emit("OK")
     when "rg"
       rg_handler(io, msg)
+    when "cue"
+      cue_handler(io, msg)
     when "skip"
       skip_handler(io, msg)
     when "sink"

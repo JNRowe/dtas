@@ -111,4 +111,47 @@ class TestSource < Testcase
       tmp.unlink
     end
   end
+
+  def test_flac_cuesheet_cdda
+    return if `which metaflac`.strip.size == 0
+    tmp = Tempfile.new(%W(tmp .flac))
+    x(%W(sox -n -r44100 -b16 -c2 #{tmp.path} synth 5 pluck vol -1dB))
+    cue = Tempfile.new(%W(tmp .cue))
+    cue.puts %Q(FILE "ignored.flac" FLAC)
+    cue.puts "  TRACK 01 AUDIO"
+    cue.puts "    INDEX 01 00:00:00"
+    cue.puts "  TRACK 02 AUDIO"
+    cue.puts "    INDEX 01 00:01:40"
+    cue.puts "  TRACK 03 AUDIO"
+    cue.puts "    INDEX 01 00:03:00"
+    cue.flush
+    x(%W(metaflac --import-cuesheet-from=#{cue.path} #{tmp.path}))
+    source = DTAS::Source::Sox.new.try(tmp.path)
+    offsets = source.cuebreakpoints.map(&:offset)
+    assert_equal %w(00:00 00:01.0.533333 00:03), offsets
+    source.cuebreakpoints.all?(&:track?)
+  end
+
+  def test_flac_cuesheet_48
+    return if `which metaflac`.strip.size == 0
+    ver = `flac --version`.split(/ /)[1].strip
+    ver.to_f >= 1.3 or return # flac 1.3.0 fixed non-44.1k rate support
+
+    tmp = Tempfile.new(%W(tmp .flac))
+    x(%W(sox -n -r48000 -c2 -b24 #{tmp.path} synth 5 pluck vol -1dB))
+    cue = Tempfile.new(%W(tmp .cue))
+    cue.puts %Q(FILE "ignored.flac" FLAC)
+    cue.puts "  TRACK 01 AUDIO"
+    cue.puts "    INDEX 01 00:00:00"
+    cue.puts "  TRACK 02 AUDIO"
+    cue.puts "    INDEX 01 00:01:00"
+    cue.puts "  TRACK 03 AUDIO"
+    cue.puts "    INDEX 01 00:03:00"
+    cue.flush
+    x(%W(metaflac --import-cuesheet-from=#{cue.path} #{tmp.path}))
+    source = DTAS::Source::Sox.new.try(tmp.path)
+    offsets = source.cuebreakpoints.map(&:offset)
+    assert_equal %w(0s 48000s 144000s), offsets
+    source.cuebreakpoints.all?(&:track?)
+  end
 end
