@@ -32,7 +32,7 @@ Key bindings are inspired partially by mplayer(1)
 - 9/0 - decrease/increase ReplayGain preamp
 - 'f'/'F' - decrease/increase ReplayGain fallback_gain value
 - 'r'/'R' - cycle forward/backwards through ReplayGain modes
-- Ctrl-C - exit dtas-console
+- 'q'/Ctrl-C - exit dtas-console
 
 # ENVIRONMENT
 

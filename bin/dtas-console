@@ -172,6 +172,7 @@ begin
         case key = Curses.getch
         when "j" then c.req_ok("seek -5")
         when "k" then c.req_ok("seek +5")
+        when "q" then exit(0)
         when Curses::KEY_DOWN then c.req_ok("seek -60")
         when Curses::KEY_UP then c.req_ok("seek +60")
         when Curses::KEY_LEFT then c.req_ok("seek -10")
