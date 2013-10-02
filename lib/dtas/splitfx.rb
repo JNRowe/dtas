@@ -167,6 +167,12 @@ class DTAS::SplitFX # :nodoc:
   def spawn(target, t, opts)
     target = @targets[target] || generic_target(target)
     outfmt = target["format"]
+
+    # default format:
+    unless outfmt
+      outfmt = @infmt.dup
+      outfmt.type = "flac"
+    end
     env = outfmt.to_env
 
     # set very high quality resampling if using 24-bit or higher output
