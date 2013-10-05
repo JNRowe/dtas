@@ -552,7 +552,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       _tl_skip if set_as_current
 
       # start playing if we're the only track
-      if @tl.size == 1 && !(@current || @queue[0] || @paused)
+      if @tl.size == 1 && ! need_to_queue
         next_source(_next)
       end
       io.emit("#{track_id}")
@@ -589,9 +589,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       offset = msg.shift # may be nil
       if @tl.go_to(track_id.to_i, offset)
         _tl_skip
-        if !(@current || @queue[0] || @paused)
-          next_source(_next)
-        end
+        next_source(_next) unless need_to_queue
         io.emit("OK")
       else
         io.emit("MISSING")

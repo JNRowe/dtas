@@ -165,9 +165,13 @@ class DTAS::Player # :nodoc:
     rv
   end
 
+  def need_to_queue
+    @current || @queue[0] || @paused
+  end
+
   def enq_handler(io, msg)
     # check @queue[0] in case we have no sinks
-    if @current || @queue[0] || @paused
+    if need_to_queue
       @queue << msg
     else
       next_source(msg)
@@ -177,7 +181,7 @@ class DTAS::Player # :nodoc:
 
   def do_enq_head(io, msg)
     # check @queue[0] in case we have no sinks
-    if @current || @queue[0] || @paused
+    if need_to_queue
       @queue.unshift(msg)
     else
       next_source(msg)
