@@ -344,7 +344,12 @@ module DTAS::Player::ClientHandler # :nodoc:
     # no wall, next_source will wall on new track
     @paused = false
     return if @current
-    next_source(_next)
+    n = _next
+    unless n
+      @tl.reset
+      n = _next
+    end
+    next_source(n)
   end
 
   def do_play_pause

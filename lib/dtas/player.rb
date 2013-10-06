@@ -419,7 +419,6 @@ class DTAS::Player # :nodoc:
 
   def player_idle
     stop_sinks if @sink_buf.inflight == 0
-    @tl.reset unless @paused
     wall("idle")
   end
 
