@@ -22,6 +22,11 @@ class DTAS::Pipe < IO # :nodoc:
     def pipe_size=(_)
     end
   end
+
+  # avoid syscall, we never change IO#nonblock= directly
+  def nonblock?
+    false
+  end
 end
 
 # for non-blocking sinks, this avoids extra fcntl(..., F_GETFL) syscalls
