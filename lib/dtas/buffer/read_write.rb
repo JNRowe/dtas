@@ -56,7 +56,8 @@ module DTAS::Buffer::ReadWrite # :nodoc:
     bytes = bytes > MAX_AT_ONCE ? MAX_AT_ONCE : bytes
     buf = _rbuf
     @to_io.read(bytes, buf)
-    @bytes_xfer += buf.bytesize
+    n = buf.bytesize
+    @bytes_xfer += n
 
     targets.delete_if do |dst|
       begin
