@@ -51,11 +51,7 @@ class TestBuffer < Testcase
   def test_broadcast_1
     buf = new_buffer
     r, w = IO.pipe
-    assert_equal :wait_readable, buf.broadcast([w])
-    assert_equal 0, buf.bytes_xfer
     buf.wr.write "HIHI"
-    assert_equal :wait_readable, buf.broadcast([w])
-    assert_equal 4, buf.bytes_xfer
     assert_equal :wait_readable, buf.broadcast([w])
     assert_equal 4, buf.bytes_xfer
     tmp = [w]
@@ -90,20 +86,6 @@ class TestBuffer < Testcase
     a[1].nonblock = false
     b[0].read(b[0].nread)
     b[1].write(max)
-    t = Thread.new do
-      sleep 0.005
-      [ a[0].read(max.size).size, b[0].read(max.size).size ]
-    end
-    assert_equal 5, buf.__broadcast_tee(blocked, [a[1], b[1]], 5)
-    assert_equal [a[1]], blocked
-    assert_equal [ max.size, max.size ], t.value
-    b[0].close
-    tmp = [a[1], b[1]]
-
-    newerr = tmperr { assert_equal 5, buf.__broadcast_tee(blocked, tmp, 5) }
-    assert_equal [a[1]], blocked
-    assert_match(%r{dropping}, newerr.string)
-    assert_equal [a[1]], tmp
   end
 
   def test_broadcast
@@ -115,8 +97,6 @@ class TestBuffer < Testcase
     assert_equal 5, buf.bytes_xfer
     assert_equal "HELLO", a[0].read(5)
     assert_equal "HELLO", b[0].read(5)
-    assert_equal :wait_readable, buf.broadcast([a[1], b[1]])
-    assert_equal 5, buf.bytes_xfer
 
     return unless b[1].respond_to?(:pipe_size)
 

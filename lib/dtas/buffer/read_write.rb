@@ -17,25 +17,30 @@ module DTAS::Buffer::ReadWrite # :nodoc:
   def discard(bytes)
     buf = _rbuf
     begin
-      @to_io.read(bytes, buf) or break # EOF
+      @to_io.readpartial(bytes, buf)
       bytes -= buf.bytesize
+    rescue EOFError
+      return
     end until bytes == 0
   end
 
   # always block when we have a single target
-  def broadcast_one(targets, bytes)
+  def broadcast_one(targets)
     buf = _rbuf
-    @to_io.read(bytes, buf)
+    @to_io.readpartial(MAX_AT_ONCE, buf)
     n = targets[0].write(buf) # IO#write has write-in-full behavior
     @bytes_xfer += n
     :wait_readable
+  rescue EOFError
+    nil
   rescue Errno::EPIPE, IOError => e
     __dst_error(targets[0], e)
     targets.clear
     nil # do not return error here, we already spewed an error message
   end
 
-  def broadcast_inf(targets, bytes)
+  def broadcast_inf(targets)
+    bytes = inflight
     nr_nb = targets.count { |sink| sink.nonblock? }
     if nr_nb == 0 || nr_nb == targets.size
       # if all targets are full, don't start until they're all writable

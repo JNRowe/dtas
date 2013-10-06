@@ -8,6 +8,7 @@ require_relative '../pipe'
 
 module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
+  MAX_AT_ONCE_1 = 65536
   MAX_SIZE = File.read("/proc/sys/fs/pipe-max-size").to_i
   DEVNULL = File.open("/dev/null", "r+")
   F_MOVE = IO::Splice::F_MOVE
@@ -28,9 +29,9 @@ module DTAS::Buffer::Splice # :nodoc:
     IO.splice(@to_io, nil, DEVNULL, nil, bytes)
   end
 
-  def broadcast_one(targets, bytes)
+  def broadcast_one(targets)
     # single output is always non-blocking
-    s = IO.trysplice(@to_io, nil, targets[0], nil, bytes, F_MOVE)
+    s = IO.trysplice(@to_io, nil, targets[0], nil, MAX_AT_ONCE_1, F_MOVE)
     if Symbol === s
       targets # our one and only target blocked on write
     else
@@ -48,11 +49,14 @@ module DTAS::Buffer::Splice # :nodoc:
     most_teed = 0
     targets.delete_if do |dst|
       begin
-        t = dst.nonblock? ?
+        t = (dst.nonblock? || most_teed == 0) ?
             IO.trytee(@to_io, dst, chunk_size) :
             IO.tee(@to_io, dst, chunk_size, WAITALL)
         if Integer === t
-          most_teed = t if t > most_teed
+          if t > most_teed
+            chunk_size = t if most_teed == 0
+            most_teed = t
+          end
         else
           blocked << dst
         end
@@ -65,7 +69,7 @@ module DTAS::Buffer::Splice # :nodoc:
     most_teed
   end
 
-  def broadcast_inf(targets, bytes)
+  def broadcast_inf(targets)
     if targets.none? { |sink| sink.nonblock? }
       # if all targets are blocking, don't start until they're all writable
       r = IO.select(nil, targets, nil, 0) or return targets
@@ -80,9 +84,10 @@ module DTAS::Buffer::Splice # :nodoc:
     end
 
     # don't pin too much on one target
-    bytes = bytes > MAX_AT_ONCE ? MAX_AT_ONCE : bytes
-
+    bytes = MAX_AT_ONCE
     last = targets.pop # we splice to the last one, tee to the rest
+
+    # this may return zero if all targets were non-blocking
     most_teed = __broadcast_tee(blocked, targets, bytes)
 
     # don't splice more than the largest amount we successfully teed
@@ -90,7 +95,7 @@ module DTAS::Buffer::Splice # :nodoc:
 
     begin
       targets << last
-      if last.nonblock?
+      if last.nonblock? || most_teed == 0
         s = IO.trysplice(@to_io, nil, last, nil, bytes, F_MOVE)
         if Symbol === s
           blocked << last

@@ -47,16 +47,13 @@ class DTAS::Buffer # :nodoc:
   # - some type of StandardError
   # - nil
   def broadcast(targets)
-    bytes = inflight
-    return :wait_readable if 0 == bytes # spurious wakeup
-
     case targets.size
     when 0
       :ignore # this will pause decoders
     when 1
-      broadcast_one(targets, bytes)
+      broadcast_one(targets)
     else # infinity
-      broadcast_inf(targets, bytes)
+      broadcast_inf(targets)
     end
   end
 
