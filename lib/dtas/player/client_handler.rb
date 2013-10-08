@@ -554,12 +554,11 @@ module DTAS::Player::ClientHandler # :nodoc:
       rescue ArgumentError => e
         return io.emit("ERR #{e.message}")
       end
-      _tl_skip if set_as_current
 
-      # start playing if we're the only track
-      if @tl.size == 1 && ! need_to_queue
-        next_source(_next)
-      end
+      _tl_skip if set_as_current # if @current is playing, it will restart soon
+
+      # start playing if we're currently idle
+      next_source(_next) unless need_to_queue
       io.emit("#{track_id}")
     when "repeat"
       case msg.shift
