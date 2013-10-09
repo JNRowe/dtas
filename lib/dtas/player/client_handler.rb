@@ -580,7 +580,13 @@ module DTAS::Player::ClientHandler # :nodoc:
         _tl_skip
       end
 
-      io.emit(@tl.remove_track(track_id) ? "OK" : "MISSING")
+      if @tl.remove_track(track_id)
+        # drop it from the queue, too, in case it just got requeued or paused
+        @queue.delete_if { |t| Array === t && t[0].object_id == track_id }
+        io.emit("OK")
+      else
+        io.emit("MISSING")
+      end
     when "get"
       res = @tl.get_tracks(msg.map! { |i| i.to_i })
       res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
