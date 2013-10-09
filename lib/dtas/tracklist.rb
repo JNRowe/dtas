@@ -101,11 +101,15 @@ class DTAS::Tracklist # :nodoc:
 
   def remove_track(track_id)
     by_track_id = _track_id_map
-    if idx = by_track_id.delete(track_id)
-      @list[idx] = nil
-      @list.compact!
-      # TODO: what do we do with @pos (and the currently-playing track)
+    idx = by_track_id.delete(track_id) or return false
+    @list[idx] = nil
+    @list.compact!
+    len = @list.size
+    if @pos >= len
+      @pos = len == 0 ? TL_DEFAULTS["pos"] : len
     end
+    @goto_pos = @goto_pos = nil # TODO: reposition?
+    true
   end
 
   def go_to(track_id, offset_hhmmss = nil)
