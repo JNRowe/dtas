@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# TODO
+# - option parsing: sox effects, stats effect options
+# - support piping out to external processes
+# - configurable output formatting
+# - Sequel/SQLite support
+require 'dtas/partstats'
+infile = ARGV[0] or abort "usage: #$0 INFILE"
+ps = DTAS::PartStats.new(infile)
+opts = {
+  jobs: `nproc 2>/dev/null || echo 2`.to_i
+}
+stats = ps.run(opts)
+
+headers = ps.key_idx.to_a
+headers = headers.sort_by! { |(n,i)| i }.map! { |(n,_)| n }
+width = ps.key_width
+print "    time "
+puts(headers.map do |h|
+  cols = width[h]
+  sprintf("% #{(cols * 6)+cols-1}s", h.tr(' ','_'))
+end.join(" | "))
+
+stats.each do |row|
+  trim_part = row.shift
+  print "#{trim_part.hhmmss} "
+  puts(row.map do |group|
+    group.map do |f|
+      case f
+      when Float
+        sprintf("% 6.2f", f)
+      else
+        sprintf("% 6s", f)
+      end
+    end.join(" ")
+  end.join(" | "))
+end
