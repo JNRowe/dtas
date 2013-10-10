@@ -94,7 +94,7 @@ class DTAS::Tracklist # :nodoc:
       if set_as_current
         @pos = idx + 1
       else
-        @pos += 1 if @pos >= idx
+        @pos += 1 if @pos > idx
       end
     else # nil = first_track
       @list.unshift(track)
