@@ -91,10 +91,18 @@ class DTAS::Tracklist # :nodoc:
       idx = by_track_id[after_track_id] or
         raise ArgumentError, "after_track_id invalid"
       @list[idx, 1] = [ @list[idx], track ]
-      @pos = idx + 1 if set_as_current
+      if set_as_current
+        @pos = idx + 1
+      else
+        @pos += 1 if @pos >= idx
+      end
     else # nil = first_track
       @list.unshift(track)
-      @pos = 0 if set_as_current
+      if set_as_current
+        @pos = 0
+      else
+        @pos += 1 if @pos >= 0
+      end
     end
     track.object_id
   end
