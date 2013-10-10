@@ -134,27 +134,12 @@ class DTAS::SplitFX # :nodoc:
     load_tracks!(hash)
   end
 
-  # FIXME: duplicate from dtas/source/sox
-  def precision
-    qx(@env, %W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
-  rescue # fallback to parsing the whole output
-    s = qx(@env, %W(soxi #@infile), err: "/dev/null")
-    s =~ /Precision\s+:\s*(\d+)-bit/n
-    v = $1.to_i
-    return v if v > 0
-    raise TypeError, "could not determine precision for #@infile"
-  end
-
   def load_input!(hash)
     @infile = hash["infile"] or raise ArgumentError, "'infile' not specified"
     if infmt = hash["infmt"] # rarely needed
       @infmt = DTAS::Format.load(infmt)
     else # likely
-      @infmt = DTAS::Format.new
-      @infmt.channels = qx(@env, %W(soxi -c #@infile)).to_i
-      @infmt.rate = qx(@env, %W(soxi -r #@infile)).to_i
-      @infmt.bits ||= precision
-      # we don't care for type
+      @infmt = DTAS::Format.from_file(@env, @infile)
     end
   end
 

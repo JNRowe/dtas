@@ -35,6 +35,32 @@ class DTAS::Format # :nodoc:
     fmt
   end
 
+  # some of these are sox-only, but that's what we mainly care about
+  # for audio-editing.  We only use ffmpeg/avconv for odd files during
+  # playback.
+
+  extend DTAS::Process
+
+  def self.precision(env, infile)
+    # sox.git f4562efd0aa3
+    qx(env, %W(soxi -p #{infile}), err: "/dev/null").to_i
+  rescue # fallback to parsing the whole output
+    s = qx(env, %W(soxi #{infile}), err: "/dev/null")
+    s =~ /Precision\s+:\s*(\d+)-bit/n
+    v = $1.to_i
+    return v if v > 0
+    raise TypeError, "could not determine precision for #{infile}"
+  end
+
+  def self.from_file(env, infile)
+    fmt = new
+    fmt.channels = qx(env, %W(soxi -c #{infile})).to_i
+    fmt.type = qx(env, %W(soxi -t #{infile})).strip
+    fmt.rate = qx(env, %W(soxi -r #{infile})).to_i
+    fmt.bits ||= precision(env, infile)
+    fmt
+  end
+
   def initialize
     FORMAT_DEFAULTS.each do |k,v|
       instance_variable_set("@#{k}", v)

@@ -47,26 +47,8 @@ class DTAS::Source::Sox # :nodoc:
     source_file_dup(infile, offset)
   end
 
-  def precision
-    qx(@env, %W(soxi -p #@infile), err: "/dev/null").to_i # sox.git f4562efd0aa3
-  rescue # fallback to parsing the whole output
-    s = qx(@env, %W(soxi #@infile), err: "/dev/null")
-    s =~ /Precision\s+:\s*(\d+)-bit/n
-    v = $1.to_i
-    return v if v > 0
-    raise TypeError, "could not determine precision for #@infile"
-  end
-
   def format
-    @format ||= begin
-      fmt = DTAS::Format.new
-      path = @infile
-      fmt.channels = qx(@env, %W(soxi -c #{path})).to_i
-      fmt.type = qx(@env, %W(soxi -t #{path})).strip
-      fmt.rate = qx(@env, %W(soxi -r #{path})).to_i
-      fmt.bits ||= precision
-      fmt
-    end
+    @format ||= DTAS::Format.from_file(@env, @infile)
   end
 
   # This is the number of samples according to the samples in the source
