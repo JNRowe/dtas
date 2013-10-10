@@ -572,21 +572,16 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "remove"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
       track_id = track_id.to_i
-      cur = @tl.cur_track
+      @tl.remove_track(track_id) or return io.emit("MISSING")
 
       # skip if we're removing the currently playing track
-      if cur.object_id == track_id && @current &&
-             @current.respond_to?(:infile) && @current.infile == cur
+      if @current && @current.respond_to?(:infile) &&
+         @current.infile.object_id == track_id
         _tl_skip
       end
-
-      if @tl.remove_track(track_id)
-        # drop it from the queue, too, in case it just got requeued or paused
-        @queue.delete_if { |t| Array === t && t[0].object_id == track_id }
-        io.emit("OK")
-      else
-        io.emit("MISSING")
-      end
+      # drop it from the queue, too, in case it just got requeued or paused
+      @queue.delete_if { |t| Array === t && t[0].object_id == track_id }
+      io.emit("OK")
     when "get"
       res = @tl.get_tracks(msg.map! { |i| i.to_i })
       res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
