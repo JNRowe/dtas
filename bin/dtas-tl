@@ -56,7 +56,7 @@ when "reto"
   re = ignorecase ? %r{#{re}}i : %r{#{re}}
   get_track_ids(c).each do |track_id|
     res = c.req("tl get #{track_id}")
-    res.sub!(/\A1 /, '')
+    res.sub!(/\A1 \d+=/, '')
     if re =~ res
       req = %W(tl goto #{track_id})
       req << time if time
