@@ -1,0 +1,30 @@
+# To the extent possible under law, Eric Wong has waived all copyright and
+# related or neighboring rights to this example.
+# Note: be sure to update test/test_trimfx.rb if you change this,
+# test_trimfx.rb relies on this.
+---
+infile: foo.flac
+env:
+  PATH: $PATH
+  SOX_OPTS: $SOX_OPTS -R
+  I2: second.flac
+  I3: third.flac
+comments:
+  ARTIST: John Smith
+  ALBUM: Hello World
+  YEAR: 2013
+track_start: 1
+effects:
+# the fade parameter sets the default fade for every subsequent effect
+- fade=t1,t1;t1,t1 # fade-out-orig,fade-in-new;fade-out-orig;fade-in-new
+
+# the following commands are equivalent
+- trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX vol -6dB $FADEFX
+- trim 52 1 sox vol -6dB # shorthand
+
+# as are the following (for little endian machines)
+- trim 52 1 eca -eadb:-6
+- trim 52 1 sh sox $SOXIN $SOX2ECA $TRIMFX | ecasound $ECAFMT
+  -i stdin -o stdout -eadb:-6 | sox $ECA2SOX - $SOXOUT $FADEFX
+# SOX2ECA='-tf32 -c$CHANNELS -r$RATE'
+# ECAFMT='-f32_le,$CHANNELS,$RATE
