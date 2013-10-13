@@ -17,7 +17,7 @@ class DTAS::UNIXClient # :nodoc:
   end
 
   def initialize(path = self.class.default_path)
-    @to_io = Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
+    @to_io = Socket.new(:UNIX, :SEQPACKET, 0)
     @to_io.connect(Socket.pack_sockaddr_un(path))
   end
 

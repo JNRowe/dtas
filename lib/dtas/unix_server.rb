@@ -26,13 +26,13 @@ class DTAS::UNIXServer # :nodoc:
     # lock down access by default, arbitrary commands may run as the
     # same user dtas-player runs as:
     old_umask = File.umask(0077)
-    @to_io = Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
+    @to_io = Socket.new(:UNIX, :SEQPACKET, 0)
     addr = Socket.pack_sockaddr_un(path)
     begin
       @to_io.bind(addr)
     rescue Errno::EADDRINUSE
       # maybe we have an old path leftover from a killed process
-      tmp = Socket.new(:AF_UNIX, :SOCK_SEQPACKET, 0)
+      tmp = Socket.new(:UNIX, :SEQPACKET, 0)
       begin
         tmp.connect(addr)
         raise RuntimeError, "socket `#{path}' is in use", []
