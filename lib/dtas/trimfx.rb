@@ -22,7 +22,13 @@ class DTAS::TrimFX
 
   def to_sox_arg(format)
     if @tbeg && @tlen
-      %W(trim #{@tbeg * format.rate}s #{@tlen * format.rate}s)
+      beg = @tbeg * format.rate
+      len = @tlen * format.rate
+      %W(trim #{beg.round}s #{len.round}s)
+    elsif @tbeg
+      return [] if @tbeg == 0
+      beg = @tbeg * format.rate
+      %W(trim #{beg.round}s)
     else
       []
     end
@@ -55,11 +61,15 @@ class DTAS::TrimFX
 
   def parse_trim!(args)
     tbeg = parse_time(args.shift)
-    tlen = args.shift
-    is_stop_time = tlen.sub!(/\A=/, "") ? true : false
-    tlen = parse_time(tlen)
-    if is_stop_time
-      tlen = tlen - tbeg
+    if args[0] =~ /\A=?[\d\.]+\z/
+      tlen = args.shift
+      is_stop_time = tlen.sub!(/\A=/, "") ? true : false
+      tlen = parse_time(tlen)
+      if is_stop_time
+        tlen = tlen - tbeg
+      end
+    else
+      tlen = nil
     end
     @tbeg = tbeg
     @tlen = tlen

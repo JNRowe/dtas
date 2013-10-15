@@ -2,6 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require './test/helper'
 require 'dtas/trimfx'
+require 'dtas/format'
 require 'yaml'
 
 class TestTrimFX < Testcase
@@ -25,11 +26,20 @@ class TestTrimFX < Testcase
     tfx = DTAS::TrimFX.new(%w(all))
     assert_equal 0, tfx.tbeg
     assert_nil tfx.tlen
+    assert_equal [], tfx.to_sox_arg(DTAS::Format.new)
   end
 
   def test_time
     tfx = DTAS::TrimFX.new(%w(trim 2:30 3.1))
     assert_equal 150, tfx.tbeg
     assert_equal 3.1, tfx.tlen
+  end
+
+  def test_to_sox_arg
+    tfx = DTAS::TrimFX.new(%w(trim 1 0.5))
+    assert_equal %w(trim 44100s 22050s), tfx.to_sox_arg(DTAS::Format.new)
+
+    tfx = DTAS::TrimFX.new(%w(trim 1 foo bar))
+    assert_equal %w(trim 44100s), tfx.to_sox_arg(DTAS::Format.new)
   end
 end
