@@ -1,11 +1,15 @@
 # Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
+require_relative 'parse_time'
 require 'shellwords'
 
 class DTAS::TrimFX
+  include DTAS::ParseTime
+
   attr_reader :tbeg
   attr_reader :tlen
+  attr_reader :cmd
 
   def initialize(args)
     args = args.dup
@@ -18,6 +22,28 @@ class DTAS::TrimFX
     else
       raise ArgumentError, "#{args.inspect} not understood"
     end
+    case tmp =  args.shift
+    when "sh" then @cmd = args
+    when "sox" then tfx_sox(args)
+    when "eca" then tfx_eca(args)
+    when nil
+      @cmd = []
+    else
+      raise ArgumentError, "unknown effect type: #{tmp}"
+    end
+  end
+
+  def tfx_sox(args)
+    @cmd = %w(sox $SOXIN $SOXOUT $TRIMFX)
+    @cmd.concat(args)
+    @cmd.concat(%w($FADEFX))
+  end
+
+  def tfx_eca(args)
+    @cmd = %w(sox $SOXIN $SOX2ECA $TRIMFX)
+    @cmd.concat(%w(| ecasound $ECAFMT -i stdin -o stdout))
+    @cmd.concat(args)
+    @cmd.concat(%w(| sox $ECA2SOX - $SOXOUT $FADEFX))
   end
 
   def to_sox_arg(format)
@@ -31,31 +57,6 @@ class DTAS::TrimFX
       %W(trim #{beg.round}s)
     else
       []
-    end
-  end
-
-  def parse_time(tbeg)
-    case tbeg
-    when /\A\d+\z/
-      tbeg.to_i
-    when /\A[\d\.]+\z/
-      tbeg.to_f
-    when /\A[:\d\.]+\z/
-      hhmmss = tbeg.dup
-      rv = hhmmss.sub!(/\.(\d+)\z/, "") ? "0.#$1".to_f : 0
-
-      # deal with HH:MM:SS
-      t = hhmmss.split(/:/)
-      raise ArgumentError, "Bad time format: #{hhmmss}" if t.size > 3
-
-      mult = 1
-      while part = t.pop
-        rv += part.to_i * mult
-        mult *= 60
-      end
-      rv
-    else
-      raise ArgumentError, "unparseable: #{tbeg.inspect}"
     end
   end
 

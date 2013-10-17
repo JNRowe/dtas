@@ -39,7 +39,12 @@ class TestTrimFX < Testcase
     tfx = DTAS::TrimFX.new(%w(trim 1 0.5))
     assert_equal %w(trim 44100s 22050s), tfx.to_sox_arg(DTAS::Format.new)
 
-    tfx = DTAS::TrimFX.new(%w(trim 1 foo bar))
+    tfx = DTAS::TrimFX.new(%w(trim 1 sox vol -1dB))
     assert_equal %w(trim 44100s), tfx.to_sox_arg(DTAS::Format.new)
+  end
+
+  def test_tfx_effects
+    tfx = DTAS::TrimFX.new(%w(trim 1 sox vol -1dB))
+    assert_equal %w(sox $SOXIN $SOXOUT $TRIMFX vol -1dB $FADEFX), tfx.cmd
   end
 end
