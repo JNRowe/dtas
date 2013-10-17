@@ -16,7 +16,7 @@ comments:
 track_start: 1
 effects:
 # the fade parameter sets the default fade for every subsequent effect
-- fade=t1,t1;t1,t1 # fade-out-orig,fade-in-new;fade-out-orig;fade-in-new
+- fade=t1,t1;t1,t1 # fade-out-prev,fade-in-main;fade-out-main,fade-in-next
 
 # the following commands are equivalent
 - trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX vol -6dB $FADEFX
