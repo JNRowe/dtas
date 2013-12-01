@@ -13,6 +13,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-n', '--dry-run') { opts[:dryrun] = true }
   op.on('-j', '--jobs [JOBS]', Integer) { |val| opts[:jobs] = val }
   op.on('-s', '--quiet', '--silent') { |val| opts[:silent] = true }
+  op.on('-D', '--no-dither') { |val| opts[:no_dither] = true }
   op.parse!(ARGV)
 end
 

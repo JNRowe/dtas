@@ -31,6 +31,10 @@ to use ecasound(1), too.
 -s, \--quiet, \--silent
 :    Silent operation, commands are not printed as executed
 
+-D, \--no-dither
+:    Disable automatic setting of the DITHERFX env.  This also passes
+    the option to sox(1) via SOX_OPTS.
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file
