@@ -26,12 +26,14 @@ module DTAS::Buffer::ReadWrite # :nodoc:
   # always block when we have a single target
   def broadcast_one(targets)
     buf = _rbuf
-    @to_io.readpartial(MAX_AT_ONCE, buf)
+    @to_io.read_nonblock(MAX_AT_ONCE, buf)
     n = targets[0].write(buf) # IO#write has write-in-full behavior
     @bytes_xfer += n
     :wait_readable
   rescue EOFError
     nil
+  rescue Errno::EAGAIN
+    :wait_readable
   rescue Errno::EPIPE, IOError => e
     __dst_error(targets[0], e)
     targets.clear
