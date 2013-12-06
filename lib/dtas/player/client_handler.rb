@@ -265,7 +265,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def active_sinks
-    sinks = @targets.map { |t| t.sink }
+    sinks = @targets.map(&:sink)
     sinks.uniq!
     sinks
   end
@@ -588,7 +588,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       io.emit("#{res.size} #{res.join(' ')}")
     when "tracks"
       tracks = @tl.tracks
-      io.emit("#{tracks.size} " << tracks.map! { |i| i.to_s }.join(' '))
+      io.emit("#{tracks.size} " << tracks.map!(&:to_s).join(' '))
     when "goto"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
       offset = msg.shift # may be nil
@@ -660,7 +660,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       bp = cur.cuebreakpoints
       case msg[0]
       when nil
-        tmp = { "infile" => cur.infile, "cue" => bp.map { |ci| ci.to_hash } }
+        tmp = { "infile" => cur.infile, "cue" => bp.map(&:to_hash) }
         io.emit(tmp.to_yaml)
       when "next", "prev"
         return __bp_prev_next(io, msg, cur, bp)
