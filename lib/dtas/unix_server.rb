@@ -93,17 +93,15 @@ class DTAS::UNIXServer # :nodoc:
   end
 
   def run_once
-    begin
-      # give IO.select one-shot behavior, snapshot and replace the watchlist
-      r = IO.select(@readers.keys, @writers.keys) or return
-      r[1].each do |io|
-        @writers.delete(io)
-        wait_ctl(io, io.writable_iter)
-      end
-      r[0].each do |io|
-        @readers.delete(io)
-        wait_ctl(io, io.readable_iter { |_io, msg| yield(_io, msg) })
-      end
+    # give IO.select one-shot behavior, snapshot and replace the watchlist
+    r = IO.select(@readers.keys, @writers.keys) or return
+    r[1].each do |io|
+      @writers.delete(io)
+      wait_ctl(io, io.writable_iter)
+    end
+    r[0].each do |io|
+      @readers.delete(io)
+      wait_ctl(io, io.readable_iter { |_io, msg| yield(_io, msg) })
     end
   end
 end
