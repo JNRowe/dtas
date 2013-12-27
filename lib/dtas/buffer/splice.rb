@@ -69,7 +69,7 @@ module DTAS::Buffer::Splice # :nodoc:
   end
 
   def broadcast_inf(targets)
-    if targets.none? { |sink| sink.nonblock? }
+    if targets.none?(&:nonblock?)
       # if all targets are blocking, don't start until they're all writable
       r = IO.select(nil, targets, nil, 0) or return targets
       blocked = targets - r[1]
