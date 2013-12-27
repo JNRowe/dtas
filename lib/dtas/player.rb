@@ -300,6 +300,13 @@ class DTAS::Player # :nodoc:
     end
   end
 
+  def _optimize_write_prepare(targets)
+    targets.each do |dst|
+      dst.wait_writable_prepare
+      @srv.wait_ctl(dst, :wait_writable)
+    end
+  end
+
   # returns a wait_ctl arg for self
   def broadcast_iter(buf, targets)
     case rv = buf.broadcast(targets)
@@ -315,6 +322,7 @@ class DTAS::Player # :nodoc:
       # via DTAS::Sink#writable_iter
       :ignore
     else # :wait_readable or nil
+      _optimize_write_prepare(targets)
       rv
     end
   end

@@ -15,6 +15,11 @@ class TestBuffer < Testcase
 
   def pipe
     ret = IO.pipe
+    ret.each do |x|
+      def x.ready_write_optimized?
+        false
+      end
+    end
     @to_close.concat(ret)
     ret
   end
