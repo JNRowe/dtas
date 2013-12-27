@@ -312,7 +312,7 @@ class DTAS::Player # :nodoc:
     case rv = buf.broadcast(targets)
     when Array # array of blocked sinks
       # have sinks wake up the this buffer when they're writable
-      trade_ctl = proc { @srv.wait_ctl(buf, :wait_readable) }
+      trade_ctl = proc { @srv.wait_ctl(buf, :hot_read) }
       rv.each do |dst|
         dst.on_writable = trade_ctl
         @srv.wait_ctl(dst, :wait_writable)

@@ -69,6 +69,11 @@ class DTAS::UNIXServer # :nodoc:
 
   def wait_ctl(io, err)
     case err
+    when :hot_read
+      # this is only safe when we're iterating through ready writers
+      # the linear search for Array#include? is not expensive since
+      # we usually don't have a lot of sinks.
+      @hot_read << io unless @hot_read.include?(io)
     when :wait_readable
       @readers[io] = true
     when :wait_writable
@@ -95,10 +100,12 @@ class DTAS::UNIXServer # :nodoc:
   def run_once
     # give IO.select one-shot behavior, snapshot and replace the watchlist
     r = IO.select(@readers.keys, @writers.keys) or return
+    @hot_read = r[0]
     r[1].each do |io|
       @writers.delete(io)
       wait_ctl(io, io.writable_iter)
     end
+    @hot_read = nil
     r[0].each do |io|
       @readers.delete(io)
       wait_ctl(io, io.readable_iter { |_io, msg| yield(_io, msg) })
