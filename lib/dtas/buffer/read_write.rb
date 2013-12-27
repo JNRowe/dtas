@@ -41,8 +41,7 @@ module DTAS::Buffer::ReadWrite # :nodoc:
   end
 
   def broadcast_inf(targets)
-    bytes = inflight
-    nr_nb = targets.count { |sink| sink.nonblock? }
+    nr_nb = targets.count(&:nonblock?)
     if nr_nb == 0 || nr_nb == targets.size
       # if all targets are full, don't start until they're all writable
       r = IO.select(nil, targets, nil, 0) or return targets
@@ -59,6 +58,7 @@ module DTAS::Buffer::ReadWrite # :nodoc:
     again = {}
 
     # don't pin too much on one target
+    bytes = inflight
     bytes = bytes > MAX_AT_ONCE ? MAX_AT_ONCE : bytes
     buf = _rbuf
     @to_io.read(bytes, buf)
