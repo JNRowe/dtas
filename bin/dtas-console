@@ -6,8 +6,12 @@
 require 'dtas/unix_client'
 require 'dtas/rg_state'
 require 'dtas/sigevent'
-require 'curses'
 require 'yaml'
+begin
+  require 'curses'
+rescue LoadError
+  abort "please install the 'curses' RubyGem to use #$0"
+end
 
 se = DTAS::Sigevent.new
 trap(:WINCH) { se.signal }
