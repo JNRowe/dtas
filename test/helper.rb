@@ -25,6 +25,12 @@ if ENV["COVERAGE"]
       # filter out stuff that's not in our project
       COVMATCH =~ filename or next
 
+      # For compatibility with https://bugs.ruby-lang.org/issues/9508
+      # TODO: support those features if that gets merged into mainline
+      unless Array === counts
+        counts = counts[:lines]
+      end
+
       merge = prev[filename] || []
       merge = merge
       counts.each_with_index do |count, i|
