@@ -52,7 +52,7 @@ class DTAS::Player # :nodoc:
   end
 
   def source_map_reload
-    @sources = @source_map.values.sort_by { |src| src.tryorder }
+    @sources = @source_map.values.sort_by(&:tryorder)
   end
 
   def wall(msg)
