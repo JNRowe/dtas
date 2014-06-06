@@ -1,4 +1,4 @@
-# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# Copyright (C) 2013-2014, Eric Wong <e@80x24.org> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'tempfile'
 include Rake::DSL
@@ -23,7 +23,7 @@ task "NEWS" do
   end
   fp.puts "Unreleased" unless fp.size > 0
   fp.puts "# COPYRIGHT"
-  bdfl = 'Eric Wong <normalperson@yhbt.net>'
+  bdfl = 'Eric Wong <e@80x24.org>'
   fp.puts "Copyright (C) 2013, #{bdfl} and all contributors"
   fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
   fp.rewind

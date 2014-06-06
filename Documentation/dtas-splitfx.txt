@@ -163,7 +163,7 @@ For reference, the "opusenc" default target is implemented as follows:
 
 # COPYRIGHT
 
-Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO

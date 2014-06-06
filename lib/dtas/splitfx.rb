@@ -1,4 +1,4 @@
-# Copyright (C) 2013, Eric Wong <normalperson@yhbt.net> and all contributors
+# Copyright (C) 2013-2014, Eric Wong <e@80x24.org> and all contributors
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 # Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
 # (but we may still pipe to ecasound or anything else)

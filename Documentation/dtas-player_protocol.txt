@@ -22,7 +22,7 @@ shell in disguise, after all.
 
 Protocol feedback greatly appreciated email me at
 
-normalperson@yhbt.net
+e@80x24.org
 
 *********************************************************
 
@@ -277,5 +277,5 @@ No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013, Eric Wong <normalperson@yhbt.net> and all contributors.\
+Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
