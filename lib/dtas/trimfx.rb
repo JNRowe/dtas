@@ -75,4 +75,66 @@ class DTAS::TrimFX
     @tbeg = tbeg
     @tlen = tlen
   end
+
+  def <=>(other)
+    tbeg <=> other.tbeg
+  end
+
+  # for stable sorting
+  class TFXSort < Struct.new(:tfx, :idx)
+    def <=>(other)
+      cmp = tfx <=> other.tfx
+      0 == cmp ? idx <=> other.idx : cmp
+    end
+  end
+
+  # there'll be multiple epochs if ranges overlap
+  def self.schedule(ary)
+    sorted = []
+    ary.each_with_index { |tfx, i| sorted << TFXSort[tfx, i] }
+    sorted.sort!
+    rv = []
+    epoch = 0
+    prev_end = 0
+    defer = []
+    begin
+      while tfxsort = sorted.shift
+        tfx = tfxsort.tfx
+        if tfx.tbeg >= prev_end
+          prev_end = tfx.tbeg + tfx.tlen
+          (rv[epoch] ||= []) << tfx
+        else
+          defer << tfxsort
+        end
+      end
+      if defer[0]
+        epoch += 1
+        sorted = defer
+        defer = []
+        prev_end = 0
+      end
+    end while sorted[0]
+    rv
+  end
+
+  def self.expand(ary, total_len)
+    rv = []
+    schedule(ary).each_with_index do |sary, i|
+      tip = 0
+      dst = rv[i] = []
+      while tfx = sary.shift
+        if tfx.tbeg > tip
+          nfx = new(%W(trim #{tip} =#{tfx.tbeg}))
+          dst << nfx
+          dst << tfx
+          tip = tfx.tbeg + tfx.tlen
+        end
+      end
+      if tip < total_len
+        nfx = new(%W(trim #{tip} =#{total_len}))
+        dst << nfx
+      end
+    end
+    rv
+  end
 end

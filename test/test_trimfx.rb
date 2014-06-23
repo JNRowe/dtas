@@ -47,4 +47,35 @@ class TestTrimFX < Testcase
     tfx = DTAS::TrimFX.new(%w(trim 1 sox vol -1dB))
     assert_equal %w(sox $SOXIN $SOXOUT $TRIMFX vol -1dB $FADEFX), tfx.cmd
   end
+
+  def test_schedule_simple
+    fx = [
+      DTAS::TrimFX.new(%w(trim 1 0.3)),
+      DTAS::TrimFX.new(%w(trim 2 0.2)),
+      DTAS::TrimFX.new(%w(trim 0.5 0.5)),
+    ].shuffle
+    ary = DTAS::TrimFX.schedule(fx)
+    assert_operator 1, :==, ary.size
+    assert_equal [ 0.5, 1, 2 ], ary[0].map(&:tbeg)
+    assert_equal [ 0.5, 0.3, 0.2 ], ary[0].map(&:tlen)
+  end
+
+  def test_schedule_overlaps
+    fx = [
+      DTAS::TrimFX.new(%w(trim 1 0.3 sox)),
+      DTAS::TrimFX.new(%w(trim 1.1 0.2 sox)),
+      DTAS::TrimFX.new(%w(trim 0.5 0.5 sox)),
+    ]
+    ary = DTAS::TrimFX.schedule(fx)
+    assert_equal 2, ary.size
+    assert_equal [ 0.5, 1 ], ary[0].map(&:tbeg)
+    assert_equal [ 1.1 ], ary[1].map(&:tbeg)
+
+    ex = DTAS::TrimFX.expand(fx, 10)
+    assert_equal 2, ex.size
+    assert_equal 0, ex[0][0].tbeg
+    assert_equal 3, ex[0].size
+    assert_equal 0, ex[1][0].tbeg
+    assert_equal 3, ex[1].size
+  end
 end
