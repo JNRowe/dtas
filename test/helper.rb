@@ -50,14 +50,21 @@ if ENV["COVERAGE"]
   at_exit { __covmerge }
 end
 
-gem 'minitest'
+begin
+  gem 'minitest'
+rescue LoadError
+end
 require 'minitest/autorun'
 require "tempfile"
 
 Testcase = begin
   Minitest::Test
 rescue NameError
-  Minitest::Unit::TestCase
+  begin
+    Minitest::Unit::TestCase # minitest 4
+  rescue
+    MiniTest::Unit::TestCase # minitest 3
+  end
 end
 
 FIFOS = []
