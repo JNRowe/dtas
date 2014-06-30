@@ -65,13 +65,13 @@ class TestSplitfx < Testcase
             assert system(cmd), cmd
             assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
           end
-        end
 
-        # ensure 16/44.1kHz FLAC works (CDDA-like)
-        File.unlink('1.flac', '2.flac')
-        WAIT_ALL_MTX.synchronize { sfx.run("flac-cdda", opts) }
-        %w(1 2).each do |nr|
-          assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
+          # ensure 16/44.1kHz FLAC works (CDDA-like)
+          File.unlink('1.flac', '2.flac')
+          WAIT_ALL_MTX.synchronize { sfx.run("flac-cdda", opts) }
+          %w(1 2).each do |nr|
+            assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
+          end
         end
       end
     end
