@@ -45,7 +45,7 @@ class TestTrimFX < Testcase
 
   def test_tfx_effects
     tfx = DTAS::TrimFX.new(%w(trim 1 sox vol -1dB))
-    assert_equal %w(sox $SOXIN $SOXOUT $TRIMFX vol -1dB $FADEFX), tfx.cmd
+    assert_equal %w(sox $SOXIN $SOXOUT $TRIMFX vol -1dB), tfx.cmd
   end
 
   def test_schedule_simple

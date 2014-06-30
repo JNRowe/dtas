@@ -15,16 +15,13 @@ comments:
   YEAR: 2013
 track_start: 1
 effects:
-# the fade parameter sets the default fade for every subsequent effect
-- fade=t1,t1;t1,t1 # fade-out-prev,fade-in-main;fade-out-main,fade-in-next
-
 # the following commands are equivalent
-- trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX vol -6dB $FADEFX
+- trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX vol -6dB
 - trim 52 1 sox vol -6dB # shorthand
 
 # as are the following (for little endian machines)
 - trim 52 1 eca -eadb:-6
 - trim 52 1 sh sox $SOXIN $SOX2ECA $TRIMFX | ecasound $ECAFMT
-  -i stdin -o stdout -eadb:-6 | sox $ECA2SOX - $SOXOUT $FADEFX
+  -i stdin -o stdout -eadb:-6 | sox $ECA2SOX - $SOXOUT
 # SOX2ECA='-tf32 -c$CHANNELS -r$RATE'
 # ECAFMT='-f32_le,$CHANNELS,$RATE

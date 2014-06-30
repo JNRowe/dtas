@@ -36,14 +36,13 @@ class DTAS::TrimFX
   def tfx_sox(args)
     @cmd = %w(sox $SOXIN $SOXOUT $TRIMFX)
     @cmd.concat(args)
-    @cmd.concat(%w($FADEFX))
   end
 
   def tfx_eca(args)
     @cmd = %w(sox $SOXIN $SOX2ECA $TRIMFX)
     @cmd.concat(%w(| ecasound $ECAFMT -i stdin -o stdout))
     @cmd.concat(args)
-    @cmd.concat(%w(| sox $ECA2SOX - $SOXOUT $FADEFX))
+    @cmd.concat(%w(| sox $ECA2SOX - $SOXOUT))
   end
 
   def to_sox_arg(format)
