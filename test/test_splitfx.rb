@@ -20,11 +20,7 @@ class TestSplitfx < Testcase
     sfx = DTAS::SplitFX.new
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # create a guitar pluck
-        cmd = '(for n in E2 A2 D3 G3 B3 E4; do '\
-               'sox -n -ts32 -c2 -r44100 - synth 4 pluck $n; done ) | ' \
-               'sox -ts32 -c2 -r44100 - foo.flac'
-        assert system(cmd), cmd.inspect
+        guitar_pluck("foo.flac")
         sfx.import(hash, {})
         opts = { jobs: nil, silent: true }
 

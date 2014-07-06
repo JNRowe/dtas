@@ -99,3 +99,11 @@ class Dir
     end
   end
 end unless Dir.respond_to?(:mktmpdir)
+
+def guitar_pluck(outfile)
+  outfile =~ %r{\A[\w\./-]+\z} or raise ArgumentError, "bad chars"
+  cmd = '(for n in E2 A2 D3 G3 B3 E4; do '\
+         'sox -n -ts32 -c2 -r44100 - synth 4 pluck $n; done ) | ' \
+         "sox -ts32 -c2 -r44100 - #{outfile}"
+  assert_equal(true, system(cmd), cmd)
+end
