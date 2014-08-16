@@ -13,7 +13,7 @@ class DTAS::UNIXClient # :nodoc:
   include DTAS::XS
 
   def self.default_path
-    (ENV["DTAS_PLAYER_SOCK"] || File.expand_path("~/.dtas/player.sock")).b
+    (ENV["DTAS_PLAYER_SOCK"] || File.expand_path("~/.dtas/player.sock"))
   end
 
   def initialize(path = self.class.default_path)

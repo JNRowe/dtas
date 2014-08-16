@@ -5,8 +5,7 @@ require 'dtas/unix_client'
 c = DTAS::UNIXClient.new
 
 ARGV.each do |path|
-  # Unix paths are encoding agnostic
-  path = File.expand_path(path.b)
+  path = File.expand_path(path)
   res = c.req_ok(%W(enq #{path}))
   puts "#{path} #{res}"
 end

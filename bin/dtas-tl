@@ -31,7 +31,7 @@ when "clear"
 when "addhead"
   ARGV.shift
   ARGV.reverse.each do |path|
-    path = File.expand_path(path.b)
+    path = File.expand_path(path)
     res = c.req(%W(tl add #{path}))
     puts "#{path} #{res}"
   end
@@ -40,7 +40,7 @@ when "addtail"
   track_ids = get_track_ids(c)
   last_id = track_ids.pop
   ARGV.each do |path|
-    path = File.expand_path(path.b)
+    path = File.expand_path(path)
     req = %W(tl add #{path})
     req << last_id.to_s if last_id
     res = c.req(req)

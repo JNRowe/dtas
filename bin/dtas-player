@@ -4,10 +4,9 @@
 Thread.abort_on_exception = $stderr.sync = $stdout.sync = true
 require 'yaml'
 require 'dtas/player'
-sock = (ENV["DTAS_PLAYER_SOCK"] ||
-        File.expand_path("~/.dtas/player.sock")).b
+sock = (ENV["DTAS_PLAYER_SOCK"] || File.expand_path("~/.dtas/player.sock"))
 state = (ENV["DTAS_PLAYER_STATE"] ||
-         File.expand_path("~/.dtas/player_state.yml")).b
+         File.expand_path("~/.dtas/player_state.yml"))
 [ sock, state ].each do |file|
   dir = File.dirname(file)
   next if File.directory?(dir)

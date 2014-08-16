@@ -24,8 +24,6 @@ def tmpfile(file, suffix)
 end
 
 ARGV.each do |file|
-  # Unix paths are encoding agnostic
-  file = file.b
   file =~ /\.flac\z/i or warn "Unsupported suffix, assuming FLAC"
   tmp = tmpfile(file, '.cue')
   begin
