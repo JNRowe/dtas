@@ -24,6 +24,7 @@ client).
 * current-id - display the TRACKID of the current track
   "NONE" if not playing
 * cat - display a newline-delimited list of TRACK_ID=PATH output
+  Note: this is shell-escaped, multibyte characters may not show up properly.
 * clear - remove all tracks from the tracklist
 * goto TRACKID [POS] - play TRACKID immediately, optionally seek to POS
 TRACKID may be looked up via cat, and POS should be a timestamp in

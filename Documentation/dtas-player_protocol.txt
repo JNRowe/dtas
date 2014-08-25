@@ -252,7 +252,7 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   the track list
 
 * tl get [TRACKIDS]
-  returns a list of TRACKIDS mapped to filenames.
+  returns a list of TRACKIDS mapped to shell-escaped filenames.
 
 * tl goto TRACKID [TIMESTAMP] - plays the given TRACKID
   An optional timestamp may be added to prevent playing the
