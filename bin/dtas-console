@@ -104,6 +104,9 @@ def rg_string(rg, current)
   rv
 end
 
+enc_locale = Encoding.find("locale")
+$stdout.set_encoding(enc_locale)
+enc_opts = { undef: :replace, invalid: :replace, replace: '?' }
 begin
   Curses.init_screen
   Curses.nonl
@@ -118,7 +121,15 @@ begin
     if current = cur['current']
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr(current['infile'] || current['command'])
+      if infile = current['infile']
+        # FS encoding != locale encoding, but we need to display an FS path
+        # name to whatever locale the terminal is encoded to, so force
+        # it and risk mojibake...
+        infile.encode(enc_locale, enc_opts)
+        Curses.addstr(infile)
+      else
+        Curses.addstr(current['command'])
+      end
 
       elapsed = Time.now.to_f - current['spawn_at']
       if (nr = cur['current_initial']) && (current_format = current['format'])
