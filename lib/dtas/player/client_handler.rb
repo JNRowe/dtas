@@ -583,7 +583,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       @queue.delete_if { |t| Array === t && t[0].object_id == track_id }
       io.emit("OK")
     when "get"
-      res = @tl.get_tracks(msg.map! { |i| i.to_i })
+      res = @tl.get_tracks(msg.map!(&:to_i))
       res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
       io.emit("#{res.size} #{res.join(' ')}")
     when "tracks"
