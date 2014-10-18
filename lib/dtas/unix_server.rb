@@ -99,7 +99,13 @@ class DTAS::UNIXServer # :nodoc:
 
   def run_once
     # give IO.select one-shot behavior, snapshot and replace the watchlist
-    r = IO.select(@readers.keys, @writers.keys) or return
+    begin
+      r = IO.select(@readers.keys, @writers.keys) or return
+    rescue IOError
+      # this only happens when sinks error out
+      @writers.delete_if { |io| io.to_io.closed? }
+      retry
+    end
     @hot_read = r[0]
     r[1].each do |io|
       @writers.delete(io)
