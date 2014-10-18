@@ -618,11 +618,11 @@ module DTAS::Player::ClientHandler # :nodoc:
   def __bp_prev_next(io, msg, cur, bp)
     case type = msg[1]
     when nil, "track"
-      bp.keep_if { |ci| ci.track? }
+      bp.keep_if(&:track?)
     when "pregap"
-      bp.keep_if { |ci| ci.pregap? }
+      bp.keep_if(&:pregap?)
     when "subindex" # any subindex
-      bp.keep_if { |ci| ci.subindex? }
+      bp.keep_if(&:subindex?)
     when /\A\d+\z/ # exact subindex match
       si = type.to_i
       bp.keep_if { |ci| ci.index == si }
