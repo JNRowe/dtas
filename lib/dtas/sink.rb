@@ -102,7 +102,7 @@ class DTAS::Sink # :nodoc:
     end
 
     @pid = dtas_spawn(format.to_env.merge!(@env), cmd, opts)
-    inputs.each_value { |rpipe| rpipe.close }
+    inputs.each_value(&:close)
     rv
   end
 
