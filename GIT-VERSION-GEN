@@ -4,7 +4,7 @@
 CONSTANT = "DTAS::VERSION"
 RVF = "lib/dtas/version.rb"
 GVF = "GIT-VERSION-FILE"
-DEF_VER = "v0.7.0"
+DEF_VER = "v0.8.0"
 vn = DEF_VER
 
 # First see if there is a version file (included in release tarballs),
