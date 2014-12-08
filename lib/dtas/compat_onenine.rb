@@ -12,6 +12,6 @@ end unless String.method_defined?(:b)
 
 def IO # :nodoc:
   def self.pipe # :nodoc:
-    super.map! { |io| io.close_on_exec = true; io }
+    super.each { |io| io.close_on_exec = true }
   end
 end if RUBY_VERSION.to_f <= 1.9
