@@ -49,7 +49,8 @@ module DTAS::Process # :nodoc:
 
     pid = begin
       Process.spawn(env, cmd, opts)
-    rescue Errno::EINTR # Ruby bug?
+    rescue Errno::EINTR
+      # workaround for older Rubies https://bugs.ruby-lang.org/issues/8770
       retry
     end
     warn [ :spawn, pid, cmd ].inspect if $DEBUG
