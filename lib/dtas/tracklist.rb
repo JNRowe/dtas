@@ -62,7 +62,7 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def tracks
-    @list.map { |t| t.object_id }
+    @list.map(&:object_id)
   end
 
   def advance_track(repeat_ok = true)
