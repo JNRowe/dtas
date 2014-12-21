@@ -200,6 +200,8 @@ begin
         when "0" then c.req_ok("rg preamp+=1")
         when "F" then c.req_ok("rg fallback_gain+=1")
         when "f" then c.req_ok("rg fallback_gain-=1")
+        when ">" then c.req_ok("tl next")
+        when "<" then c.req_ok("tl prev")
         when " "
           c.req("play_pause")
         when "r" # cycle through replaygain modes
