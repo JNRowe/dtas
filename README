@@ -63,7 +63,7 @@ Coming:
 Please use git-format-patch(1) and git-send-email(1) distributed with
 the git(7) suite for generating and sending patches.  Please format
 pull requests with the git-request-pull(1) script (also distributed
-with git(7)) and send them via email.
+with git(7)) and send them via email to <dtas-all@nongnu.org>.
 
 See http://www.git-scm.com/ for more information on git.
 
@@ -75,7 +75,8 @@ appreciated.
 
 Please send plain-text mail to the list at <dtas-all@nongnu.org>\
 HTML will not be read.  dtas is for GUI-phobes, by GUI-phobes.\
-Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+Mailing list archives available at <ftp://lists.gnu.org/dtas-all>
+or <http://80x24.org/dtas-all/>
 No subscription is necessary to post to the mailing list.
 
 ## Copyright
