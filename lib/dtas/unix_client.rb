@@ -38,9 +38,9 @@ class DTAS::UNIXClient # :nodoc:
   end
 
   def res_wait(timeout = nil)
-    @to_io.wait(timeout)
+    IO.select([@to_io], nil, nil, timeout)
     nr = @to_io.nread
     nr > 0 or raise EOFError, "unexpected EOF from server"
-    @to_io.recvmsg[0]
+    @to_io.recvmsg(nr, 0, 0)[0]
   end
 end
