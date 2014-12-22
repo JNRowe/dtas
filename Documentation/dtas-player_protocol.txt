@@ -248,6 +248,10 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   currently playing track with the newly-added one.
   Returns the TRACKID of the newly added track
 
+* tl current - display the pathname to the currently playing track
+
+* tl current-id - display the TRACKID of the currently playing track
+
 * tl remove TRACKID - remove the track with the given TRACKID from
   the track list
 
@@ -257,6 +261,10 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * tl goto TRACKID [TIMESTAMP] - plays the given TRACKID
   An optional timestamp may be added to prevent playing the
   same part(s) repeated.y
+
+* tl next - jump to the next track in the tracklist
+
+* tl prev - jump to the previous track in the tracklist
 
 * tl repeat [BOOLEAN|1] - show/or change repeat status of the tracklist.
   With no args, this will show "true", "false", or "1"
