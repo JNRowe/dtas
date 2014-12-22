@@ -22,18 +22,18 @@ when "cat"
   get_track_ids(c).each do |track_id|
     res = c.req("tl get #{track_id}")
     res.sub!(/\A1 /, '')
-    puts res
+    print "#{res}\n"
   end
 when "clear"
   get_track_ids(c).each do |track_id|
-    puts "#{track_id} " << c.req("tl remove #{track_id}")
+    print("#{track_id} " << c.req("tl remove #{track_id}") << "\n")
   end
 when "addhead"
   ARGV.shift
   ARGV.reverse.each do |path|
     path = File.expand_path(path)
     res = c.req(%W(tl add #{path}))
-    puts "#{path} #{res}"
+    print "#{path} #{res}\n"
   end
 when "addtail"
   ARGV.shift
@@ -44,7 +44,7 @@ when "addtail"
     req = %W(tl add #{path})
     req << last_id.to_s if last_id
     res = c.req(req)
-    puts "#{path} #{res}"
+    print "#{path} #{res}\n"
     last_id = res if res =~ /\A\d+\z/
   end
 when "reto"
