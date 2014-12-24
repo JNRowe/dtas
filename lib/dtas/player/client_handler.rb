@@ -474,7 +474,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "cat"
       io.emit(src.to_source_cat.to_yaml)
     when "ed"
-      before = src.to_state_hash
+      before = src.to_state_hash.inspect
       sd = src.source_defaults
       msg.each do |kv|
         k, v = kv.split(/=/, 2)
@@ -492,7 +492,7 @@ module DTAS::Player::ClientHandler # :nodoc:
           source_map_reload
         end
       end
-      after = src.to_state_hash
+      after = src.to_state_hash.inspect
       __current_requeue if before != after && @current.class == src.class
       io.emit("OK")
     else
