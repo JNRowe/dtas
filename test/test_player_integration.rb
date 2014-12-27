@@ -5,10 +5,9 @@ class TestPlayerIntegration < Testcase
   include PlayerIntegration
 
   def test_cmd_rate
-    pid = fork do
-      @fmt.to_env.each { |k,v| ENV[k] = v }
-      exec("sox -n $SOXFMT - synth 3 pinknoise | #@cmd")
-    end
+    env = ENV.to_hash.merge(@fmt.to_env)
+    cmd = "sox -n $SOXFMT - synth 3 pinknoise | #@cmd"
+    pid = Process.spawn(env, cmd)
     t = Time.now
     _, _ = Process.waitpid2(pid)
     elapsed = Time.now - t
