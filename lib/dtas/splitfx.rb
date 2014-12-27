@@ -12,6 +12,7 @@ class DTAS::SplitFX # :nodoc:
         '$TRIMFX $RATEFX $DITHERFX'
   include DTAS::Process
   include DTAS::XS
+  attr_reader :infile, :env
 
   class Skip < Struct.new(:tstart) # :nodoc:
     def commit(_)
@@ -76,6 +77,7 @@ class DTAS::SplitFX # :nodoc:
     }
     @tracks = []
     @infmt = nil # wait until input is assigned
+    @cuebp = nil # for playback
   end
 
   def _bool(hash, key)
@@ -333,5 +335,11 @@ class DTAS::SplitFX # :nodoc:
       warn "FAIL #{s.inspect} #{_t.inspect}"
     end
     false
+  end
+
+  def cuebreakpoints
+    rv = @cuebp and return rv
+    require_relative 'cue_index'
+    @cuebp = @tracks.map { |t| DTAS::CueIndex.new(1, "#{t.tstart}s") }
   end
 end

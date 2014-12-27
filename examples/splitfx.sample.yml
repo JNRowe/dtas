@@ -11,6 +11,14 @@ comments:
   ARTIST: John Smith
   ALBUM: Hello World
   YEAR: 2013
+# override the normal sox command for dtas-player playback:
+command: exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX $FX
+env:
+  # these effects may be used in any command in this file, including targets
+  FX:
+    highpass -1 120 highpass 40 highpass 40
+    ladspa -lr tap_limiter -10 9.5
+    stats
 track_start: 1 # 0 for pregap/intro tracks
 cdda_align: true
 tracks:
