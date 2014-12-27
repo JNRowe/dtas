@@ -463,7 +463,11 @@ module DTAS::Player::ClientHandler # :nodoc:
   def source_handler(io, msg)
     map = @source_map
     op = msg.shift
-    if op == "ls"
+    case op
+    when "restart"
+      __current_requeue
+      return io.emit("OK")
+    when "ls"
       s = map.keys.sort { |a,b| map[a].tryorder <=> map[b].tryorder }
       return io.emit(s.join(' '))
     end
