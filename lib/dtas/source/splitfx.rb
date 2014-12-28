@@ -35,7 +35,9 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     sfx = DTAS::SplitFX.new
     begin
       Dir.chdir(File.dirname(ymlfile)) do # ugh
-        sfx.import(@ymlhash = YAML.load(buf))
+        @ymlhash = YAML.load(buf)
+        @ymlhash['tracks'] ||= [ "t 0 default" ]
+        sfx.import(@ymlhash)
         sfx.infile.replace(File.expand_path(sfx.infile))
       end
       @splitfx = sfx
