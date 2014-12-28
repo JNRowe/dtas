@@ -385,6 +385,7 @@ class DTAS::Player # :nodoc:
   end
 
   def next_source(source_spec)
+    @current.respond_to?(:watch_end) and @current.watch_end(@srv)
     @current = nil
     if source_spec
       case source_spec
@@ -413,6 +414,12 @@ class DTAS::Player # :nodoc:
       dst = @sink_buf
       pending.dst_assoc(dst)
       pending.spawn(@format, @rg, out: dst.wr, in: "/dev/null")
+
+      # watch and restart on modifications
+      pending.respond_to?(:watch_begin) and
+        @srv.wait_ctl(pending.watch_begin(method(:__current_requeue)),
+                      :wait_readable)
+
       @current = pending
       @srv.wait_ctl(dst, :wait_readable)
       wall(msg)
