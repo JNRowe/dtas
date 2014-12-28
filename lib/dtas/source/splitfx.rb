@@ -10,7 +10,10 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   attr_writer :sox
   include DTAS::Source::Watchable if defined?(DTAS::Source::Watchable)
 
-  SPLITFX_DEFAULTS = SOX_DEFAULTS.merge("tryorder" => 3)
+  SPLITFX_DEFAULTS = SOX_DEFAULTS.merge(
+    "command" => "#{SOX_DEFAULTS["command"]} $FX",
+    "tryorder" => 3,
+  )
 
   def initialize(sox = DTAS::Source::Sox.new)
     command_init(SPLITFX_DEFAULTS)
@@ -52,7 +55,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   end
 
   def command_string
-    @ymlhash["command"] || @sox.command_string
+    @ymlhash["command"] || super
   end
 
   def spawn(player_format, rg_state, opts)
