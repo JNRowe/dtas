@@ -18,7 +18,7 @@ env:
   # these effects may be used in any command in this file, including targets
   FX:
     highpass -1 120 highpass 40 highpass 40
-    ladspa -lr tap_limiter -10 9.5
+    vol +1.5dB
     stats
 track_start: 1 # 0 for pregap/intro tracks
 cdda_align: true
