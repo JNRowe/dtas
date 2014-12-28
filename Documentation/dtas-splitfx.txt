@@ -39,6 +39,8 @@ to use ecasound(1), too.
 
 * infile - string, the pathname of the original audio file
 * env - hash of environment variables to set for all commands
+    env:
+      FX: vol +3dB stats
 * comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
     comments:
       ARTIST: John Smith
@@ -52,6 +54,7 @@ to use ecasound(1), too.
   highest-numbered track (default: true)
 * tracks - array, see "TRACKS" section
 * targets - hash, see "TARGETS" section
+* command - used only by dtas-player(1)
 
 # TRACKS
 
@@ -168,4 +171,4 @@ License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO
 
-sox(1), ecasound(1), flac(1), opusenc(1)
+sox(1), ecasound(1), flac(1), opusenc(1), dtas-player(1)

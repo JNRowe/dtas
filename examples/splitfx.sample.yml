@@ -4,9 +4,6 @@
 # test_splitfx.rb relies on this.
 ---
 infile: foo.flac
-env:
-  PATH: $PATH
-  SOX_OPTS: $SOX_OPTS -R
 comments:
   ARTIST: John Smith
   ALBUM: Hello World
@@ -15,10 +12,12 @@ comments:
 # specify this as it is the default:
 # command: exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX $FX
 env:
+  PATH: $PATH
   # these effects may be used in any command in this file, including targets
+  SOX_OPTS: $SOX_OPTS -R
   FX:
-    highpass -1 120 highpass 40 highpass 40
-    vol +1.5dB
+    # highpass -1 120 highpass 40 highpass 40
+    # vol +1.5dB
     stats
 track_start: 1 # 0 for pregap/intro tracks
 cdda_align: true

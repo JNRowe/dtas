@@ -9,7 +9,7 @@ require_relative 'xs'
 require 'tempfile'
 class DTAS::SplitFX # :nodoc:
   CMD = 'sox "$INFILE" $COMMENTS $OUTFMT "$TRACKNUMBER.$SUFFIX" '\
-        '$TRIMFX $RATEFX $DITHERFX'
+        '$TRIMFX $FX $RATEFX $DITHERFX'
   include DTAS::Process
   include DTAS::XS
   attr_reader :infile, :env
@@ -61,7 +61,7 @@ class DTAS::SplitFX # :nodoc:
       },
       "opusenc" => {
         "command" => 'sox "$INFILE" $COMMENTS $OUTFMT - ' \
-           '$TRIMFX $RATEFX $DITHERFX | opusenc --music ' \
+           '$TRIMFX $FX $RATEFX $DITHERFX | opusenc --music ' \
            '--raw-bits $BITS_PER_SAMPLE ' \
            '$OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS ' \
            '--raw-endianness $ENDIAN_OPUSENC ' \
