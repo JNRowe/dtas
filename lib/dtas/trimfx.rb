@@ -2,6 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 require_relative 'parse_time'
+require_relative 'format'
 require 'shellwords'
 
 class DTAS::TrimFX
@@ -11,9 +12,13 @@ class DTAS::TrimFX
   attr_reader :tlen
   attr_reader :cmd
 
-  def initialize(args)
+  def initialize(args, format = DTAS::Format.new)
+    @format = format
     args = args.dup
     case args.shift
+    when :pad # [ :pad, start_time, end_time ]
+      @tbeg = args.shift
+      @tlen = args.shift - @tbeg
     when "trim"
       parse_trim!(args)
     when "all"
@@ -22,7 +27,7 @@ class DTAS::TrimFX
     else
       raise ArgumentError, "#{args.inspect} not understood"
     end
-    case tmp =  args.shift
+    case tmp = args.shift
     when "sh" then @cmd = args
     when "sox" then tfx_sox(args)
     when "eca" then tfx_eca(args)
@@ -45,15 +50,12 @@ class DTAS::TrimFX
     @cmd.concat(%w(| sox $ECA2SOX - $SOXOUT))
   end
 
-  def to_sox_arg(format)
+  def to_sox_arg
     if @tbeg && @tlen
-      beg = @tbeg * format.rate
-      len = @tlen * format.rate
-      %W(trim #{beg.round}s #{len.round}s)
+      %W(trim #{@tbeg}s #{@tlen}s)
     elsif @tbeg
       return [] if @tbeg == 0
-      beg = @tbeg * format.rate
-      %W(trim #{beg.round}s)
+      %W(trim #{@tbeg}s)
     else
       []
     end
@@ -69,11 +71,11 @@ class DTAS::TrimFX
       is_stop_time = tlen.sub!(/\A=/, "") ? true : false
       tlen = parse_time(tlen)
       tlen = tlen - tbeg if is_stop_time
+      @tlen = (tlen * @format.rate).round
     else
-      tlen = nil
+      @tlen = nil
     end
-    @tbeg = tbeg
-    @tlen = tlen
+    @tbeg = (tbeg * @format.rate).round
   end
 
   def <=>(other)
@@ -137,7 +139,7 @@ class DTAS::TrimFX
 
   # like schedule, but fills in the gaps with pass-through (no-op) TrimFX objs
   # This does not change the number of epochs.
-  def self.expand(ary, total_len)
+  def self.expand(ary, total_samples)
     rv = []
     schedule(ary).each_with_index do |sary, epoch|
       tip = 0
@@ -145,14 +147,14 @@ class DTAS::TrimFX
       while tfx = sary.shift
         if tfx.tbeg > tip
           # fill in the previous gap
-          nfx = new(%W(trim #{tip} =#{tfx.tbeg}))
+          nfx = new([:pad, tip, tfx.tbeg])
           dst << nfx
           dst << tfx
           tip = tfx.tbeg + tfx.tlen
         end
       end
-      if tip < total_len # fill until the last chunk
-        nfx = new(%W(trim #{tip} =#{total_len}))
+      if tip < total_samples # fill until the last chunk
+        nfx = new([:pad, tip, total_samples])
         dst << nfx
       end
     end
