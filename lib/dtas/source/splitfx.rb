@@ -33,23 +33,22 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     end
 
     sfx = DTAS::SplitFX.new
-    begin
-      Dir.chdir(File.dirname(ymlfile)) do # ugh
-        @ymlhash = YAML.load(buf)
-        @ymlhash['tracks'] ||= [ "t 0 default" ]
-        sfx.import(@ymlhash)
-        sfx.infile.replace(File.expand_path(sfx.infile))
-      end
-      @splitfx = sfx
-    rescue
-      return false
+    Dir.chdir(File.dirname(ymlfile)) do # ugh
+      @ymlhash = YAML.load(buf)
+      @ymlhash['tracks'] ||= [ "t 0 default" ]
+      sfx.import(@ymlhash)
+      sfx.infile.replace(File.expand_path(sfx.infile))
     end
+    @splitfx = sfx
     @infile = ymlfile
     sox = @sox.try(sfx.infile, offset) or return false
     rv = source_file_dup(ymlfile, offset)
     rv.sox = sox
     rv.env = sfx.env
     rv
+  rescue => e
+    warn "#{e.message} (#{e.class})"
+    false
   end
 
   def __load_comments
