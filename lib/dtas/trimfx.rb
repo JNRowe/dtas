@@ -59,15 +59,16 @@ class DTAS::TrimFX
     end
   end
 
+  # tries to interpret "trim" time args the same way the sox trim effect does
+  # This takes _time_ arguments only, not sample counts;
+  # otherwise, deviations from sox are considered bugs in dtas
   def parse_trim!(args)
     tbeg = parse_time(args.shift)
     if args[0] =~ /\A=?[\d\.]+\z/
       tlen = args.shift
       is_stop_time = tlen.sub!(/\A=/, "") ? true : false
       tlen = parse_time(tlen)
-      if is_stop_time
-        tlen = tlen - tbeg
-      end
+      tlen = tlen - tbeg if is_stop_time
     else
       tlen = nil
     end
@@ -87,7 +88,20 @@ class DTAS::TrimFX
     end
   end
 
-  # there'll be multiple epochs if ranges overlap
+  # sorts and converts an array of TrimFX objects into non-overlapping arrays
+  # of epochs
+  #
+  # input:
+  #   [ tfx1, tfx2, tfx3, ... ]
+  #
+  # output:
+  #   [
+  #     [ tfx1 ],         # first epoch
+  #     [ tfx2, tfx3 ],   # second epoch
+  #     ...
+  #   ]
+  # There are multiple epochs only if ranges overlap,
+  # There is only one epoch if there are no overlaps
   def self.schedule(ary)
     sorted = []
     ary.each_with_index { |tfx, i| sorted << TFXSort[tfx, i] }
@@ -96,40 +110,48 @@ class DTAS::TrimFX
     epoch = 0
     prev_end = 0
     defer = []
+
     begin
       while tfxsort = sorted.shift
         tfx = tfxsort.tfx
         if tfx.tbeg >= prev_end
+          # great, no overlap, append to the current epoch
           prev_end = tfx.tbeg + tfx.tlen
           (rv[epoch] ||= []) << tfx
         else
+          # overlapping region, we'll need a new epoch
           defer << tfxsort
         end
       end
-      if defer[0]
+
+      if defer[0] # do we need another epoch?
         epoch += 1
         sorted = defer
         defer = []
         prev_end = 0
       end
     end while sorted[0]
+
     rv
   end
 
+  # like schedule, but fills in the gaps with pass-through (no-op) TrimFX objs
+  # This does not change the number of epochs.
   def self.expand(ary, total_len)
     rv = []
-    schedule(ary).each_with_index do |sary, i|
+    schedule(ary).each_with_index do |sary, epoch|
       tip = 0
-      dst = rv[i] = []
+      dst = rv[epoch] = []
       while tfx = sary.shift
         if tfx.tbeg > tip
+          # fill in the previous gap
           nfx = new(%W(trim #{tip} =#{tfx.tbeg}))
           dst << nfx
           dst << tfx
           tip = tfx.tbeg + tfx.tlen
         end
       end
-      if tip < total_len
+      if tip < total_len # fill until the last chunk
         nfx = new(%W(trim #{tip} =#{total_len}))
         dst << nfx
       end
