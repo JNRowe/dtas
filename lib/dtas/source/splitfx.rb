@@ -7,7 +7,7 @@ require_relative 'watchable'
 
 class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   MAX_YAML_SIZE = 512 * 1024
-  attr_writer :sox
+  attr_writer :sox, :sfx
   include DTAS::Source::Watchable if defined?(DTAS::Source::Watchable)
 
   SPLITFX_DEFAULTS = SOX_DEFAULTS.merge(
@@ -45,6 +45,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     rv = source_file_dup(ymlfile, offset)
     rv.sox = sox
     rv.env = sfx.env
+    rv.sfx = sfx
     rv
   rescue => e
     warn "#{e.message} (#{e.class})"
@@ -62,7 +63,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   def spawn(player_format, rg_state, opts)
     raise "BUG: #{self.inspect}#spawn called twice" if @to_io
     e = @env.merge!(player_format.to_env)
-    e["INFILE"] = @sox.infile
+    @sfx.infile_env(e, @sox.infile)
 
     # make sure these are visible to the "current" command...
     e["TRIMFX"] = @offset ? "trim #@offset" : nil

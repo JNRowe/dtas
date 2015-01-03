@@ -99,6 +99,8 @@ dtas-splitfx sets several default environment variables for commands to
 use in targets:
 
 * INFILE - this matches the "infile" directive in the YAML file
+* INDIR - the directory INFILE belongs to
+* INBASE - the basename of INFILE
 * TRIMFX - essential, this supplys the necessary sox(1) trim effect to
   each track.
 * COMMENTS - expands to --comment-file=PATH for sox(1)

@@ -187,7 +187,7 @@ class DTAS::SplitFX # :nodoc:
       comments.puts("#{k}=#{v}")
     end
     env["COMMENTS"] = "--comment-file=#{comments.path}"
-    env["INFILE"] = @infile
+    infile_env(env, @infile)
     env["OUTFMT"] = xs(outfmt.to_sox_arg)
     env["SUFFIX"] = outfmt.type
     env.merge!(t.env)
@@ -341,5 +341,10 @@ class DTAS::SplitFX # :nodoc:
     rv = @cuebp and return rv
     require_relative 'cue_index'
     @cuebp = @tracks.map { |t| DTAS::CueIndex.new(1, "#{t.tstart}s") }
+  end
+
+  def infile_env(env, infile)
+    env["INFILE"] = infile
+    env["INDIR"], env["INBASE"] = File.split(File.expand_path(infile))
   end
 end
