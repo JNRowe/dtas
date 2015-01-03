@@ -101,7 +101,6 @@ class DTAS::SplitFX # :nodoc:
       end
     end
 
-    hash = hash.merge(overrides)
     case v = hash["track_zpad"]
     when Integer then @track_zpad = val
     else
