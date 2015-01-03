@@ -9,9 +9,15 @@
 require 'dtas/partstats'
 infile = ARGV[0] or abort "usage: #$0 INFILE"
 ps = DTAS::PartStats.new(infile)
-opts = {
-  jobs: `nproc 2>/dev/null || echo 2`.to_i
-}
+
+def nproc
+  require 'etc'
+  Etc.nprocessors
+rescue NoMethodError
+  `nproc 2>/dev/null || echo 2`.to_i
+end
+
+opts = { jobs: nproc }
 stats = ps.run(opts)
 
 headers = ps.key_idx.to_a
