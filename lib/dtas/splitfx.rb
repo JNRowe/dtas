@@ -78,6 +78,7 @@ class DTAS::SplitFX # :nodoc:
     @tracks = []
     @infmt = nil # wait until input is assigned
     @cuebp = nil # for playback
+    @command = nil # top-level, for playback
   end
 
   def _bool(hash, key)
@@ -134,6 +135,7 @@ class DTAS::SplitFX # :nodoc:
 
     load_input!(hash)
     load_tracks!(hash)
+    @command = hash["command"] # nil by default
   end
 
   def load_input!(hash)
@@ -193,10 +195,23 @@ class DTAS::SplitFX # :nodoc:
     env.merge!(t.env)
 
     command = target["command"]
-    tmp = Shellwords.split(command).map do |arg|
-      qx(env, "printf %s \"#{arg}\"")
+
+    # if a default dtas-player command is set, use that.
+    # we'll clobber our default environment since we assume play_cmd
+    # already takes those into account.  In other words, use our
+    # target-specific commands like a dtas-player sink:
+    #   @command | (INFILE= FX= TRIMFX=; target['command'])
+    if player_cmd = @command
+      sub_env = { 'INFILE' => '-', 'FX' => '', 'TRIMFX' => '' }
+      sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=#{v} " }
+      command = "#{player_cmd} | (#{sub_env_s}; #{command})"
+      show_cmd = [ _expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
+                   _expand_cmd(env.merge(sub_env), command), ')' ].flatten
+    else
+      show_cmd = _expand_cmd(env, command)
     end
-    echo = "echo #{xs(tmp)}"
+
+    echo = "echo #{xs(show_cmd)}"
     if opts[:dryrun]
       command = echo
     else
@@ -346,5 +361,11 @@ class DTAS::SplitFX # :nodoc:
   def infile_env(env, infile)
     env["INFILE"] = infile
     env["INDIR"], env["INBASE"] = File.split(File.expand_path(infile))
+  end
+
+  def _expand_cmd(env, command)
+    Shellwords.split(command).map do |arg|
+      qx(env, "printf %s \"#{arg}\"")
+    end
   end
 end
