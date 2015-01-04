@@ -232,8 +232,6 @@ class DTAS::SplitFX # :nodoc:
       fmt = "%0#{max.to_s.size}d"
     when Integer
       fmt = "%0#{@track_zpad}d"
-    else
-      fmt = "%d"
     end
     nr = @track_start
     @tracks.delete_if do |t|
