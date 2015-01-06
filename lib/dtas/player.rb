@@ -400,7 +400,7 @@ class DTAS::Player # :nodoc:
         msg = %W(command #{pending.command_string})
       end
 
-      unless @bypass.empty?
+      if ! @bypass.empty? && pending.respond_to?(:format)
         new_fmt = bypass_match!(@format.dup, pending.format)
         if new_fmt != @format
           stop_sinks # we may fail to start below
