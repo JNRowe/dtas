@@ -3,12 +3,12 @@
 require 'yaml'
 require_relative 'sox'
 require_relative '../splitfx'
-require_relative 'watchable'
+require_relative '../watchable'
 
 class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   MAX_YAML_SIZE = 512 * 1024
   attr_writer :sox, :sfx
-  include DTAS::Source::Watchable if defined?(DTAS::Source::Watchable)
+  include DTAS::Watchable if defined?(DTAS::Watchable)
 
   SPLITFX_DEFAULTS = SOX_DEFAULTS.merge(
     "command" => "#{SOX_DEFAULTS["command"]} $FX",

@@ -7,7 +7,7 @@ end
 
 # used to restart DTAS::Source::SplitFX processing in dtas-player
 # if the YAML file is edited
-module DTAS::Source::Watchable
+module DTAS::Watchable
   class InotifyReadableIter < SleepyPenguin::Inotify
     def self.new
       super(:CLOEXEC)

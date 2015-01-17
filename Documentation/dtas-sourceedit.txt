@@ -17,6 +17,22 @@ a pipe or file, it is parsed as YAML and fed to the dtas-player(1) instance
 non-interactively.  This is useful for loading various profiles from the
 filesystem.
 
+On Linux machines with the sleepy_penguin RubyGem installed, inotify(7)
+is used to monitor the file for changes while the text exitor is running.
+Each time a user finishes saving a file, changes are committed immediately.
+This behavior may be disabled by using the -N or --no-watch command-line
+switch.
+
+# OPTIONS
+-N, \--no-watch
+:   Disable inotify(7) support on Linux systems
+
+-n, \--dry-run
+:   Only print commands which would be sent to dtas-player
+
+-V, \--verbose
+:   Print out commands as they are sent to dtas-player
+
 # EXAMPLES
 
 Invoking dtas-sourceedit will spawn your favorite text editor on "sox":
