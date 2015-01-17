@@ -104,6 +104,10 @@ def rg_string(rg, current)
   rv
 end
 
+def may_fail(res, events)
+  events << res if res != "OK"
+end
+
 enc_locale = Encoding.find("locale")
 $stdout.set_encoding(enc_locale)
 enc_opts = { undef: :replace, invalid: :replace, replace: '?' }
@@ -202,8 +206,8 @@ begin
         when "f" then c.req_ok("rg fallback_gain-=1")
         when ">" then c.req_ok("tl next")
         when "<" then c.req_ok("tl prev")
-        when "!" then c.req_ok("cue prev")
-        when "@" then c.req_ok("cue next")
+        when "!" then may_fail(c.req("cue prev"), events)
+        when "@" then may_fail(c.req("cue next"), events)
         when " "
           c.req("play_pause")
         when "r" # cycle through replaygain modes
