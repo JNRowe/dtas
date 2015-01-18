@@ -150,7 +150,7 @@ module DTAS::Player::ClientHandler # :nodoc:
           rv = set_bool(io, kv, v) { |b| sink.__send__("#{k}=", b) }
           rv == true or return rv
         when "pipe_size"
-          rv = set_uint(io, kv, v, false) { |u| sink.pipe_size = u }
+          rv = set_uint(io, kv, v, true) { |u| sink.pipe_size = u }
           rv == true or return rv
         when "command" # nothing to validate, this could be "rm -rf /" :>
           sink.command = v.empty? ? DTAS::Sink::SINK_DEFAULTS["command"] : v
@@ -170,7 +170,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       io.emit("OK")
     when "cat"
       sink = @sinks[name] or return io.emit("ERR #{name} not found")
-      io.emit(sink.to_hsh.to_yaml)
+      io.emit(sink.to_hash.to_yaml)
     else
       io.emit("ERR unknown sink op #{msg[0]}")
     end

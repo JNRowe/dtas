@@ -11,7 +11,7 @@ begin
       default_sink_pid(s)
       s.req_ok("sink ed default pipe_size=0x1000")
       s.req_ok("sink ed default pipe_size=0x10000")
-      assert_match %r{\AERR }, s.req("sink ed default pipe_size=")
+      s.req_ok("sink ed default pipe_size=")
       s.req_ok("sink ed default pipe_size=4096")
     end if IO.method_defined?(:pipe_size=)
   end

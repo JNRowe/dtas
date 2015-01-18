@@ -28,9 +28,11 @@ update_cmd_env(cmd, orig, sink)
   cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
 end
 
-%w(prio pipe_size).each do |field|
+%w(prio).each do |field|
   value = sink[field] and cmd << "#{field}=#{value}"
 end
+
+%w(pipe_size).each { |field| cmd << "#{field}=#{sink[field]}" }
 
 # nil OK
 %w(command).each do |field|
