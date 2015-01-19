@@ -22,6 +22,7 @@ m1 += dtas-splitfx
 m7 =
 m7 += dtas-player_protocol
 m7 += dtas-player_sink_examples
+m7 += dtas-env
 
 man1 := $(addsuffix .1, $(m1))
 man7 := $(addsuffix .7, $(m7))

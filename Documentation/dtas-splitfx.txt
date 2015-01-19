@@ -99,17 +99,18 @@ dtas-splitfx sets several default environment variables for commands to
 use in targets:
 
 * INFILE - this matches the "infile" directive in the YAML file
-* INDIR - the directory INFILE belongs to
+* INDIR - the directory INFILE belongs to, without trailing slash
 * INBASE - the basename of INFILE
 * TRIMFX - essential, this supplys the necessary sox(1) trim effect to
   each track.
 * COMMENTS - expands to --comment-file=PATH for sox(1)
-* OUTFMT - sox(1) arguments for the output format (e.g. "-ts32 -c2 -r44100"
+* OUTFMT - sox(1) arguments for the output format (e.g. "-ts32 -c2 * -r44100")
 * SUFFIX - the suffix of the output format without "." (e.g. "flac", "ogg")
 * TRACKNUMBER - the track number, useful for comments and filenames
 * RATEFX - rate effect and arguments for sox(1) resampling
 * DITHERFX - dither effect and arguments for sox(1) dithering
-
+* FX - any user-specified sox effects which encompases the entire file.
+  (e.g. "highpass 35 vol +3dB stats")
 # TARGETS
 
 The default targets will split audio and avoid applying any effects.
