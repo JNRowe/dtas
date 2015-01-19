@@ -14,16 +14,16 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::XS
   attr_reader :infile, :env
 
-  class Skip < Struct.new(:tstart) # :nodoc:
+  class Skip < Struct.new(:tbeg) # :nodoc:
     def commit(_)
       # noop
     end
   end
 
-  class T < Struct.new(:env, :comments, :tstart, :fade_in, :fade_out) # :nodoc:
+  class T < Struct.new(:env, :comments, :tbeg, :fade_in, :fade_out) # :nodoc:
     def commit(advance_track_samples)
-      tlen = advance_track_samples - tstart
-      trimfx = "trim #{tstart}s #{tlen}s"
+      tlen = advance_track_samples - tbeg
+      trimfx = "trim #{tbeg}s #{tlen}s"
       if fade_in
         trimfx << " #{fade_in}"
       end
@@ -35,6 +35,10 @@ class DTAS::SplitFX # :nodoc:
         fade = " fade #{fade_type} 0 #{tlen}s #{fade_out_len}"
         trimfx << fade
       end
+
+      # raw sample counts (without 's' suffix)
+      env["TBEG"] = tbeg.to_s
+      env["TLEN"] = tlen.to_s
       env["TRIMFX"] = trimfx
     end
   end
@@ -255,7 +259,7 @@ class DTAS::SplitFX # :nodoc:
       start_time = argv.shift
       title = argv.shift
       t = T.new
-      t.tstart = @t2s.call(start_time)
+      t.tbeg = @t2s.call(start_time)
       t.comments = @comments.dup
       t.comments["TITLE"] = title
       t.env = @env.dup
@@ -274,17 +278,17 @@ class DTAS::SplitFX # :nodoc:
         end
       end
 
-      prev = @tracks.last and prev.commit(t.tstart)
+      prev = @tracks.last and prev.commit(t.tbeg)
       @tracks << t
     when "skip"
       stop_time = argv.shift
       argv.empty? or raise ArgumentError, "skip does not take extra args"
       s = Skip.new
-      s.tstart = @t2s.call(stop_time)
+      s.tbeg = @t2s.call(stop_time)
       # s.comments = {}
       # s.env = {}
       prev = @tracks.last or raise ArgumentError, "no tracks to skip"
-      prev.commit(s.tstart)
+      prev.commit(s.tbeg)
       @tracks << s
     when "stop"
       stop_time = argv.shift
@@ -352,7 +356,7 @@ class DTAS::SplitFX # :nodoc:
   def cuebreakpoints
     rv = @cuebp and return rv
     require_relative 'cue_index'
-    @cuebp = @tracks.map { |t| DTAS::CueIndex.new(1, "#{t.tstart}s") }
+    @cuebp = @tracks.map { |t| DTAS::CueIndex.new(1, "#{t.tbeg}s") }
   end
 
   def infile_env(env, infile)

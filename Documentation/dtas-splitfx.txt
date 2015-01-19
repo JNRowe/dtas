@@ -101,8 +101,10 @@ use in targets:
 * INFILE - this matches the "infile" directive in the YAML file
 * INDIR - the directory INFILE belongs to, without trailing slash
 * INBASE - the basename of INFILE
+* TBEG - the integer sample offset where the sox(1) trim effect starts
+* TLEN - the integer sample count representing the length of the trim
 * TRIMFX - essential, this supplys the necessary sox(1) trim effect to
-  each track.
+  each track. In other words, this is: "trim ${TBEG}s ${TLEN}s"
 * COMMENTS - expands to --comment-file=PATH for sox(1)
 * OUTFMT - sox(1) arguments for the output format (e.g. "-ts32 -c2 * -r44100")
 * SUFFIX - the suffix of the output format without "." (e.g. "flac", "ogg")
