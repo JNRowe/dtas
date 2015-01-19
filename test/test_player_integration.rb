@@ -3,11 +3,12 @@
 require './test/player_integration'
 class TestPlayerIntegration < Testcase
   include PlayerIntegration
+  include DTAS::SpawnFix
 
   def test_cmd_rate
     env = ENV.to_hash.merge(@fmt.to_env)
     cmd = "sox -n $SOXFMT - synth 3 pinknoise | #@cmd"
-    pid = Process.spawn(env, cmd)
+    pid = spawn(env, cmd)
     t = Time.now
     _, _ = Process.waitpid2(pid)
     elapsed = Time.now - t

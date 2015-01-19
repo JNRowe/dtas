@@ -10,6 +10,7 @@ require_relative 'sigevent'
 class DTAS::PartStats
   CMD = 'sox "$INFILE" -n $TRIMFX $SOXFX stats $STATSOPTS'
   include DTAS::Process
+  include DTAS::SpawnFix
   attr_reader :key_idx
   attr_reader :key_width
 
@@ -56,12 +57,7 @@ class DTAS::PartStats
     env["INFILE"] = @infile
     env["TRIMFX"] = "trim #{trim_part.tbeg}s #{trim_part.tlen}s"
     opts = { pgroup: true, close_others: true, err: wr }
-    pid = begin
-      Process.spawn(env, CMD, opts)
-    rescue Errno::EINTR
-      # workaround for older Rubies https://bugs.ruby-lang.org/issues/8770
-      retry
-    end
+    pid = spawn(env, CMD, opts)
     wr.close
     [ pid, rd ]
   end

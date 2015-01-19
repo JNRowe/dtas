@@ -54,6 +54,7 @@ if st_in.file? || st_in.pipe?
   buf = $stdin.read
   commit_update.call(buf)
 else
+  include DTAS::SpawnFix
   tmp = tmpyaml
   tmp_path = tmp.path
   do_update = lambda { commit_update.call(File.read(tmp_path)) }
@@ -69,7 +70,7 @@ else
   end
 
   trap(:CHLD) { sev.signal }
-  pid = Process.spawn(cmd)
+  pid = spawn(cmd)
   begin
     r = IO.select(rset) or next
     r[0].each do |io|

@@ -7,6 +7,7 @@ require_relative 'xs'
 module DTAS::Process # :nodoc:
   PIDS = {}
   include DTAS::XS
+  include DTAS::SpawnFix
 
   def self.reaper
     begin
@@ -47,12 +48,7 @@ module DTAS::Process # :nodoc:
     opts = { close_others: true, pgroup: true }.merge!(opts)
     env = env_expand(env, opts)
 
-    pid = begin
-      Process.spawn(env, cmd, opts)
-    rescue Errno::EINTR
-      # workaround for older Rubies https://bugs.ruby-lang.org/issues/8770
-      retry
-    end
+    pid = spawn(env, cmd, opts)
     warn [ :spawn, pid, cmd ].inspect if $DEBUG
     @spawn_at = Time.now.to_f
     PIDS[pid] = self
@@ -76,12 +72,7 @@ module DTAS::Process # :nodoc:
       opts[:err] = we
     end
     env = env_expand(env, opts)
-    pid = begin
-      Process.spawn(env, *cmd, opts)
-    rescue Errno::EINTR
-      # workaround for older Rubies https://bugs.ruby-lang.org/issues/8770
-      retry
-    end
+    pid = spawn(env, *cmd, opts)
     w.close
     if err_str
       we.close

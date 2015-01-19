@@ -6,6 +6,7 @@ require 'thread'
 require_relative 'helper'
 
 class TestSplitfx < Testcase
+  include DTAS::SpawnFix
 
   def tmp_err(path)
     err = $stderr.dup
@@ -56,9 +57,9 @@ class TestSplitfx < Testcase
 
         # compare results with expected output
         res_cmd = "sox 1.flac 2.flac -ts32 -c2 -r44100 result.s32 stats"
-        res_pid = Process.spawn(res_cmd, err: 'b.txt')
+        res_pid = spawn(res_cmd, err: 'b.txt')
         exp_cmd = "sox foo.flac -ts32 -c2 -r44100 expect.s32 trim 4 stats"
-        exp_pid = Process.spawn(exp_cmd, err: 'a.txt')
+        exp_pid = spawn(exp_cmd, err: 'a.txt')
         _, s = Process.waitpid2(res_pid)
         assert s.success?, "#{res_cmd}: #{s.inspect}"
         _, s = Process.waitpid2(exp_pid)

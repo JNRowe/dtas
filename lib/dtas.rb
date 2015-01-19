@@ -4,3 +4,4 @@ module DTAS # :nodoc:
 end
 
 require_relative 'dtas/compat_onenine'
+require_relative 'dtas/spawn_fix'
