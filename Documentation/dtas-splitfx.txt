@@ -113,6 +113,7 @@ use in targets:
 * DITHERFX - dither effect and arguments for sox(1) dithering
 * FX - any user-specified sox effects which encompases the entire file.
   (e.g. "highpass 35 vol +3dB stats")
+
 # TARGETS
 
 The default targets will split audio and avoid applying any effects.
@@ -171,7 +172,7 @@ For reference, the "opusenc" default target is implemented as follows:
 
 # COPYRIGHT
 
-Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
+Copyright 2013-2015 all contributors <dtas-all@nongnu.org>.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO

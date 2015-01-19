@@ -56,11 +56,11 @@ GNU/Linux users may optionally install "io_splice" and
 
 Please do not hesitate to send plain-text mail to <dtas-all@nongnu.org>
 regarding installation and to share your notes/experiences.
-Mailing list archives available at <ftp://lists.gnu.org/dtas-all>
-or <http://80x24.org/dtas-all/>
+Mailing list archives available at <http://80x24.org/dtas-all/> or
+<ftp://lists.gnu.org/dtas-all>\
 No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
+Copyright 2013-2015 all contributors <dtas-all@nongnu.org>\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

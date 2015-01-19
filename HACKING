@@ -17,10 +17,11 @@ We use git(7) and develop dtas on a public mailing list like git
 developers do.  Please send patches via git-send-email(1) to the public
 mailing list at <dtas-all@nongnu.org>.  Pull requests should be
 formatted using git-request-pull(1).\
-Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+Mailing list archives available at <http://80x24.org/dtas-all/> and
+<ftp://lists.gnu.org/dtas-all/>\
 No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
+Copyright 2013-2015 all contributors <dtas-all@nongnu.org>.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>

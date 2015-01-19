@@ -1,5 +1,7 @@
+# Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# workaround for older Rubies: https://bugs.ruby-lang.org/issues/8770
 module DTAS::SpawnFix # :nodoc:
-  # workaround for older Rubies: https://bugs.ruby-lang.org/issues/8770
   def spawn(*args)
     super(*args)
   rescue Errno::EINTR

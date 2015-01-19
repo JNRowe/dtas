@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2014, Eric Wong <e@80x24.org> and all contributors
+# Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 $stdout.sync = $stderr.sync = Thread.abort_on_exception = true
 require 'thread'

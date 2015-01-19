@@ -24,6 +24,7 @@ This behavior may be disabled by using the -N or --no-watch command-line
 switch.
 
 # OPTIONS
+
 -N, \--no-watch
 :   Disable inotify(7) support on Linux systems
 
@@ -61,13 +62,14 @@ This defaults to ~/.dtas/player.sock
 
 # CONTACT
 
-All feedback welcome via plain-text mail to <dtas-all@nongnu.org>\
-Mailing list archives available at <ftp://lists.gnu.org/dtas-all/>\
+All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
+Mailing list archives available at <http://80x24.org/dtas-all/> and
+<ftp://lists.gnu.org/dtas-all/>\
 No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.\
+Copyright 2013-2015 all contributors <dtas-all@nongnu.org>.\
 License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO

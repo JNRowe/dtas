@@ -1,4 +1,4 @@
-# Copyright 2013-2014, Eric Wong <e@80x24.org> and all contributors.
+# Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv2 or later <http://www.gnu.org/licenses/gpl-2.0.txt>
 # This is GPLv2+ instead of GPLv3+ because ruby-dbus is LGPLv2.1 (only)
 Gem::Specification.new do |s|
