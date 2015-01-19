@@ -49,7 +49,7 @@ class DTAS::PartStats
     rv
   end
 
-  def spawn(trim_part, opts)
+  def partstats_spawn(trim_part, opts)
     rd, wr = IO.pipe
     env = opts[:env]
     env = env ? env.dup : {}
@@ -58,7 +58,8 @@ class DTAS::PartStats
     opts = { pgroup: true, close_others: true, err: wr }
     pid = begin
       Process.spawn(env, CMD, opts)
-    rescue Errno::EINTR # Ruby bug?
+    rescue Errno::EINTR
+      # workaround for older Rubies https://bugs.ruby-lang.org/issues/8770
       retry
     end
     wr.close
@@ -74,7 +75,7 @@ class DTAS::PartStats
     stats = []
     fails = []
     do_spawn = lambda do |trim_part|
-      pid, rpipe = spawn(trim_part, opts)
+      pid, rpipe = partstats_spawn(trim_part, opts)
       rset[rpipe] = [ trim_part, "" ]
       pids[pid] = [ trim_part, rpipe ]
     end

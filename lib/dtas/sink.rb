@@ -66,8 +66,8 @@ class DTAS::Sink # :nodoc:
     super
   end
 
-  def spawn(format, opts = {})
-    raise "BUG: #{self.inspect}#spawn called twice" if @pid
+  def sink_spawn(format, opts = {})
+    raise "BUG: #{self.inspect}#sink_spawn called twice" if @pid
     rv = []
 
     pclass = @nonblock ? DTAS::PipeNB : DTAS::Pipe

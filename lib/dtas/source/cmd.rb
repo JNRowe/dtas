@@ -31,8 +31,8 @@ class DTAS::Source::Cmd # :nodoc:
 
   alias to_hsh to_hash
 
-  def spawn(format, rg_state, opts)
-    raise "BUG: #{self.inspect}#spawn called twice" if @to_io
+  def src_spawn(format, rg_state, opts)
+    raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     e = format.to_env
     @pid = dtas_spawn(e.merge!(@env), command_string, opts)
   end

@@ -75,8 +75,8 @@ class DTAS::Source::Sox # :nodoc:
     tmp
   end
 
-  def spawn(player_format, rg_state, opts)
-    raise "BUG: #{self.inspect}#spawn called twice" if @to_io
+  def src_spawn(player_format, rg_state, opts)
+    raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     e = @env.merge!(player_format.to_env)
     e["INFILE"] = @infile
 

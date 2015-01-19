@@ -348,7 +348,7 @@ class DTAS::Player # :nodoc:
     @sinks.each_value do |sink|
       sink.active or next
       next if sink.pid
-      @targets.concat(sink.spawn(@format))
+      @targets.concat(sink.sink_spawn(@format))
     end
     if @targets[0]
       @targets.sort_by! { |t| t.sink.prio }
@@ -413,7 +413,7 @@ class DTAS::Player # :nodoc:
 
       dst = @sink_buf
       pending.dst_assoc(dst)
-      pending.spawn(@format, @rg, out: dst.wr, in: "/dev/null")
+      pending.src_spawn(@format, @rg, out: dst.wr, in: "/dev/null")
 
       # watch and restart on modifications
       pending.respond_to?(:watch_begin) and

@@ -69,7 +69,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   def __sink_activate(sink)
     return if sink.pid
-    @targets.concat(sink.spawn(@format))
+    @targets.concat(sink.sink_spawn(@format))
     @targets.sort_by! { |t| t.sink.prio }
   end
 

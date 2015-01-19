@@ -60,8 +60,8 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     @ymlhash["command"] || super
   end
 
-  def spawn(player_format, rg_state, opts)
-    raise "BUG: #{self.inspect}#spawn called twice" if @to_io
+  def src_spawn(player_format, rg_state, opts)
+    raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     e = @env.merge!(player_format.to_env)
     @sfx.infile_env(e, @sox.infile)
 

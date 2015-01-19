@@ -156,7 +156,7 @@ class DTAS::SplitFX # :nodoc:
     { "command" => CMD, "format" => outfmt }
   end
 
-  def spawn(target, t, opts)
+  def splitfx_spawn(target, t, opts)
     target = @targets[target] || generic_target(target)
     outfmt = target["format"]
 
@@ -327,7 +327,7 @@ class DTAS::SplitFX # :nodoc:
     jobs = opts[:jobs] || tracks.size # jobs == nil => everything at once
     jobs.times.each do
       t = tracks.shift or break
-      pid, tmp = spawn(target, t, opts)
+      pid, tmp = splitfx_spawn(target, t, opts)
       pids[pid] = [ t, tmp ]
     end
 
@@ -336,7 +336,7 @@ class DTAS::SplitFX # :nodoc:
       done = pids.delete(pid)
       if status.success?
         if t = tracks.shift
-          pid, tmp = spawn(target, t, opts)
+          pid, tmp = splitfx_spawn(target, t, opts)
           pids[pid] = [ t, tmp ]
         end
         puts "DONE #{done[0].inspect}" if $DEBUG

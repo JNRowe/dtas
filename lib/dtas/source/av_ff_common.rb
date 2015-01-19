@@ -127,8 +127,8 @@ module DTAS::Source::AvFfCommon # :nodoc:
     raise "BUG: no audio stream in #@infile"
   end
 
-  def spawn(player_format, rg_state, opts)
-    raise "BUG: #{self.inspect}#spawn called twice" if @to_io
+  def src_spawn(player_format, rg_state, opts)
+    raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     amap = nil
 
     # try to find an audio stream which matches our channel count
