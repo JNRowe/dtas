@@ -1,12 +1,14 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-# Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
-# (but we may still pipe to ecasound or anything else)
 require_relative '../dtas'
 require_relative 'format'
 require_relative 'process'
 require_relative 'xs'
 require 'tempfile'
+
+# The backend for dtas-splitfx(1) command, but also supported by dtas-player
+# Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
+# (but we may still pipe to ecasound or anything else)
 class DTAS::SplitFX # :nodoc:
   CMD = 'sox "$INFILE" $COMMENTS $OUTFMT "$TRACKNUMBER.$SUFFIX" '\
         '$TRIMFX $FX $RATEFX $DITHERFX'

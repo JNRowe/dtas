@@ -5,6 +5,7 @@ require 'io/splice'
 require_relative '../../dtas'
 require_relative '../pipe'
 
+# Used by -player on Linux systems with the "io-splice" RubyGem installed
 module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_AT_ONCE_1 = 65536

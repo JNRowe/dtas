@@ -5,6 +5,7 @@ module DTAS::Source::Common # :nodoc:
   attr_reader :dst
   attr_accessor :requeued
 
+  # buf - a DTAS::Buffer object (pipe)
   def dst_assoc(buf)
     @dst = buf
     @dst_zero_byte = buf.bytes_xfer + buf.inflight

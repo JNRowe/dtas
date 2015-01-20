@@ -1,10 +1,11 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-# class represents an audio format (type/bits/channels/sample rate/...)
 require_relative '../dtas'
 require_relative 'process'
 require_relative 'serialize'
 
+# class represents an audio format (type/bits/channels/sample rate/...)
+# used throughout dtas
 class DTAS::Format # :nodoc:
   include DTAS::Process
   include DTAS::Serialize

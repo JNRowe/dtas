@@ -2,6 +2,8 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'yaml'
 require 'tempfile'
+
+# state file preserves state across restarts of dtas-player
 class DTAS::StateFile # :nodoc:
   attr_reader :path
 

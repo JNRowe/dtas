@@ -18,6 +18,7 @@ require_relative 'rg_state'
 require_relative 'state_file'
 require_relative 'tracklist'
 
+# the core of dtas-player(1)
 class DTAS::Player # :nodoc:
   require_relative 'player/client_handler'
   include DTAS::XS

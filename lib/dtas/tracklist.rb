@@ -3,6 +3,7 @@
 require_relative '../dtas'
 require_relative 'serialize'
 
+# the a tracklist object for -player
 # this is inspired by the MPRIS 2.0 TrackList spec
 class DTAS::Tracklist # :nodoc:
   include DTAS::Serialize

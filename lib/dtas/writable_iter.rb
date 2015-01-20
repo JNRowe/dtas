@@ -2,6 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
+# used to manage writable state for -player pipes
 module DTAS::WritableIter # :nodoc:
   attr_accessor :on_writable
   # we may use the ready_write flag to avoid an extra IO.select

@@ -1,7 +1,9 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
+
 module DTAS::ParseTime
+  # convert a string time to seconds, returning a Flot or Integer
   def parse_time(time)
     case time
     when /\A\d+\z/

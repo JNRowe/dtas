@@ -6,6 +6,7 @@ require 'socket'
 require 'io/wait'
 require 'shellwords'
 
+# a socket connection used by dtas-player clients (e.g. dtas-ctl)
 class DTAS::UNIXClient # :nodoc:
   attr_reader :to_io
 

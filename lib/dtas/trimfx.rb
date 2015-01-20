@@ -5,6 +5,8 @@ require_relative 'parse_time'
 require_relative 'format'
 require 'shellwords'
 
+# this will represent a trim section inside -splitfx for applying
+# effects to only a part of the output
 class DTAS::TrimFX
   include DTAS::ParseTime
 

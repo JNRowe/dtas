@@ -7,6 +7,7 @@ end
 require_relative '../dtas'
 require_relative 'writable_iter'
 
+# pipe wrapper for -player sinks
 class DTAS::Pipe < IO # :nodoc:
   include DTAS::WritableIter
   attr_accessor :sink

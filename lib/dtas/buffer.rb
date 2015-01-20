@@ -3,6 +3,7 @@
 require 'io/wait'
 require_relative '../dtas'
 
+# pipe buffer management for -player
 class DTAS::Buffer # :nodoc:
   begin
     raise LoadError, "no splice with _DTAS_POSIX" if ENV["_DTAS_POSIX"]

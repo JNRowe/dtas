@@ -1,7 +1,7 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-#
-# Represents ReplayGain metadata for a DTAS::Source
+
+# Represents ReplayGain metadata for a DTAS::Source, only used by -player
 # cleanup/validate values to prevent malicious files from making us
 # run arbitrary commands
 # *_peak values are 0..inf (1.0 being full scale, but >1 is possible

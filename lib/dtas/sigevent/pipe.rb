@@ -1,5 +1,8 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# used in various places for safe wakeups from IO.select via signals
+# A fallback for non-Linux systems lacking the "sleepy_penguin" RubyGem
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io
 

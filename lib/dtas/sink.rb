@@ -8,7 +8,7 @@ require_relative 'command'
 require_relative 'format'
 require_relative 'serialize'
 
-# this is a sink (endpoint, audio enters but never leaves)
+# this is a sink (endpoint, audio enters but never leaves), used by -player
 class DTAS::Sink # :nodoc:
   attr_accessor :prio    # any Integer
   attr_accessor :active  # boolean

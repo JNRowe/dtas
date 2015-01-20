@@ -3,6 +3,7 @@
 require 'socket'
 require 'io/wait'
 
+# an accepted (client) socket in dtas-player server
 class DTAS::UNIXAccepted # :nodoc:
   attr_reader :to_io
 

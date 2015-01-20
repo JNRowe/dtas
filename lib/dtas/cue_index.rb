@@ -1,6 +1,8 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
+
+# embedded CUE sheet representation for -player
 class DTAS::CueIndex
   attr_reader :offset
   attr_reader :index

@@ -1,12 +1,13 @@
 # -*- encoding: binary -*-
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-# Unlike the stuff for dtas-player, dtas-partstats is fairly tied to sox
 require_relative '../dtas'
 require_relative 'xs'
 require_relative 'process'
 require_relative 'sigevent'
 
+# backend for the dtas-partstats(1) command
+# Unlike the stuff for dtas-player, dtas-partstats is fairly tied to sox
 class DTAS::PartStats
   CMD = 'sox "$INFILE" -n $TRIMFX $SOXFX stats $STATSOPTS'
   include DTAS::Process

@@ -4,6 +4,7 @@ require 'io/wait'
 require_relative '../dtas'
 require_relative 'xs'
 
+# process management helpers
 module DTAS::Process # :nodoc:
   PIDS = {}
   include DTAS::XS
