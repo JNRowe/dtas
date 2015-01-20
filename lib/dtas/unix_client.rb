@@ -5,7 +5,6 @@ require_relative 'xs'
 require 'socket'
 require 'io/wait'
 require 'shellwords'
-require_relative 'compat_rbx'
 
 class DTAS::UNIXClient # :nodoc:
   attr_reader :to_io

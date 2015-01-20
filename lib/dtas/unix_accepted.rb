@@ -2,7 +2,6 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'socket'
 require 'io/wait'
-require_relative 'compat_rbx'
 
 class DTAS::UNIXAccepted # :nodoc:
   attr_reader :to_io
