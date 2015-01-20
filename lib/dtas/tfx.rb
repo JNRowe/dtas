@@ -7,7 +7,7 @@ require 'shellwords'
 
 # this will represent a trim section inside -splitfx for applying
 # effects to only a part of the output
-class DTAS::TrimFX
+class DTAS::TFX
   include DTAS::ParseTime
 
   attr_reader :tbeg
@@ -92,7 +92,7 @@ class DTAS::TrimFX
     end
   end
 
-  # sorts and converts an array of TrimFX objects into non-overlapping arrays
+  # sorts and converts an array of TFX objects into non-overlapping arrays
   # of epochs
   #
   # input:
@@ -139,7 +139,7 @@ class DTAS::TrimFX
     rv
   end
 
-  # like schedule, but fills in the gaps with pass-through (no-op) TrimFX objs
+  # like schedule, but fills in the gaps with pass-through (no-op) TFX objs
   # This does not change the number of epochs.
   def self.expand(ary, total_samples)
     rv = []
