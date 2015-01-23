@@ -76,7 +76,8 @@ else
     r[0].each do |io|
       case io
       when sev
-        _, status = Process.waitpid2(pid)
+        _, status = Process.waitpid2(pid, Process::WNOHANG)
+        status or next
         status.success? or abort "#{cmd} failed: #{status.inspect}"
         do_update.call
         exit
