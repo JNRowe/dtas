@@ -22,7 +22,7 @@ module DTAS::Watchable
           or_call = true
         end
       end
-      if or_call && @on_readable
+      if or_call
         @on_readable.call
         :delete
       else
