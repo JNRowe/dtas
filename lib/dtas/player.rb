@@ -120,6 +120,10 @@ class DTAS::Player # :nodoc:
     rv
   end
 
+  def to_omap(hash)
+    YAML::Omap === hash ? hash : YAML::Omap.new.merge!(hash)
+  end
+
   def self.load(hash)
     rv = new
     rv.instance_eval do
@@ -150,6 +154,7 @@ class DTAS::Player # :nodoc:
         @source_map.each do |name, src|
           src_hsh = v[name] or next
           src.load!(src_hsh)
+          src.env = to_omap(src.env)
         end
         source_map_reload
       end
@@ -161,6 +166,7 @@ class DTAS::Player # :nodoc:
       if sinks = hash["sinks"]
         sinks.each do |sink_hsh|
           sink = DTAS::Sink.load(sink_hsh)
+          sink.env = to_omap(sink.env)
           @sinks[sink.name] = sink
         end
       end

@@ -38,8 +38,8 @@ to use ecasound(1), too.
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file
-* env - hash of environment variables to set for all commands
-    env:
+* env - ordered hash of environment variables to set for all commands
+    env: !omap
       FX: vol +3dB stats
 * comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
     comments:
