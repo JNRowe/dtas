@@ -165,6 +165,7 @@ class DTAS::Format # :nodoc:
   # HH:MM:SS.frac (don't bother with more complex times, too much code)
   # part of me wants to drop this feature from playq, feels like bloat...
   def hhmmss_to_samples(hhmmss)
+    Numeric === hhmmss and return hhmmss * @rate
     time = hhmmss.dup
     rv = 0
     if time.sub!(/\.(\d+)\z/, "")

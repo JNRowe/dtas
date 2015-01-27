@@ -2,7 +2,9 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 require_relative 'parse_time'
+require_relative 'xs'
 
+# note: This is sox-specific
 # --------- time --------->
 # _____   _______   ______
 #      \ /       \ /
@@ -15,6 +17,7 @@ require_relative 'parse_time'
 # in_next  - controls the upward slope into next
 class DTAS::FadeFX # :nodoc:
   include DTAS::ParseTime
+  include DTAS::XS
 
   attr_reader :out_prev, :in_cur, :out_cur, :in_next
   F = Struct.new(:type, :flen)
@@ -26,6 +29,59 @@ class DTAS::FadeFX # :nodoc:
     %w(out_prev in_cur out_cur in_next).each do |iv|
       instance_variable_set("@#{iv}", parse!(fades.shift))
     end
+  end
+
+  def fade_cur_fx(format, tbeg, tlen, args = [])
+    fx = %W(trim #{tbeg}s #{tlen}s)
+    fx.concat(args)
+    if @in_cur && @out_cur && @in_cur.type == @out_cur.type
+      f = %W(fade #{@in_cur.type} #{@in_cur.flen} #{tlen}s #{@out_cur.flen})
+      fx.concat(f)
+    else # differing fade types for in/out, chain them:
+      fpart = @in_cur and
+        fx.concat(%W(fade #{fpart.type} #{fpart.flen} 0 0))
+      fpart = @out_cur and
+        fx.concat(%W(fade #{fpart.type} 0 #{tlen}s #{fpart.flen}))
+    end
+    fx
+  end
+
+  def fade_out_prev_fx(format, tbeg, tlen)
+    fx = %W(trim #{tbeg}s)
+
+    if fpart = @out_prev
+      out_len = format.hhmmss_to_samples(fpart.flen)
+      fx.concat(%W(fade #{fpart.type} 0 #{out_len}s #{out_len}s))
+      remain = tlen - out_len
+
+      # fade-out is longer than tlen, so truncate again:
+      remain < 0 and fx.concat(%W(trim 0 #{tlen}s))
+
+      # pad with silence, this is where fade_cur_fx goes
+      remain > 0 and fx.concat(%W(pad #{remain}s@#{out_len}s))
+    end
+    fx
+  end
+
+  def fade_in_next_fx(format, tbeg, tlen)
+    fpart = @in_next
+    flen = fpart ? fpart.flen : 0
+    nlen = format.hhmmss_to_samples(flen)
+    nbeg = tbeg + tlen - nlen
+    npad = nbeg - tbeg
+    if npad < 0
+      warn("in_next should not exceed range: #{inspect} @trim " \
+           "#{tbeg}s #{tlen}s\nclamping to #{tbeg}")
+      nbeg = tbeg
+    end
+
+    fx = %W(trim #{nbeg}s #{nlen}s)
+    nlen != 0 and
+      fx.concat(%W(fade #{fpart.type} #{nlen}s 0 0))
+
+    # likely, the pad section is where fade_cur_fx goes
+    npad > 0 and fx.concat(%W(pad #{npad}s@0s))
+    fx
   end
 
   # q - quarter of a sine wave

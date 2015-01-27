@@ -2,6 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative 'helper'
 require 'dtas/fadefx'
+require 'dtas/format'
 
 class TestFadeFX < Testcase
   def test_fadefx
@@ -14,6 +15,22 @@ class TestFadeFX < Testcase
     assert_equal 4, ffx.out_cur.flen
     assert_equal 't', ffx.in_next.type
     assert_equal 1, ffx.in_next.flen
+
+    fmt = DTAS::Format.new
+    fmt.rate = 48000
+    tbeg = 0
+    tlen = 48000 * 9
+
+    # XXX: this isn't testing much...
+    cur = ffx.fade_cur_fx(fmt, tbeg, tlen, %w(vol +3dB))
+    assert_equal(%w(trim 0s 432000s vol +3dB
+                    fade t 3.1 0 0 fade l 0 432000s 4), cur)
+    out = ffx.fade_out_prev_fx(fmt, tbeg, tlen)
+    assert_equal(%w(trim 0s
+                    fade t 0 48000s 48000s pad 384000s@48000s), out)
+    inn = ffx.fade_in_next_fx(fmt, tbeg, tlen)
+    assert_equal(%w(trim 384000s 48000s
+                    fade t 48000s 0 0 pad 384000s@0s), inn)
   end
 
   def test_fadefx_no_cur
