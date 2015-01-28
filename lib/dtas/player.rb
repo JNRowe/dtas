@@ -378,8 +378,9 @@ class DTAS::Player # :nodoc:
 
     # keep going down the list until we find something
     while source_spec = @queue.shift
+      path, off = source_spec
       @sources.each do |src|
-        rv = src.try(file, offset, @trim) and return rv
+        rv = src.try(path, off, @trim) and return rv
       end
     end
 
