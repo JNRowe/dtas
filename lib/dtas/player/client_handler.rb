@@ -1,10 +1,12 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../xs'
+require_relative '../parse_time'
 
 # client protocol handling for -player
 module DTAS::Player::ClientHandler # :nodoc:
   include DTAS::XS
+  include DTAS::ParseTime
 
   # returns true on success, wait_ctl arg on error
   def set_bool(io, kv, v)
@@ -183,6 +185,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     bytes = bytes < 0 ? 0 : bytes # maybe negative in case of sink errors
   end
 
+  # returns seek offset as an Integer in sample count
   def __seek_offset_adj(dir, offset)
     if offset.sub!(/s\z/, '')
       offset = offset.to_i
@@ -678,6 +681,32 @@ module DTAS::Player::ClientHandler # :nodoc:
       end
     else
       io.emit("NOCUE")
+    end
+  end
+
+  def trim_handler(io, msg)
+    case msg.size
+    when 0
+      io.emit({ 'trim' => @trim }.to_yaml)
+    when 1, 2
+      case msg[0]
+      when 'off'
+        @trim = nil
+      else
+        begin
+          tbeg = parse_time(msg[0])
+          if tlen = msg[1]
+            absolute = tlen.sub!(/\A=/, '') # 44:00 =44:55
+            tlen = parse_time(tlen)
+            tlen -= tbeg if absolute
+          end
+          @trim = [ tbeg, tlen ] # seconds as float, since we don't know rate
+        rescue => e
+          return io.emit("ERR #{e.message}")
+        end
+      end
+      __current_requeue
+      io.emit('OK')
     end
   end
 end

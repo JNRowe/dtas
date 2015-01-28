@@ -21,17 +21,18 @@ module DTAS::Source::File # :nodoc:
   FILE_SIVS = %w(infile comments command env) # for the "current" command
   SRC_SIVS = %w(command env tryorder)
 
-  def source_file_dup(infile, offset)
+  def source_file_dup(infile, offset, trim)
     rv = dup
-    rv.__file_init(infile, offset)
+    rv.__file_init(infile, offset, trim)
     rv
   end
 
-  def __file_init(infile, offset)
+  def __file_init(infile, offset, trim)
     @env = @env.dup
     @format = nil
     @infile = infile
     @offset = offset
+    @trim = trim
     @comments = nil
     @samples = nil
     @cuebp = nil
@@ -47,6 +48,13 @@ module DTAS::Source::File # :nodoc:
   # returns any offset in samples (relative to the original source file),
   # likely zero unless seek was used
   def offset_samples
+    off = __offset_samples
+    return off unless @trim
+    tbeg = @trim[0] * format.rate
+    tbeg < off ? off : tbeg
+  end
+
+  def __offset_samples
     return 0 unless @offset
     case @offset
     when /\A\d+s\z/
@@ -54,6 +62,16 @@ module DTAS::Source::File # :nodoc:
     else
       format.hhmmss_to_samples(@offset)
     end
+  end
+
+  # creates the effect to fill the TRIMFX env
+  def trimfx
+    return unless @offset || @trim
+    fx = "trim #{offset_samples}s"
+    if @trim && @trim[1]
+      fx << sprintf(' =%0.9gs', (@trim[0] + @trim[1]) * format.rate)
+    end
+    fx
   end
 
   # A user may be downloading the file and start playing

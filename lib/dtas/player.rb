@@ -45,6 +45,7 @@ class DTAS::Player # :nodoc:
     @sink_buf = DTAS::Buffer.new
     @current = nil
     @watchers = {}
+    @trim = nil
     @source_map = {
       "sox" => (sox = DTAS::Source::Sox.new),
       "av" => DTAS::Source::Av.new,
@@ -83,6 +84,7 @@ class DTAS::Player # :nodoc:
     rv = {}
     rv["socket"] = @socket
     rv["paused"] = @paused if @paused
+    rv["trim"] = @trim if @trim
     src_map = rv["source"] = {}
     @source_map.each do |name, src|
       src_hsh = src.to_state_hash
@@ -135,7 +137,7 @@ class DTAS::Player # :nodoc:
         v = v["buffer_size"]
         @sink_buf.buffer_size = v
       end
-      %w(socket queue paused bypass).each do |k|
+      %w(socket queue paused bypass trim).each do |k|
         v = hash[k] or next
         instance_variable_set("@#{k}", v)
       end
@@ -247,6 +249,8 @@ class DTAS::Player # :nodoc:
       io.emit(Dir.pwd)
     when "tl"
       tl_handler(io, msg)
+    when "trim"
+      trim_handler(io, msg)
     end
   end
 
@@ -367,23 +371,24 @@ class DTAS::Player # :nodoc:
     end
   end
 
-  def try_file(*args)
+  def try_file(file, offset = nil)
     @sources.each do |src|
-      rv = src.try(*args) and return rv
+      rv = src.try(file, offset, @trim) and return rv
     end
 
     # keep going down the list until we find something
     while source_spec = @queue.shift
       @sources.each do |src|
-        rv = src.try(*source_spec) and return rv
+        rv = src.try(file, offset, @trim) and return rv
       end
     end
 
     # don't get stuck in an infinite loop if @tl.repeat==true and we can't
     # decode anything (FS errors, sox uninstalled, etc...)
     while path_off = @tl.advance_track(false)
+      path, off = path_off
       @sources.each do |src|
-        rv = src.try(*path_off) and return rv
+        rv = src.try(path, off, @trim) and return rv
       end
     end
 

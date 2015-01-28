@@ -20,7 +20,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     @sox = sox
   end
 
-  def try(ymlfile, offset = nil)
+  def try(ymlfile, offset = nil, trim = nil)
     @splitfx = @ymlhash = nil
     st = File.stat(ymlfile)
     return false if !st.file? || st.size > MAX_YAML_SIZE
@@ -41,8 +41,8 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     end
     @splitfx = sfx
     @infile = ymlfile
-    sox = @sox.try(sfx.infile, offset) or return false
-    rv = source_file_dup(ymlfile, offset)
+    sox = @sox.try(sfx.infile, offset, trim) or return false
+    rv = source_file_dup(ymlfile, offset, trim)
     rv.sox = sox
     rv.env = sfx.env
     rv.sfx = sfx
@@ -66,7 +66,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     @sfx.infile_env(e, @sox.infile)
 
     # make sure these are visible to the "current" command...
-    e["TRIMFX"] = @offset ? "trim #@offset" : nil
+    e["TRIMFX"] = trimfx
     e["RGFX"] = rg_state.effect(self) || nil
     e.merge!(@rg.to_env) if @rg
 

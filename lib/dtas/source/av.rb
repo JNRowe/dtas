@@ -10,7 +10,7 @@ class DTAS::Source::Av # :nodoc:
   AV_DEFAULTS = COMMAND_DEFAULTS.merge(
     "command" =>
       'avconv -v error $SSPOS $PROBE -i "$INFILE" $AMAP -f sox - |' \
-      'sox -p $SOXFMT - $RGFX',
+      'sox -p $SOXFMT - $TRIMFX $RGFX',
 
     # this is above ffmpeg because this av is the Debian default and
     # it's easier for me to test av than ff

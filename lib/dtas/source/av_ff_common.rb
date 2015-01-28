@@ -19,8 +19,8 @@ module DTAS::Source::AvFfCommon # :nodoc:
   attr_reader :precision # always 32
   attr_reader :format
 
-  def try(infile, offset = nil)
-    rv = source_file_dup(infile, offset)
+  def try(infile, offset = nil, trim = nil)
+    rv = source_file_dup(infile, offset, trim)
     rv.av_ff_ok? or return
     rv
   end
@@ -101,10 +101,20 @@ module DTAS::Source::AvFfCommon # :nodoc:
     ! @astreams.compact.empty?
   end
 
-  def sspos(offset)
-    offset =~ /\A(\d+)s\z/ or return "-ss #{offset}"
-    samples = $1.to_f
-    sprintf("-ss %0.9g", samples / @format.rate)
+  def sspos
+    return unless @offset || @trim
+    off = offset_samples / @format.rate.to_f
+    sprintf('-ss %0.9g', off)
+  end
+
+  def av_ff_trimfx # for sox
+    return unless @trim
+    tbeg, tlen = @trim # Floats
+    tend = tbeg + tlen
+    off = offset_samples / @format.rate.to_f
+    tlen = tend - off
+    tlen = 0 if tlen < 0
+    sprintf('trim 0 %0.9g', tlen)
   end
 
   def select_astream(as)
@@ -150,8 +160,9 @@ module DTAS::Source::AvFfCommon # :nodoc:
     # make sure these are visible to the source command...
     e["INFILE"] = @infile
     e["AMAP"] = amap
-    e["SSPOS"] = @offset ? sspos(@offset) : nil
+    e["SSPOS"] = sspos
     e["RGFX"] = rg_state.effect(self) || nil
+    e["TRIMFX"] = av_ff_trimfx
     e.merge!(@rg.to_env) if @rg
 
     @pid = dtas_spawn(e, command_string, opts)

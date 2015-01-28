@@ -38,13 +38,13 @@ class DTAS::Source::Sox # :nodoc:
     command_init(SOX_DEFAULTS)
   end
 
-  def try(infile, offset = nil)
+  def try(infile, offset = nil, trim = nil)
     err = ""
     cmd = %W(soxi -s #{infile})
     s = qx(@env.dup, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
     self.class.try_to_fail_harder(infile, s, cmd) or return
-    source_file_dup(infile, offset)
+    source_file_dup(infile, offset, trim)
   end
 
   def format
@@ -81,7 +81,7 @@ class DTAS::Source::Sox # :nodoc:
     e["INFILE"] = @infile
 
     # make sure these are visible to the "current" command...
-    e["TRIMFX"] = @offset ? "trim #@offset" : nil
+    e["TRIMFX"] = trimfx
     e["RGFX"] = rg_state.effect(self) || nil
     e.merge!(@rg.to_env) if @rg
 

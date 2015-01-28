@@ -283,6 +283,18 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * tl tracks
   returns a list of all TRACKIDS in the tracklist
 
+* trim [off|TBEG [TLEN]]
+  Limits playback of all tracks in the tracklist to the time starting
+  at TBEG and ending after TLEN has elapsed.  Not specifying TLEN will
+  cause sox.  Like the sox "trim" effect, prefixing TLEN with a '='
+  will be interpreted as an absolute stop time.
+  Both TBEG and TLEN should be specified in seconds, not sample counts.
+  Specifying "off" (without quotes) disables trim.
+  This feature is intended to allow users to "zoom-in" on a particular
+  portion of a track to tweak parameters (either with
+  dtas-sourceedit(1) or via playback of splitfx YAML files) and often
+  combined with looping the tracklist (via "tl repeat").
+
 * watch - adds the client to the passive watch list for notifications.
   It is recommended clients issue no further commands and open
   another client socket to issue non-watch commands.
