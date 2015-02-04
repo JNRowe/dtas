@@ -12,7 +12,6 @@ module DTAS::Buffer::Splice # :nodoc:
   MAX_SIZE = File.read("/proc/sys/fs/pipe-max-size").to_i
   DEVNULL = File.open("/dev/null", "r+")
   F_MOVE = IO::Splice::F_MOVE
-  WAITALL = IO::Splice::WAITALL
 
   def buffer_size
     @to_io.pipe_size
@@ -44,6 +43,26 @@ module DTAS::Buffer::Splice # :nodoc:
     nil # do not return error here, we already spewed an error message
   end
 
+  def __tee_in_full(src, dst, bytes)
+    rv = 0
+    while bytes > 0
+      s = IO.tee(src, dst, bytes)
+      bytes -= s
+      rv += s
+    end
+    rv
+  end
+
+  def __splice_in_full(src, dst, bytes, flags)
+    rv = 0
+    while bytes > 0
+      s = IO.splice(src, nil, dst, nil, bytes, flags)
+      rv += s
+      bytes -= s
+    end
+    rv
+  end
+
   # returns the largest value we teed
   def __broadcast_tee(blocked, targets, chunk_size)
     most_teed = 0
@@ -51,7 +70,7 @@ module DTAS::Buffer::Splice # :nodoc:
       begin
         t = (dst.nonblock? || most_teed == 0) ?
             IO.trytee(@to_io, dst, chunk_size) :
-            IO.tee(@to_io, dst, chunk_size, WAITALL)
+            __tee_in_full(@to_io, dst, chunk_size)
         if Integer === t
           if t > most_teed
             chunk_size = t if most_teed == 0
@@ -117,7 +136,7 @@ module DTAS::Buffer::Splice # :nodoc:
         end
       else
         # the blocking case is simple
-        s = IO.splice(@to_io, nil, last, nil, bytes, WAITALL|F_MOVE)
+        s = __splice_in_full(@to_io, last, bytes, F_MOVE)
       end
       @bytes_xfer += s
 
