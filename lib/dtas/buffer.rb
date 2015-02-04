@@ -48,14 +48,14 @@ class DTAS::Buffer # :nodoc:
   # - subset of targets array for :wait_writable
   # - some type of StandardError
   # - nil
-  def broadcast(targets)
+  def broadcast(targets, limit = nil)
     case targets.size
     when 0
       :ignore # this will pause decoders
     when 1
-      broadcast_one(targets)
+      broadcast_one(targets, limit)
     else # infinity
-      broadcast_inf(targets)
+      broadcast_inf(targets, limit)
     end
   end
 

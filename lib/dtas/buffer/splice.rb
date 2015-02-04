@@ -28,9 +28,10 @@ module DTAS::Buffer::Splice # :nodoc:
     IO.splice(@to_io, nil, DEVNULL, nil, bytes)
   end
 
-  def broadcast_one(targets)
+  def broadcast_one(targets, limit = nil)
     # single output is always non-blocking
-    s = IO.trysplice(@to_io, nil, targets[0], nil, MAX_AT_ONCE_1, F_MOVE)
+    limit ||= MAX_AT_ONCE_1
+    s = IO.trysplice(@to_io, nil, targets[0], nil, limit, F_MOVE)
     if Symbol === s
       targets # our one and only target blocked on write
     else
@@ -88,7 +89,7 @@ module DTAS::Buffer::Splice # :nodoc:
     most_teed
   end
 
-  def broadcast_inf(targets)
+  def broadcast_inf(targets, limit = nil)
     if targets.all?(&:ready_write_optimized?)
       blocked = []
     elsif targets.none?(&:nonblock?)
@@ -105,7 +106,7 @@ module DTAS::Buffer::Splice # :nodoc:
     end
 
     # don't pin too much on one target
-    bytes = MAX_AT_ONCE
+    bytes = limit || MAX_AT_ONCE
     last = targets.pop # we splice to the last one, tee to the rest
 
     # this may return zero if all targets were non-blocking

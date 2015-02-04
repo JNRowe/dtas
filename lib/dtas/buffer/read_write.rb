@@ -26,9 +26,9 @@ module DTAS::Buffer::ReadWrite # :nodoc:
   end
 
   # always block when we have a single target
-  def broadcast_one(targets)
+  def broadcast_one(targets, limit = nil)
     buf = _rbuf
-    @to_io.read_nonblock(MAX_AT_ONCE, buf)
+    @to_io.read_nonblock(limit || MAX_AT_ONCE, buf)
     n = targets[0].write(buf) # IO#write has write-in-full behavior
     @bytes_xfer += n
     :wait_readable
@@ -42,7 +42,7 @@ module DTAS::Buffer::ReadWrite # :nodoc:
     nil # do not return error here, we already spewed an error message
   end
 
-  def broadcast_inf(targets)
+  def broadcast_inf(targets, limit = nil)
     nr_nb = targets.count(&:nonblock?)
     if nr_nb == 0 || nr_nb == targets.size
       # if all targets are full, don't start until they're all writable
@@ -61,7 +61,8 @@ module DTAS::Buffer::ReadWrite # :nodoc:
 
     # don't pin too much on one target
     bytes = inflight
-    bytes = bytes > MAX_AT_ONCE ? MAX_AT_ONCE : bytes
+    limit ||= MAX_AT_ONCE
+    bytes = bytes > limit ? limit : bytes
     buf = _rbuf
     @to_io.read(bytes, buf)
     n = buf.bytesize
