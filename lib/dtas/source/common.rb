@@ -1,7 +1,7 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 module DTAS::Source::Common # :nodoc:
-  attr_reader :dst_zero_byte
+  attr_reader :dst_zero_byte # first byte this source object saw
   attr_reader :dst
   attr_accessor :requeued
 
