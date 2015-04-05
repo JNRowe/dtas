@@ -1,0 +1,61 @@
+% dtas-archive(1) dtas user manual
+%
+
+# NAME
+
+dtas-archive - paranoid audio file copy
+
+# SYNOPSYS
+
+dtas-archive [OPTIONS] SOURCE DESTINATION
+
+# DESCRIPTION
+
+dtas-archive is intended for archiving audio data to/from laptops and
+computers without ECC memory, attempting to read data multiple times in
+an attempt to detect memory corruption.  dtas-archive may only be
+effective on machines running the Linux kernel where posix_fadvise(2)
+can be used to drop caches for a particular file after fsync(2).
+
+dtas-archive spawns sox(1) to archive audio data (likely uncompressed
+WAVE) to FLAC and verifies the result using sndfile-cmp(1), a tool
+implemented by different than sox and less likely to share the same bugs
+(if any) as sox.
+
+# OPTIONS
+
+-j, \--jobs [JOBS]
+:    Number of jobs to run in parallel.  Incrementing this may hurt
+     performance on slow storage devices.  Default: 1
+
+-n, \--dry-run
+:    Print, but do not run the commands to be executed
+
+-s, \--quiet, \--silent
+:    Silent operation, commands are not printed as executed
+
+-S, \--stats
+:    Run and save the text output of the sox "stats" effect as
+     $DESTINATION_FILE_WITHOUT_SUFFIX.stats next to the output file
+
+-k, \--keep-going
+:    Continue after error
+
+-r, \--repeat [COUNT]
+:    Number of times to repeat the sndfile-cmp(1) check.  Default: 1
+
+# COPYRIGHT
+
+Copyright 2015 all contributors <dtas-all@nongnu.org>.\
+License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+
+# CONTACT
+
+All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
+Mailing list archives available at <http://80x24.org/dtas-all/> and
+<ftp://lists.gnu.org/dtas-all/>\
+No subscription is necessary to post to the mailing list.
+
+# SEE ALSO
+
+sndfile-cmp(1), sox(1)

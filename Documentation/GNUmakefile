@@ -18,6 +18,7 @@ m1 += dtas-sinkedit
 m1 += dtas-sourceedit
 m1 += dtas-tl
 m1 += dtas-splitfx
+m1 += dtas-archive
 
 m7 =
 m7 += dtas-player_protocol

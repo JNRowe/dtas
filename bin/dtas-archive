@@ -1,0 +1,187 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+usage = "#$0 SOURCE DESTINATION"
+
+# We could use the equivalent sox command here, but some folks working on
+# dtas is more likely to write patches for sox (and thus introduce bugs
+# into it), so we'll use sndfile-cmp as it lives in a different source tree
+%w(sndfile-cmp sox).each do |cmd|
+  `which #{cmd} 2>/dev/null`.chomp.empty? and abort "#{cmd} not found in PATH"
+end
+
+RUBY_PLATFORM =~ /linux/ or
+  warn "#$0 is unproven without Linux kernel fadvise semantics"
+have_advise = IO.instance_methods.include?(:advise)
+have_advise or warn "#$0 does not work reliably without IO#advise support"
+
+require 'shellwords'
+require 'fileutils'
+require 'find'
+require 'optparse'
+Thread.abort_on_exception = true
+dry_run = false
+silent = false
+type = 'flac'
+jobs = 1
+repeat = 1
+stats = false
+keep_going = false
+
+OptionParser.new('', 24, '  ') do |op|
+  op.banner = usage
+  op.on('-t', '--type [TYPE]', 'FILE-TYPE (default: flac)') { |t| type = t }
+  op.on('-j', '--jobs [JOBS]', Integer) { |j| jobs = j }
+  op.on('-S', '--stats', 'save stats on the file') { stats = true }
+  op.on('-k', '--keep-going', 'continue after error') { keep_going = true }
+  op.on('-n', '--dry-run', 'only print commands, do not run them') do
+    dry_run = true
+  end
+  op.on('-r', '--repeat [COUNT]', 'number of times to check', Integer) do |r|
+    repeat = r
+  end
+  op.on('-s', '--quiet', '--silent') { silent = true }
+  op.on('-h', '--help') do
+    puts(op.to_s)
+    exit
+  end
+  op.parse!(ARGV)
+end
+
+dst = ARGV.pop
+src = ARGV.dup
+
+FileUtils.mkpath(dst) unless File.exist?(dst)
+src_files = Hash.new { |h,dest_dir| h[dest_dir] = [] }
+
+src.each do |s|
+  src_st = File.stat(s)
+  if src_st.directory?
+    Find.find(s) do |path|
+      File.file?(path) or next
+      dir = File.dirname(path)
+      dir_st = File.stat(dir)
+      if dir_st.ino == src_st.ino && dir_st.dev == src_st.dev
+        src_files['.'] << path
+      else
+        dir = File.basename(File.dirname(path))
+        src_files[dir] << path
+      end
+    end
+  else
+    src_files['.'] << s
+  end
+end
+
+pairs = []
+type = ".#{type}" unless type.start_with?('.')
+
+src_files.each do |dir, files|
+  dir = dir == '.' ? dst : File.join(dst, dir)
+  if dry_run || !silent
+    puts "mkdir -p #{Shellwords.escape(dir)}"
+  end
+  FileUtils.mkpath(dir) unless dry_run
+
+  files.each do |path|
+    base = File.basename(path).sub(/\.[^\.]+\z/, type)
+    out = File.join(dir, base)
+    pairs << [ path, out ]
+  end
+end
+
+mtx = Mutex.new # protects fails and pairs
+fails = []
+mismatches = []
+
+on_fail = lambda do |job, status|
+  mtx.synchronize do
+    pairs.clear unless keep_going
+    fails << [ job, status ]
+  end
+end
+
+on_mismatch = lambda do |job, status|
+  mtx.synchronize do
+    mismatches << [ job, status ]
+  end
+end
+
+exiting = false
+%w(INT TERM).each do |s|
+  trap(s) do
+    warn "Caught SIG#{s}, stopping gracefully..."
+    exiting = true
+    trap(s, 'DEFAULT') # non-graceful if signaled again
+  end
+end
+
+thrs = jobs.times.map do |i|
+  Thread.new do
+    while job = mtx.synchronize { pairs.shift }
+      break if exiting
+
+      input, output = *job
+
+      unless system('soxi', '-s', input, out: IO::NULL, err: IO::NULL)
+        warn "skipping #{input.inspect}, not an audio file"
+        next
+      end
+
+      stats_out = "#{output.sub(/\.[\.]+\z/, '')}.stats" if stats
+
+      if dry_run || !silent
+        names = job.map { |x| Shellwords.escape(x) }
+        cmd = [ 'sox', *names ]
+        if stats
+          cmd << 'stats'
+          cmd << "2>#{Shellwords.escape(stats_out)}"
+        end
+
+        puts cmd.join(' ')
+        cmpcmd = "sndfile-cmp #{names[0]} #{names[1]}"
+        if dry_run
+          puts cmpcmd
+          next
+        end
+      end
+
+      cmd = [ 'sox', input, output ]
+      if stats
+        cmd << 'stats'
+        cmd = [ *cmd, { err: stats_out } ]
+      end
+      system(*cmd) or on_fail.call(job, $?)
+
+      # clear kernel caches, this relies on Linux behavior
+      repeat.times do
+        if have_advise
+          th = Thread.new { File.open(input) { |fp| fp.advise(:dontneed) } }
+          File.open(output, 'ab') do |fp|
+            fp.fsync
+            fp.advise(:dontneed)
+          end
+          th.join
+        end
+
+        puts cmpcmd unless silent
+        system('sndfile-cmp', input, output) or on_mismatch.call(job, $?)
+      end
+      st = File.stat(input)
+      File.utime(st.atime, st.mtime, output)
+    end
+  end
+end
+
+thrs.each(&:join)
+ok = true
+fails.each do |job, status|
+  $stderr.puts "#{job.inspect} failed: #{status.inspect}"
+  ok = false
+end
+mismatches.each do |job, status|
+  $stderr.puts "#{job.inspect} mismatched: #{status.inspect}"
+  ok = false
+end
+
+exit ok
