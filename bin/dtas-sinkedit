@@ -1,42 +1,102 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+require 'optparse'
 require 'dtas/edit_client'
+require 'dtas/sigevent'
+require 'dtas/watchable'
 include DTAS::EditClient
 c = client_socket
 sinks = c.req('sink ls') || "(unknown)"
-usage = "Usage: #{DTAS_PROGNAME} SINKNAME\n" \
+usage = "Usage: #{DTAS_PROGNAME} [OPTIONS] SINKNAME\n" \
         "available SINKNAME values: #{sinks}"
+dry_run = verbose = false
+watch = defined?(DTAS::Watchable)
+
+OptionParser.new('', 24, '  ') do |op|
+  op.banner = usage
+  watch and
+    op.on('-N', '--no-watch', 'disable inotify support') { watch = false }
+
+  op.on('-n', '--dry-run', 'only print commands, do not run them') {
+    dry_run = true
+  }
+  op.on('-V', '--verbose', 'print out commands sent to change the sink') {
+    verbose = true
+  }
+  op.on('-h', '--help') { puts(op.to_s); exit }
+  op.parse!(ARGV)
+end
+
 ARGV.size == 1 or abort usage
 name = ARGV[0]
 
-tmp = tmpyaml
+st_in = $stdin.stat
+
 buf = c.req(%W(sink cat #{name}))
 abort(buf) if buf =~ /\AERR/
 orig = YAML.load(buf)
 
-tmp.write(buf << DTAS_DISCLAIMER)
-cmd = "#{editor} #{tmp.path}"
-system(cmd) or abort "#{cmd} failed: #$?"
-sink = YAML.load(File.read(tmp.path))
+commit_update = lambda do |buf|
+  sink = YAML.load(buf)
+  cmd = %W(sink ed #{name})
+  update_cmd_env(cmd, orig, sink)
 
-cmd = %W(sink ed #{name})
-update_cmd_env(cmd, orig, sink)
+  # both of these default to false
+  %w(nonblock active).each do |field|
+    cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
+  end
 
-# both of these default to false
-%w(nonblock active).each do |field|
-  cmd << "#{field}=#{sink[field] ? 'true' : 'false'}"
+  %w(prio).each do |field|
+    value = sink[field] and cmd << "#{field}=#{value}"
+  end
+
+  %w(pipe_size).each { |field| cmd << "#{field}=#{sink[field]}" }
+
+  # nil OK
+  %w(command).each do |field|
+    cmd << "#{field}=#{sink[field]}"
+  end
+
+  warn(Shellwords.join(cmd)) if verbose || dry_run
+  c.req_ok(cmd) unless dry_run
+  orig = sink
 end
 
-%w(prio).each do |field|
-  value = sink[field] and cmd << "#{field}=#{value}"
+if st_in.file? || st_in.pipe?
+  buf = $stdin.read
+  commit_update.call(buf)
+else
+  include DTAS::SpawnFix
+  tmp = tmpyaml
+  tmp_path = tmp.path
+  do_update = lambda { commit_update.call(File.read(tmp_path)) }
+  tmp.write(buf << DTAS_DISCLAIMER)
+  cmd = "#{editor} #{tmp_path}"
+
+  sev = DTAS::Sigevent.new
+  rset = [ sev ]
+  if watch
+    ino = DTAS::Watchable::InotifyReadableIter.new
+    ino.watch_file(tmp_path, do_update)
+    rset << ino
+  end
+
+  trap(:CHLD) { sev.signal }
+  pid = spawn(cmd)
+  begin
+    r = IO.select(rset) or next
+    r[0].each do |io|
+      case io
+      when sev
+        _, status = Process.waitpid2(pid, Process::WNOHANG)
+        status or next
+        status.success? or abort "#{cmd} failed: #{status.inspect}"
+        do_update.call
+        exit
+      when ino
+        ino.readable_iter # calls do_update
+      end
+    end
+  end while true
 end
-
-%w(pipe_size).each { |field| cmd << "#{field}=#{sink[field]}" }
-
-# nil OK
-%w(command).each do |field|
-  cmd << "#{field}=#{sink[field]}"
-end
-
-c.req_ok(cmd)
