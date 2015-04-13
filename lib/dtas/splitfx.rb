@@ -298,7 +298,7 @@ class DTAS::SplitFX # :nodoc:
       samples = @t2s.call(stop_time)
       prev = @tracks.last and prev.commit(samples)
     else
-      raise ArgumentError, "unknown command: #{xs(Array(cmd))}"
+      raise ArgumentError, "unknown command: #{xs(cmd)}"
     end
   end
 

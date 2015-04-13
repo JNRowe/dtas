@@ -99,6 +99,6 @@ module DTAS::Process # :nodoc:
     _, status = Process.waitpid2(pid)
     return res if status.success?
     return status if no_raise
-    raise RuntimeError, "`#{xs(Array(cmd))}' failed: #{status.inspect}"
+    raise RuntimeError, "`#{xs(cmd)}' failed: #{status.inspect}"
   end
 end

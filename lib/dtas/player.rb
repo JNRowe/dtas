@@ -60,7 +60,7 @@ class DTAS::Player # :nodoc:
   end
 
   def wall(msg)
-    __wall(xs(Array(msg)))
+    __wall(xs(msg))
   end
 
   def __wall(msg)

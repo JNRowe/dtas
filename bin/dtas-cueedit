@@ -49,7 +49,7 @@ ARGV.each do |file|
     # avoid an expensive update if the user didn't change anything
     current = File.binread(tmp.path)
     if current == original
-      $stderr.puts "tags for #{xs(Array(file))} unchanged" if $DEBUG
+      $stderr.puts "tags for #{xs(file)} unchanged" if $DEBUG
       next
     end
 
@@ -65,7 +65,7 @@ ARGV.each do |file|
       warn err_msg(cmd, $?)
       warn "E: restoring original from backup"
       x!(*%W(metaflac --import-cuesheet-from=#{backup.path} #{file}))
-      warn "E: backup cuesheet restored, #{xs(Array(file))} unchanged"
+      warn "E: backup cuesheet restored, #{xs(file)} unchanged"
       exit(false)
     end
   ensure

@@ -535,7 +535,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       begin
         sf.dump(self)
       rescue => e
-        return io.emit("ERR dumping to #{xs(Array(dest))} #{e.message}")
+        return io.emit("ERR dumping to #{xs(dest)} #{e.message}")
       end
     end
     io.emit("OK")
