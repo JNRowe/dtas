@@ -158,7 +158,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
 
     e["PROBE"] = @probe_harder ? @probe_harder.join(' ') : nil
     # make sure these are visible to the source command...
-    e["INFILE"] = @infile
+    e["INFILE"] = xs(@infile)
     e["AMAP"] = amap
     e["SSPOS"] = sspos
     e["RGFX"] = rg_state.effect(self) || nil

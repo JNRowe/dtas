@@ -362,8 +362,10 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def infile_env(env, infile)
-    env["INFILE"] = infile
-    env["INDIR"], env["INBASE"] = File.split(File.expand_path(infile))
+    env["INFILE"] = xs(infile)
+    dir, base = File.split(File.expand_path(infile))
+    env["INDIR"] = xs(dir)
+    env["INBASE"] = xs(base)
   end
 
   def _expand_cmd(env, command)

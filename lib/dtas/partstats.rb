@@ -55,7 +55,7 @@ class DTAS::PartStats
     rd, wr = IO.pipe
     env = opts[:env]
     env = env ? env.dup : {}
-    env["INFILE"] = @infile
+    env["INFILE"] = xs(@infile)
     env["TRIMFX"] = "trim #{trim_part.tbeg}s #{trim_part.tlen}s"
     opts = { pgroup: true, close_others: true, err: wr }
     pid = spawn(env, CMD, opts)
