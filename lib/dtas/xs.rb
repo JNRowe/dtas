@@ -9,6 +9,6 @@ require 'shellwords'
 # again, filesystems can use any byte value in names except '\0'.
 module DTAS::XS # :nodoc:
   def xs(ary)
-    Shellwords.join(ary.map(&:b))
+    Shellwords.join(Array(ary).map(&:b))
   end
 end
