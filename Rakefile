@@ -6,7 +6,7 @@ task "NEWS" do
   latest = nil
   fp = Tempfile.new("NEWS", ".")
   fp.sync = true
-  `git tag -l`.split(/\n/).reverse.each do |tag|
+  `git tag -l --sort=-v:refname`.split(/\n/).each do |tag|
     %r{\Av(.+)} =~ tag or next
     version = $1
     header, subject, body = `git cat-file tag #{tag}`.split(/\n\n/, 3)
