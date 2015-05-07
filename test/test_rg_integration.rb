@@ -1,8 +1,10 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require './test/player_integration'
+require 'dtas/util'
 class TestRgIntegration < Testcase
   include PlayerIntegration
+  include DTAS::Util
 
   def tmp_pluck(len = 5)
     pluck = Tempfile.open(%w(pluck .flac))
@@ -58,10 +60,10 @@ class TestRgIntegration < Testcase
       assert_match expect, cur["current"]["env"]["RGFX"]
     end
 
-    check_gain.call(%r{vol -3dB}, "album_gain")
-    check_gain.call(%r{vol -2dB}, "track_gain")
-    check_gain.call(%r{vol 1\.3}, "track_peak")
-    check_gain.call(%r{vol 1\.0}, "album_peak")
+    check_gain.call(%r{gain -3}, "album_gain")
+    check_gain.call(%r{gain -2}, "track_gain")
+    check_gain.call(%r{gain 0\.0}, "album_peak")
+    check_gain.call(%r{gain 2\.5}, "track_peak")
 
     s.req_ok("rg preamp+=1")
     rg = YAML.load(yaml = s.req("rg"))

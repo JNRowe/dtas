@@ -5,8 +5,10 @@
 # MAYBE: account for non-standard reference loudness (89.0 dB is standard)
 require_relative '../dtas'
 require_relative 'serialize'
+require_relative 'util'
 class DTAS::RGState # :nodoc:
   include DTAS::Serialize
+  include DTAS::Util
 
   RG_MODE = {
     # attribute name => method to use
@@ -53,19 +55,19 @@ class DTAS::RGState # :nodoc:
     to_hash.delete_if { |k,v| RG_DEFAULT[k] == v }
   end
 
-  # returns a dB argument to the "vol" effect, nil if nothing found
+  # returns a dB argument to the "gain" effect, nil if nothing found
   def rg_vol_gain(val)
     val = val.to_f + @preamp
     return if val.abs < @gain_threshold
-    sprintf('vol %0.8gdB', val)
+    sprintf('gain %0.8g', val)
   end
 
-  # returns a linear argument to the "vol" effect
+  # returns a DB argument to the "gain" effect
   def rg_vol_norm(val)
     diff = @norm_level - val.to_f
     return if (@norm_level - diff).abs < @norm_threshold
     diff += @norm_level
-    sprintf('vol %0.8g', diff)
+    sprintf('gain %0.8g', linear_to_db(diff))
   end
 
   # The ReplayGain fallback adjustment value (in dB), in case a file is
@@ -77,7 +79,7 @@ class DTAS::RGState # :nodoc:
     val = @fallback_gain + @preamp
     return if val.abs < @gain_threshold
     warn(reason) if $DEBUG
-    "vol #{val}dB"
+    "gain #{val}"
   end
 
   # returns an array (for command-line argument) for the effect needed
