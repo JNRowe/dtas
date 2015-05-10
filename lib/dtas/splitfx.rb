@@ -165,7 +165,13 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def splitfx_spawn(target, t, opts)
-    target = @targets[target] || generic_target(target)
+    generic = false
+    if tgt = @targets[target]
+      target = tgt
+    else
+      generic = true
+      target = generic_target(target)
+    end
     outfmt = target["format"]
 
     # default format:
@@ -178,7 +184,9 @@ class DTAS::SplitFX # :nodoc:
     # as a self-describing format to the actual encoding instances
     player_cmd = @command
     suffix = outfmt.type
-    outfmt.type = 'sox' if player_cmd
+    if player_cmd && generic
+      outfmt.type = 'sox'
+    end
     env = outfmt.to_env
 
     # set very high quality resampling if using 24-bit or higher output
