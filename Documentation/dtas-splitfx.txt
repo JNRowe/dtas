@@ -41,6 +41,10 @@ to use ecasound(1), too.
     (by default, an empty string) $OUTDIR environment variable
     in the output command.
 
+-C, \--compression FACTOR
+:    Set the compression factor passed to sox(1).  See soxformat(7)
+    for more information on how it works across different formats.
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file

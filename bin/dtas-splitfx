@@ -15,6 +15,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-s', '--quiet', '--silent') { |val| opts[:silent] = true }
   op.on('-D', '--no-dither') { |val| opts[:no_dither] = true }
   op.on('-O', '--outdir OUTDIR') { |val| opts[:outdir] = val }
+  op.on('-C', '--compression FACTOR') { |val| opts[:compression] = val }
   op.parse!(ARGV)
 end
 

@@ -56,6 +56,7 @@ class DTAS::SplitFX # :nodoc:
     @t2s = method(:t2s)
     @infile = nil
     @outdir = nil
+    @compression = nil
     @targets = {
       "flac-cdda" => {
         "command" => CMD,
@@ -196,7 +197,9 @@ class DTAS::SplitFX # :nodoc:
     end
     env["COMMENTS"] = "--comment-file=#{comments.path}"
     infile_env(env, @infile)
-    env["OUTFMT"] = xs(outfmt.to_sox_arg)
+    outarg = outfmt.to_sox_arg
+    outarg << "-C#@compression" if @compression
+    env["OUTFMT"] = xs(outarg)
     env["SUFFIX"] = outfmt.type
     env["OUTDIR"] = @outdir ? "#@outdir/".squeeze('/') : ''
     env.merge!(t.env)
@@ -329,6 +332,7 @@ class DTAS::SplitFX # :nodoc:
       require 'fileutils'
       FileUtils.mkpath(@outdir)
     end
+    @compression = opts[:compression]
 
     fails = []
     tracks = @tracks.dup
