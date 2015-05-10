@@ -69,12 +69,13 @@ class DTAS::Tracklist # :nodoc:
   def advance_track(repeat_ok = true)
     return if @list.empty?
     # @repeat == 1 for single track repeat
-    next_pos = @goto_pos || @pos + (@repeat == 1 ? 0 : 1)
+    repeat = repeat_ok ? @repeat : false
+    next_pos = @goto_pos || @pos + (repeat == 1 ? 0 : 1)
     next_off = @goto_off # nil by default
     @goto_pos = @goto_off = nil
     if @list[next_pos]
       @pos = next_pos
-    elsif @repeat && repeat_ok
+    elsif repeat
       next_pos = @pos = 0
     else
       return
