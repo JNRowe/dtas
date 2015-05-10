@@ -46,7 +46,7 @@ to use ecasound(1), too.
 * infile - string, the pathname of the original audio file
 * env - ordered hash of environment variables to set for all commands
     env: !omap
-      FX: vol +3dB stats
+      FX: gain 3 stats
 * comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
     comments:
       ARTIST: John Smith
@@ -118,7 +118,7 @@ use in targets:
 * RATEFX - rate effect and arguments for sox(1) resampling
 * DITHERFX - dither effect and arguments for sox(1) dithering
 * FX - any user-specified sox effects which encompases the entire file.
-  (e.g. "highpass 35 vol +3dB stats")
+  (e.g. "highpass 35 gain 3 stats")
 
 # TARGETS
 
@@ -150,8 +150,8 @@ imbalance in a live concert recording from the audience:
     targets:
       flac24:
         command: sox -M
-          "|sox $INFILE -c1 -p $TRIMFX remix 1v1 vol +9.5dB"
-          "|sox $INFILE -c1 -p $TRIMFX remix 2v1 vol +8.5dB"
+          "|sox $INFILE -c1 -p $TRIMFX remix 1v1 gain 9.5"
+          "|sox $INFILE -c1 -p $TRIMFX remix 2v1 gain 8.5"
           $COMMENTS $OUTFMT
           ${OUTDIR}bandYYYY-MM-DD.FOO.t0"$TRACKNUMBER.$SUFFIX"
           $RATEFX $DITHERFX stats

@@ -7,9 +7,9 @@ They are applied in the order described.
   rely on inter-track information.
 
   Examples include:
-  - ReplayGain (simple vol/gain changes)
+  - ReplayGain (simple gain changes)
   - anything which does not change the length of the audio:
-    vol, stereo, highpass, lowpass, loudness, bass, treble, equalizer, ...
+    gain, stereo, highpass, lowpass, loudness, bass, treble, equalizer, ...
 
   Modifying source effects should introduce no extra gaps in playback.
   Effects which modify the length of the audio is not recommended here,
@@ -34,7 +34,7 @@ They are applied in the order described.
   - delaying a certain channel or frequency range for time-alignment
   - compressors/limiters
   - reverb
-  - vol
+  - gain
   - remix (for stereo image adjustments)
 
   Additionally, effects which are necessary due to the limitation of the

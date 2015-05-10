@@ -24,7 +24,7 @@ INFILE - the primary input file for playback or processing.
 (e.g. "/path/to/ex.flac")
 
 RGFX - the sox effect used for applying ReplayGain compensation.
-Only used during playback in dtas-player.  (e.g. "vol -6.0dB").
+Only used during playback in dtas-player.  (e.g. "gain -6.0").
 Removing this prevents ReplayGain from working and may damage
 playback equipment with loudly mastered music.
 

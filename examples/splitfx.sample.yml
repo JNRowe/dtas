@@ -17,7 +17,7 @@ env: !omap
   SOX_OPTS: $SOX_OPTS -R
   FX:
     # highpass -1 120 highpass 40 highpass 40
-    # vol +1.5dB
+    # gain 1.5
     stats
 track_start: 1 # 0 for pregap/intro tracks
 cdda_align: true

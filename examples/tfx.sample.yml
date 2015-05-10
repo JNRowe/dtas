@@ -16,8 +16,8 @@ comments:
 track_start: 1
 effects:
 # the following commands are equivalent
-- trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX vol -6dB
-- trim 52 1 sox vol -6dB # shorthand
+- trim 52 =53 sh sox $SOXIN $SOXOUT $TRIMFX gain -6
+- trim 52 1 sox gain -6 # shorthand
 
 # as are the following (for little endian machines)
 - trim 52 1 eca -eadb:-6
