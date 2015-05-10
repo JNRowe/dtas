@@ -173,6 +173,12 @@ class DTAS::SplitFX # :nodoc:
       outfmt = @infmt.dup
       outfmt.type = "flac"
     end
+
+    # player commands will use SOXFMT by default, so we must output that
+    # as a self-describing format to the actual encoding instances
+    player_cmd = @command
+    suffix = outfmt.type
+    outfmt.type = 'sox' if player_cmd
     env = outfmt.to_env
 
     # set very high quality resampling if using 24-bit or higher output
@@ -204,7 +210,7 @@ class DTAS::SplitFX # :nodoc:
     outarg = outfmt.to_sox_arg
     outarg << "-C#@compression" if @compression
     env["OUTFMT"] = xs(outarg)
-    env["SUFFIX"] = outfmt.type
+    env["SUFFIX"] = suffix
     env["OUTDIR"] = @outdir ? "#@outdir/".squeeze('/') : ''
     env.merge!(t.env)
 
@@ -215,7 +221,7 @@ class DTAS::SplitFX # :nodoc:
     # already takes those into account.  In other words, use our
     # target-specific commands like a dtas-player sink:
     #   @command | (INFILE= FX= TRIMFX=; target['command'])
-    if player_cmd = @command
+    if player_cmd
       sub_env = { 'INFILE' => '-', 'FX' => '', 'TRIMFX' => '' }
       sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=#{v} " }
       command = "#{player_cmd} | (#{sub_env_s}; #{command})"
