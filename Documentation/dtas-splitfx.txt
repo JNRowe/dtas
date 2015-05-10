@@ -45,6 +45,12 @@ to use ecasound(1), too.
 :    Set the compression factor passed to sox(1).  See soxformat(7)
     for more information on how it works across different formats.
 
+-r, \--rate RATE
+:    Override the output sample rate in the specified TARGET
+
+-b, \--bits BITS
+:    Override the output bit depth in the specified TARGET
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file

@@ -57,6 +57,8 @@ class DTAS::SplitFX # :nodoc:
     @infile = nil
     @outdir = nil
     @compression = nil
+    @rate = nil
+    @bits = nil
     @targets = {
       "flac-cdda" => {
         "command" => CMD,
@@ -157,6 +159,8 @@ class DTAS::SplitFX # :nodoc:
   def generic_target(target = "flac")
     outfmt = @infmt.dup
     outfmt.type = target
+    outfmt.bits = @bits if @bits
+    outfmt.rate = @rate if @rate
     { "command" => CMD, "format" => outfmt }
   end
 
@@ -333,6 +337,8 @@ class DTAS::SplitFX # :nodoc:
       FileUtils.mkpath(@outdir)
     end
     @compression = opts[:compression]
+    @rate = opts[:rate]
+    @bits = opts[:bits]
 
     fails = []
     tracks = @tracks.dup
