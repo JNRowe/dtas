@@ -184,7 +184,7 @@ class DTAS::SplitFX # :nodoc:
     # add noise-shaped dither for 16-bit (sox manual seems to recommend this)
     if opts[:no_dither]
       env["SOX_OPTS"] = "#{ENV["SOX_OPTS"]} -D"
-    else outfmt.bits && outfmt.bits <= 16
+    elsif outfmt.bits && outfmt.bits <= 16
       env["DITHERFX"] = "dither -s"
     end
     comments = Tempfile.new(%W(dtas-splitfx-#{t.comments["TRACKNUMBER"]} .txt))
