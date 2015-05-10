@@ -14,6 +14,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-j', '--jobs [JOBS]', Integer) { |val| opts[:jobs] = val }
   op.on('-s', '--quiet', '--silent') { |val| opts[:silent] = true }
   op.on('-D', '--no-dither') { |val| opts[:no_dither] = true }
+  op.on('-O', '--outdir OUTDIR') { |val| opts[:outdir] = val }
   op.parse!(ARGV)
 end
 

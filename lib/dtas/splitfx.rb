@@ -10,7 +10,7 @@ require 'tempfile'
 # Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
 # (but we may still pipe to ecasound or anything else)
 class DTAS::SplitFX # :nodoc:
-  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT "$TRACKNUMBER.$SUFFIX" '\
+  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT "$OUTDIR$TRACKNUMBER.$SUFFIX" '\
         '$TRIMFX $FX $RATEFX $DITHERFX'
   include DTAS::Process
   include DTAS::XS
@@ -55,6 +55,7 @@ class DTAS::SplitFX # :nodoc:
     @track_zpad = true
     @t2s = method(:t2s)
     @infile = nil
+    @outdir = nil
     @targets = {
       "flac-cdda" => {
         "command" => CMD,
@@ -72,7 +73,7 @@ class DTAS::SplitFX # :nodoc:
            '$OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS ' \
            '--raw-endianness $ENDIAN_OPUSENC ' \
            '$OPUSENC_COMMENTS ' \
-           '- $TRACKNUMBER.opus',
+           '- $OUTDIR$TRACKNUMBER.opus',
         "format" => {
           "bits" => 16,
           "rate" => 48000,
@@ -197,6 +198,7 @@ class DTAS::SplitFX # :nodoc:
     infile_env(env, @infile)
     env["OUTFMT"] = xs(outfmt.to_sox_arg)
     env["SUFFIX"] = outfmt.type
+    env["OUTDIR"] = @outdir ? "#@outdir/".squeeze('/') : ''
     env.merge!(t.env)
 
     command = target["command"]
@@ -323,6 +325,11 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def run(target, opts = {})
+    if @outdir = opts[:outdir]
+      require 'fileutils'
+      FileUtils.mkpath(@outdir)
+    end
+
     fails = []
     tracks = @tracks.dup
     pids = {}

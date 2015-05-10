@@ -35,6 +35,12 @@ to use ecasound(1), too.
 :    Disable automatic setting of the DITHERFX env.  This also passes
     the option to sox(1) via SOX_OPTS.
 
+-O, \--outdir OUTDIR
+:    Set output directory instead of current directory.
+    User-created targets must allow a placeholder for the
+    (by default, an empty string) $OUTDIR environment variable
+    in the output command.
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file
@@ -106,7 +112,7 @@ use in targets:
 * TRIMFX - essential, this supplys the necessary sox(1) trim effect to
   each track. In other words, this is: "trim ${TBEG}s ${TLEN}s"
 * COMMENTS - expands to --comment-file=PATH for sox(1)
-* OUTFMT - sox(1) arguments for the output format (e.g. "-ts32 -c2 * -r44100")
+* OUTDIR - placeholder for --outdir, defaults to an empty string
 * SUFFIX - the suffix of the output format without "." (e.g. "flac", "ogg")
 * TRACKNUMBER - the track number, useful for comments and filenames
 * RATEFX - rate effect and arguments for sox(1) resampling
@@ -147,7 +153,7 @@ imbalance in a live concert recording from the audience:
           "|sox $INFILE -c1 -p $TRIMFX remix 1v1 vol +9.5dB"
           "|sox $INFILE -c1 -p $TRIMFX remix 2v1 vol +8.5dB"
           $COMMENTS $OUTFMT
-          bandYYYY-MM-DD.FOO.t0"$TRACKNUMBER.$SUFFIX"
+          ${OUTDIR}bandYYYY-MM-DD.FOO.t0"$TRACKNUMBER.$SUFFIX"
           $RATEFX $DITHERFX stats
         format:
           type: flac
@@ -163,7 +169,7 @@ For reference, the "opusenc" default target is implemented as follows:
            --raw-bits $BITS_PER_SAMPLE
            $OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS
            --raw-endianness $ENDIAN_OPUSENC
-           $OPUSENC_COMMENTS - $TRACKNUMBER.opus
+           $OPUSENC_COMMENTS - $OUTDIR$TRACKNUMBER.opus
         format:
           bits: 16
           rate: 48000
