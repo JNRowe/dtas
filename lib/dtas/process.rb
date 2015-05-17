@@ -51,7 +51,7 @@ module DTAS::Process # :nodoc:
 
     pid = spawn(env, cmd, opts)
     warn [ :spawn, pid, cmd ].inspect if $DEBUG
-    @spawn_at = Time.now.to_f
+    @spawn_at = DTAS.now
     PIDS[pid] = self
     pid
   end

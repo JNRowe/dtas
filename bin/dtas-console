@@ -3,6 +3,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # Note: no idea what I'm doing, especially w.r.t. curses
+require 'dtas'
 require 'dtas/unix_client'
 require 'dtas/rg_state'
 require 'dtas/sigevent'
@@ -135,7 +136,7 @@ begin
         Curses.addstr(current['command'])
       end
 
-      elapsed = Time.now.to_f - current['spawn_at']
+      elapsed = DTAS.now - current['spawn_at']
       if (nr = cur['current_initial']) && (current_format = current['format'])
         rate = current_format['rate'].to_f
         elapsed += nr / rate
