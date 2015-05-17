@@ -1,6 +1,7 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require 'io/wait'
+require 'shellwords'
 require_relative '../dtas'
 require_relative 'xs'
 
@@ -23,6 +24,7 @@ module DTAS::Process # :nodoc:
 
   # expand common shell constructs based on environment variables
   # this is order-dependent, but Ruby 1.9+ hashes are already order-dependent
+  # This recurses
   def env_expand(env, opts)
     env = env.dup
     if false == opts.delete(:expand)
@@ -31,17 +33,38 @@ module DTAS::Process # :nodoc:
       end
     else
       env.each do |key, val|
-        case val
-        when Numeric # stringify numeric values to simplify users' lives
-          env[key] = val.to_s
-        when /[\`\$]/ # perform variable/command expansion
-          tmp = env.dup
-          tmp.delete(key)
-          val = qx(tmp, "echo #{val}", expand: false)
-          env[key] = val.chomp
+        case val = env_expand_i(env, key, val)
+        when Array
+          val.flatten!
+          env[key] = Shellwords.join(val)
         end
       end
     end
+  end
+
+  def env_expand_i(env, key, val)
+    case val
+    when Numeric # stringify numeric values to simplify users' lives
+      env[key] = val.to_s
+    when /[\`\$]/ # perform variable/command expansion
+      tmp = env.dup
+      tmp.delete(key)
+      tmp.each do |k,v|
+        # best effort, this can get wonky
+        tmp[k] = Shellwords.join(v.flatten) if Array === v
+      end
+      val = qx(tmp, "echo #{val}", expand: false)
+      env[key] = val.chomp
+    when Array
+      env[key] = env_expand_ary(env, key, val)
+    else
+      val
+    end
+  end
+
+  # warning, recursion:
+  def env_expand_ary(env, key, val)
+    val.map { |v| env_expand_i(env.dup, key, v) }
   end
 
   # for long-running processes (sox/play/ecasound filters)

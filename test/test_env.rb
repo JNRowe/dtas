@@ -52,4 +52,20 @@ class TestEnv < Testcase
     res = env_expand({"PATH"=>"$PATH"}, expand: true)
     assert_equal ENV["PATH"], res["PATH"]
   end
+
+  def test_ary
+    ENV['HELLO'] = 'HIHI'
+    ENV['PAATH'] = '/usr/local/bin:/usr/bin:/bin'
+    env = { 'BLAH' => [ '$HELLO/WORLD', '$PAATH', '$(echo hello world)' ] }
+    res = env_expand(env, expand: true)
+    exp = [ "HIHI/WORLD", ENV['PAATH'], 'hello world' ]
+    assert_equal exp, Shellwords.split(res['BLAH'])
+    env = {
+      'BLAH' => [ '$(echo hello world)' ],
+      'MOAR' => [ '$BLAH', 'OMG HALP SPACES' ]
+    }
+    res = env_expand(env, expand: true)
+    exp = ["hello\\ world", "OMG HALP SPACES"]
+    assert_equal exp, Shellwords.split(res['MOAR'])
+  end
 end
