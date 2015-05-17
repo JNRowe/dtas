@@ -12,8 +12,8 @@ OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
   op.on('-n', '--dry-run') { opts[:dryrun] = true }
   op.on('-j', '--jobs [JOBS]', Integer) { |val| opts[:jobs] = val }
-  op.on('-s', '--quiet', '--silent') { |val| opts[:silent] = true }
-  op.on('-D', '--no-dither') { |val| opts[:no_dither] = true }
+  op.on('-s', '--quiet', '--silent') { opts[:silent] = true }
+  op.on('-D', '--no-dither') { opts[:no_dither] = true }
   op.on('-O', '--outdir OUTDIR') { |val| opts[:outdir] = val }
   op.on('-C', '--compression FACTOR') { |val| opts[:compression] = val }
   op.on('-r', '--rate RATE') { |val| opts[:rate] = val }
