@@ -16,6 +16,14 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::XS
   attr_reader :infile, :env
 
+  class UTrim
+    attr_reader :env, :comments
+    def initialize(trim_arg, env, comments)
+      @env = env.merge("TRIMFX" => "trim #{trim_arg}")
+      @comments = comments.merge('TRACKNUMBER' => '000')
+    end
+  end
+
   class Skip < Struct.new(:tbeg) # :nodoc:
     def commit(_)
       # noop
@@ -353,6 +361,7 @@ class DTAS::SplitFX # :nodoc:
     @compression = opts[:compression]
     @rate = opts[:rate]
     @bits = opts[:bits]
+    trim = opts[:trim] and @tracks = [ UTrim.new(trim, @env, @comments) ]
 
     fails = []
     tracks = @tracks.dup

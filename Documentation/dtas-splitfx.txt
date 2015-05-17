@@ -51,6 +51,14 @@ to use ecasound(1), too.
 -b, \--bits BITS
 :    Override the output bit depth in the specified TARGET
 
+-t, \--trim POSITION
+:    Passes a POSITION argument to the sox "trim" effect to allow
+     limiting output to only process a portion of the original.
+     This bypasses the "tracks" section and of the YAML file and
+     outputs the result as a single file with the TRACKNUMBER
+     of "000".  For ease-of-typing, commas in this command-line
+     argument are automatically expanded to spaces when passed to sox.
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file

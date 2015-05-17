@@ -18,6 +18,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-C', '--compression FACTOR') { |val| opts[:compression] = val }
   op.on('-r', '--rate RATE') { |val| opts[:rate] = val }
   op.on('-b', '--bits RATE', Integer) { |val| opts[:bits] = val }
+  op.on('-t', '--trim POSITION') { |val| opts[:trim] = val.tr(',', ' ') }
   op.parse!(ARGV)
 end
 
