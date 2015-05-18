@@ -70,35 +70,6 @@ class TestSplitfx < Testcase
 
         cmp = "cmp result.s32 expect.s32"
         assert system(cmp), cmp
-
-        # try Ogg Opus, use opusenc/opusdec for now since that's available
-        # in Debian 7.0 (sox.git currently has opusfile support, but that
-        # hasn't made it into Debian, yet)
-        if `which opusenc 2>/dev/null`.size > 0 &&
-           `which opusdec 2>/dev/null`.size > 0
-          WAIT_ALL_MTX.synchronize do
-            tmp_err('opus.err.txt') { sfx.run("opusenc", opts) }
-          end
-          assert_contains_stats('opus.err.txt')
-
-          # ensure opus lengths match flac ones, we decode using opusdec
-          # since sox does not yet have opus support in Debian 7.0
-          %w(1 2).each do |nr|
-            cmd = "opusdec #{nr}.opus #{nr}.wav 2>/dev/null"
-            assert system(cmd), cmd
-            assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
-          end
-
-          # ensure 16/44.1kHz FLAC works (CDDA-like)
-          File.unlink('1.flac', '2.flac')
-          WAIT_ALL_MTX.synchronize do
-            tmp_err('flac-cdda.err.txt') { sfx.run("flac-cdda", opts) }
-          end
-          assert_contains_stats('flac-cdda.err.txt')
-          %w(1 2).each do |nr|
-            assert_equal `soxi -D #{nr}.flac`, `soxi -D #{nr}.wav`
-          end
-        end
       end
     end
   end

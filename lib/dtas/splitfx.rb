@@ -77,21 +77,6 @@ class DTAS::SplitFX # :nodoc:
           "channels" => 2,
         },
       },
-      "opusenc" => {
-        "command" => 'sox "$INFILE" $COMMENTS $OUTFMT - ' \
-           '$TRIMFX $FX $RATEFX $DITHERFX | opusenc --music ' \
-           '--raw-bits $BITS_PER_SAMPLE ' \
-           '$OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS ' \
-           '--raw-endianness $ENDIAN_OPUSENC ' \
-           '$OPUSENC_COMMENTS ' \
-           '- $OUTDIR$TRACKNUMBER.opus',
-        "format" => {
-          "bits" => 16,
-          "rate" => 48000,
-          "type" => "s16",
-          "channels" => 2,
-        },
-      },
     }
     @tracks = []
     @infmt = nil # wait until input is assigned
