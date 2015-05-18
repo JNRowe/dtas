@@ -240,9 +240,9 @@ class DTAS::SplitFX # :nodoc:
     if player_cmd
       sub_env = { 'INFILE' => '-', 'FX' => '', 'TRIMFX' => '' }
       sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=#{v} " }
-      command = "#{player_cmd} | (#{sub_env_s}; #{command})"
       show_cmd = [ _expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
                    _expand_cmd(env.merge(sub_env), command), ')' ].flatten
+      command = "#{player_cmd} | (#{sub_env_s}; #{command})"
     else
       show_cmd = _expand_cmd(env, command)
     end
