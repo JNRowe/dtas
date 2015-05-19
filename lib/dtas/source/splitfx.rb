@@ -17,6 +17,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
 
   def initialize(sox = DTAS::Source::Sox.new)
     command_init(SPLITFX_DEFAULTS)
+    @watch_extra = []
     @sox = sox
   end
 
@@ -64,6 +65,19 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     e = @env.merge!(player_format.to_env)
     @sfx.infile_env(e, @sox.infile)
+
+    # watch any scripts or files the command in the YAML file refers to
+    if c = @sfx.command
+      @sfx.expand_cmd(e, c).each do |f|
+        File.readable?(f) and @watch_extra << f
+      end
+    end
+
+    # allow users to specify explicit depdendencies to watch for edit
+    case extra = @ymlhash['deps']
+    when Array, String
+      @watch_extra.concat(Array(extra))
+    end
 
     # make sure these are visible to the "current" command...
     e["TRIMFX"] = trimfx

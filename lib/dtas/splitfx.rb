@@ -14,7 +14,7 @@ class DTAS::SplitFX # :nodoc:
         '$TRIMFX $FX $RATEFX $DITHERFX'
   include DTAS::Process
   include DTAS::XS
-  attr_reader :infile, :env
+  attr_reader :infile, :env, :command
 
   class UTrim
     attr_reader :env, :comments
@@ -229,11 +229,11 @@ class DTAS::SplitFX # :nodoc:
       sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=#{v} " }
       env['SOXFMT'] = '-tsox'
       sub_env['OUTFMT'] = env.delete('OUTFMT')
-      show_cmd = [ _expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
-                   _expand_cmd(env.merge(sub_env), command), ')' ].flatten
+      show_cmd = [ expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
+                   expand_cmd(env.merge(sub_env), command), ')' ].flatten
       command = "#{player_cmd} | (#{sub_env_s}; #{command})"
     else
-      show_cmd = _expand_cmd(env, command)
+      show_cmd = expand_cmd(env, command)
     end
 
     echo = "echo #{xs(show_cmd)}"
@@ -397,7 +397,7 @@ class DTAS::SplitFX # :nodoc:
     env["INBASE"] = xs(base)
   end
 
-  def _expand_cmd(env, command)
+  def expand_cmd(env, command)
     Shellwords.split(command).map do |arg|
       qx(env, "printf %s \"#{arg}\"")
     end

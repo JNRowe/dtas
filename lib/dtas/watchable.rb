@@ -18,7 +18,8 @@ module DTAS::Watchable
     def readable_iter
       or_call = false
       while event = take(true) # drain the buffer
-        if (event.mask & FLAGS) != 0 && @watching[1] == event.name
+        w = @watches[event.wd] or next
+        if (event.mask & FLAGS) != 0 && w[event.name]
           or_call = true
         end
       end
@@ -31,17 +32,27 @@ module DTAS::Watchable
     end
 
     # we must watch the directory, since
-    def watch_file(path, blk)
+    def watch_files(paths, blk)
+      @watches = {} # wd -> { basename -> true }
       @on_readable = blk
-      @watching = File.split(File.expand_path(path))
-      add_watch(@watching[0], FLAGS)
+      @dir2wd = {}
+      Array(paths).each do |path|
+        watchdir, watchbase = File.split(File.expand_path(path))
+        wd = @dir2wd[watchdir] ||= add_watch(watchdir, FLAGS)
+        m = @watches[wd] ||= {}
+        m[watchbase] = true
+      end
     end
   end
 
   def watch_begin(blk)
     @ino = InotifyReadableIter.new
-    @ino.watch_file(@infile, blk)
+    @ino.watch_files(@watch_extra << @infile, blk)
     @ino
+  end
+
+  def watch_extra(paths)
+    @ino.watch_extra(paths)
   end
 
   # Closing the inotify descriptor (instead of using inotify_rm_watch)
