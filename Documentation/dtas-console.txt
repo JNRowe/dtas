@@ -33,6 +33,7 @@ Key bindings are inspired partially by mplayer(1)
 - 'f'/'F' - decrease/increase ReplayGain fallback_gain value
 - 'r'/'R' - cycle forward/backwards through ReplayGain modes
 - 'q'/Ctrl-C - exit dtas-console
+- 'o' - toggle display between HH:MM:SS and absolute seconds
 
 # ENVIRONMENT
 

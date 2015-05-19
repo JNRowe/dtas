@@ -14,6 +14,7 @@ rescue LoadError
   abort "please install the 'curses' RubyGem to use #$0"
 end
 
+tsec = false
 se = DTAS::Sigevent.new
 trap(:WINCH) { se.signal }
 w = DTAS::UNIXClient.new
@@ -30,8 +31,12 @@ else
   rg_mode_i = 0
 end
 
-def update_tfmt(prec)
-  prec == 0 ? '%H:%M:%S' : "%H:%M:%S.%#{prec}N"
+def update_tfmt(prec, tsec)
+  if tsec
+    prec == 0 ? '%_8s' : "%_8s.%#{prec}N"
+  else
+    prec == 0 ? '%H:%M:%S' : "%H:%M:%S.%#{prec}N"
+  end
 end
 trap(:INT) { exit(0) }
 trap(:TERM) { exit(0) }
@@ -40,7 +45,7 @@ trap(:TERM) { exit(0) }
 prec_nr = 1
 prec_step = (0..9).to_a
 prec_max = prec_step.size - 1
-tfmt = update_tfmt(prec_step[prec_nr])
+tfmt = update_tfmt(prec_step[prec_nr], tsec)
 events = []
 interval = 1.0 / 10 ** prec_nr
 
@@ -209,6 +214,7 @@ begin
         when "<" then c.req_ok("tl prev")
         when "!" then may_fail(c.req("cue prev"), events)
         when "@" then may_fail(c.req("cue next"), events)
+        when "o" then tfmt = update_tfmt(prec_step[prec_nr], tsec = !tsec)
         when " "
           c.req("play_pause")
         when "r" # cycle through replaygain modes
@@ -219,13 +225,13 @@ begin
         when "p" # lower precision of time display
           if prec_nr >= 1
             prec_nr -= 1
-            tfmt = update_tfmt(prec_step[prec_nr])
+            tfmt = update_tfmt(prec_step[prec_nr], tsec)
             interval = 1.0 / 10 ** prec_nr
           end
         when "P" # increase precision of time display
           if prec_nr < prec_max
             prec_nr += 1
-            tfmt = update_tfmt(prec_step[prec_nr])
+            tfmt = update_tfmt(prec_step[prec_nr], tsec)
             interval = 1.0 / 10 ** prec_nr
           end
         when 27 # TODO readline/edit mode?
