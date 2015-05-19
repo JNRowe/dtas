@@ -177,9 +177,6 @@ class DTAS::SplitFX # :nodoc:
     # as a self-describing format to the actual encoding instances
     player_cmd = @command
     suffix = outfmt.type
-    if player_cmd && generic
-      outfmt.type = 'sox'
-    end
     env = outfmt.to_env
 
     # set very high quality resampling if using 24-bit or higher output
@@ -223,8 +220,15 @@ class DTAS::SplitFX # :nodoc:
     # target-specific commands like a dtas-player sink:
     #   @command | (INFILE= FX= TRIMFX=; target['command'])
     if player_cmd
-      sub_env = { 'INFILE' => '-', 'FX' => '', 'TRIMFX' => '' }
+      sub_env = {
+        'INFILE' => '-p',
+        'FX' => '',
+        'TRIMFX' => '',
+        'SOXFMT' => ''
+      }
       sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=#{v} " }
+      env['SOXFMT'] = '-tsox'
+      sub_env['OUTFMT'] = env.delete('OUTFMT')
       show_cmd = [ _expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
                    _expand_cmd(env.merge(sub_env), command), ')' ].flatten
       command = "#{player_cmd} | (#{sub_env_s}; #{command})"
