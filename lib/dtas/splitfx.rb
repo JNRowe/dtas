@@ -158,11 +158,9 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def splitfx_spawn(target, t, opts)
-    generic = false
     if tgt = @targets[target]
       target = tgt
     else
-      generic = true
       target = generic_target(target)
     end
     outfmt = target["format"]
