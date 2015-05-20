@@ -16,7 +16,8 @@ class DTAS::SplitFX # :nodoc:
   include DTAS::XS
   attr_reader :infile, :env, :command
 
-  class UTrim
+  # for --trim on the command-line
+  class UTrim # :nodoc:
     attr_reader :env, :comments
     def initialize(trim_arg, env, comments)
       @env = env.merge("TRIMFX" => "trim #{trim_arg}")
@@ -24,12 +25,14 @@ class DTAS::SplitFX # :nodoc:
     end
   end
 
+  # declare section to skip
   class Skip < Struct.new(:tbeg) # :nodoc:
     def commit(_)
       # noop
     end
   end
 
+  # a standard "track" for splitfx
   class T < Struct.new(:env, :comments, :tbeg, :fade_in, :fade_out) # :nodoc:
     def commit(advance_track_samples)
       tlen = advance_track_samples - tbeg
