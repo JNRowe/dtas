@@ -237,12 +237,8 @@ class DTAS::SplitFX # :nodoc:
       show_cmd = expand_cmd(env, command)
     end
 
-    echo = "echo #{xs(show_cmd)}"
-    if opts[:dryrun]
-      command = echo
-    else
-      system(echo) unless opts[:silent]
-    end
+    puts(show_cmd.join(' ')) unless opts[:silent]
+    command = 'true' if opts[:dryrun] # still gotta fork
 
     # pgroup: false so Ctrl-C on command-line will immediately stop everything
     [ dtas_spawn(env, command, pgroup: false), comments ]
@@ -398,7 +394,7 @@ class DTAS::SplitFX # :nodoc:
     env["INBASE"] = xs(base)
   end
 
-  def expand_cmd(env, command)
+  def expand_cmd(env, command) # for display purposes only
     Shellwords.split(command).map do |arg|
       qx(env, "printf %s \"#{arg}\"")
     end
