@@ -11,7 +11,7 @@ jobs = 1
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
   op.on('-n', '--dry-run') { opts[:dryrun] = true }
-  op.on('-j', '--jobs [JOBS]', Integer) { |val| opts[:jobs] = val }
+  op.on('-j', '--jobs [JOBS]', Integer) { |val| opts[:jobs] = val } # nil==inf
   op.on('-s', '--quiet', '--silent') { opts[:silent] = true }
   op.on('-D', '--no-dither') { opts[:no_dither] = true }
   op.on('-O', '--outdir OUTDIR') { |val| opts[:outdir] = val }
