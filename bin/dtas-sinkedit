@@ -78,7 +78,7 @@ else
   rset = [ sev ]
   if watch
     ino = DTAS::Watchable::InotifyReadableIter.new
-    ino.watch_file(tmp_path, do_update)
+    ino.watch_files(tmp_path, do_update)
     rset << ino
   end
 
