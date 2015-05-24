@@ -59,6 +59,11 @@ to use ecasound(1), too.
      of "000".  For ease-of-typing, commas in this command-line
      argument are automatically expanded to spaces when passed to sox.
 
+-p, \--sox-pipe
+:    Used in place of an output target to specify outputting audio data in
+     the native "sox" format to another sox(1) or play(1) command.  This
+     moves printing of output to stderr and disables parallel job invocation.
+
 # FILE FORMAT
 
 * infile - string, the pathname of the original audio file

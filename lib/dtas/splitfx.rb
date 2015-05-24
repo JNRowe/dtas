@@ -10,8 +10,7 @@ require 'tempfile'
 # Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
 # (but we may still pipe to ecasound or anything else)
 class DTAS::SplitFX # :nodoc:
-  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT "$OUTDIR$TRACKNUMBER.$SUFFIX" '\
-        '$TRIMFX $FX $RATEFX $DITHERFX'
+  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT $OUTDST $TRIMFX $FX $RATEFX $DITHERFX'
   include DTAS::Process
   include DTAS::XS
   attr_reader :infile, :env, :command
@@ -155,8 +154,6 @@ class DTAS::SplitFX # :nodoc:
   def generic_target(target = "flac")
     outfmt = @infmt.dup
     outfmt.type = target
-    outfmt.bits = @bits if @bits
-    outfmt.rate = @rate if @rate
     { "command" => CMD, "format" => outfmt }
   end
 
@@ -173,6 +170,9 @@ class DTAS::SplitFX # :nodoc:
       outfmt = @infmt.dup
       outfmt.type = "flac"
     end
+
+    outfmt.bits = @bits if @bits
+    outfmt.rate = @rate if @rate
 
     # player commands will use SOXFMT by default, so we must output that
     # as a self-describing format to the actual encoding instances
@@ -211,6 +211,7 @@ class DTAS::SplitFX # :nodoc:
     env["OUTFMT"] = xs(outarg)
     env["SUFFIX"] = suffix
     env["OUTDIR"] = @outdir ? "#@outdir/".squeeze('/') : ''
+    env["OUTDST"] = opts[:sox_pipe] ? "-p" : "$OUTDIR$TRACKNUMBER.$SUFFIX"
     env.merge!(t.env)
 
     command = target["command"]
@@ -237,7 +238,7 @@ class DTAS::SplitFX # :nodoc:
       show_cmd = expand_cmd(env, command)
     end
 
-    puts(show_cmd.join(' ')) unless opts[:silent]
+    @out.puts(show_cmd.join(' ')) unless opts[:silent]
     command = 'true' if opts[:dryrun] # still gotta fork
 
     # pgroup: false so Ctrl-C on command-line will immediately stop everything
@@ -353,6 +354,12 @@ class DTAS::SplitFX # :nodoc:
     tracks = @tracks.dup
     pids = {}
     jobs = opts[:jobs] || tracks.size # jobs == nil => everything at once
+    if opts[:sox_pipe]
+      jobs = 1
+      @out = $stderr
+    else
+      @out = $stdout
+    end
     jobs.times.each do
       t = tracks.shift or break
       pid, tmp = splitfx_spawn(target, t, opts)
@@ -367,7 +374,7 @@ class DTAS::SplitFX # :nodoc:
           pid, tmp = splitfx_spawn(target, t, opts)
           pids[pid] = [ t, tmp ]
         end
-        puts "DONE #{done[0].inspect}" if $DEBUG
+        @out.puts "DONE #{done[0].inspect}" if $DEBUG
         done[1].close!
       else
         fails << [ t, status ]

@@ -6,8 +6,8 @@ require 'optparse'
 require 'dtas/splitfx'
 usage = "#$0 [-n|--dry-run][-j [JOBS]][-s|--silent] SPLITFX_FILE.yml [TARGET]"
 overrides = {} # FIXME: not tested
+default_target = "flac"
 opts = { jobs: 1 }
-jobs = 1
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
   op.on('-n', '--dry-run') { opts[:dryrun] = true }
@@ -19,6 +19,10 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-r', '--rate RATE') { |val| opts[:rate] = val }
   op.on('-b', '--bits RATE', Integer) { |val| opts[:bits] = val }
   op.on('-t', '--trim POSITION') { |val| opts[:trim] = val.tr(',', ' ') }
+  op.on('-p', '--sox-pipe') do
+    opts[:sox_pipe] = true
+    default_target = 'sox'
+  end
   op.parse!(ARGV)
 end
 
@@ -39,8 +43,9 @@ ARGV.each do |arg|
   end
 end
 
+trap(:INT) { exit 130 }
 file = args.shift or abort usage
-target = args.shift || "flac"
+target = args.shift || default_target
 splitfx = DTAS::SplitFX.new
 splitfx.import(YAML.load(File.read(file)), overrides)
 splitfx.run(target, opts)
