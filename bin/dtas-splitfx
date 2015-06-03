@@ -16,7 +16,10 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-D', '--no-dither') { opts[:no_dither] = true }
   op.on('-O', '--outdir OUTDIR') { |val| opts[:outdir] = val }
   op.on('-C', '--compression FACTOR') { |val| opts[:compression] = val }
-  op.on('-r', '--rate RATE') { |val| opts[:rate] = val }
+  op.on('-r', '--rate RATE') do |val|
+    mult = val.sub!(/k\z/, '') ? 1000 : 1
+    opts[:rate] = (val.to_f * mult).to_i
+  end
   op.on('-b', '--bits RATE', Integer) { |val| opts[:bits] = val }
   op.on('-t', '--trim POSITION') { |val| opts[:trim] = val.tr(',', ' ') }
   op.on('-p', '--sox-pipe') do
