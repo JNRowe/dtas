@@ -56,7 +56,7 @@ class DTAS::UNIXAccepted # :nodoc:
 
     begin
       begin
-        msg, _, _ = io.recvmsg_nonblock(nread, 0, 0)
+        msg = io.recv_nonblock(nread)
       rescue Errno::EAGAIN
         return :wait_readable
       rescue EOFError, SystemCallError
