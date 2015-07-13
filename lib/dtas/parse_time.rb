@@ -3,9 +3,11 @@
 require_relative '../dtas'
 
 module DTAS::ParseTime
-  # convert a string time to seconds, returning a Flot or Integer
+  # convert a string time to seconds, returning a Floot or Integer
   def parse_time(time)
     case time
+    when Numeric
+      time
     when /\A\d+\z/
       time.to_i
     when /\A[\d\.]+\z/
