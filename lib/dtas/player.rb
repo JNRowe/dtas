@@ -426,7 +426,7 @@ class DTAS::Player # :nodoc:
 
       dst = @sink_buf
       pending.dst_assoc(dst)
-      pending.src_spawn(@format, @rg, out: dst.wr, in: "/dev/null")
+      pending.src_spawn(@format, @rg, out: dst.wr, in: DTAS.null)
 
       # watch and restart on modifications
       pending.respond_to?(:watch_begin) and

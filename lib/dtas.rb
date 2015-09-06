@@ -13,6 +13,11 @@ module DTAS # :nodoc:
       Time.now.to_f
     end
   end
+
+  @null = nil
+  def self.null
+    @null ||= File.open('/dev/null', 'r+')
+  end
 end
 
 require_relative 'dtas/compat_onenine'

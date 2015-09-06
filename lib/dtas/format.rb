@@ -44,9 +44,9 @@ class DTAS::Format # :nodoc:
 
   def self.precision(env, infile)
     # sox.git f4562efd0aa3
-    qx(env, %W(soxi -p #{infile}), err: "/dev/null").to_i
+    qx(env, %W(soxi -p #{infile}), err: DTAS.null).to_i
   rescue # fallback to parsing the whole output
-    s = qx(env, %W(soxi #{infile}), err: "/dev/null")
+    s = qx(env, %W(soxi #{infile}), err: DTAS.null)
     s =~ /Precision\s+:\s*(\d+)-bit/n
     v = $1.to_i
     return v if v > 0

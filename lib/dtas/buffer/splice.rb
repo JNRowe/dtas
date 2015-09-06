@@ -10,7 +10,6 @@ module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_AT_ONCE_1 = 65536
   MAX_SIZE = File.read("/proc/sys/fs/pipe-max-size").to_i
-  DEVNULL = File.open("/dev/null", "r+")
   F_MOVE = IO::Splice::F_MOVE
 
   def buffer_size
@@ -25,7 +24,7 @@ module DTAS::Buffer::Splice # :nodoc:
 
   # be sure to only call this with nil when all writers to @wr are done
   def discard(bytes)
-    IO.splice(@to_io, nil, DEVNULL, nil, bytes)
+    IO.splice(@to_io, nil, DTAS.null, nil, bytes)
   end
 
   def broadcast_one(targets, limit = nil)

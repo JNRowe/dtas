@@ -91,7 +91,7 @@ class DTAS::Sink # :nodoc:
         w.sink = self
         rv << w
       end
-      opts[:in] = "/dev/null"
+      opts[:in] = DTAS.null
 
       # map to real /dev/fd/* values and setup proper redirects
       cmd = cmd.gsub(DEVFD_RE) do
