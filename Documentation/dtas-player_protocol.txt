@@ -166,6 +166,11 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * play_pause - toggle the play/pause state.  This starts playback if
   paused, and pauses playback if playing.
 
+* queue cat - dump the contents of the queue as YAML
+  This may include arbitrary commands to be executed, filenames,
+  and offsets for playback.  The format is not intended to be
+  stable and subject to internal changes in dtas-player.
+
 * restart - restarts all processes in the current pipeline.  Playback
   will be momentarily interrupted while this change occurs.  This is
   necessary if one of the commands (e.g. sox or ecasound) or loaded

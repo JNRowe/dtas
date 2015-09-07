@@ -251,6 +251,8 @@ class DTAS::Player # :nodoc:
       tl_handler(io, msg)
     when "trim"
       trim_handler(io, msg)
+    when "queue"
+      msg[0] == "cat" and io.emit(@queue.to_yaml)
     end
   end
 
