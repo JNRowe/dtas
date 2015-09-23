@@ -190,12 +190,16 @@ begin
     end
     idx or break
     cur = YAML.load(c.req('current'))
-    cur['current'] or break
+    current = cur['current'] or break
   end
-  elapsed = DTAS.now - t0
-  p [:elapsed, elapsed]
-  timeout = 5 - elapsed
-  timeout = 0 if timeout < 0
+  if current
+    elapsed = DTAS.now - t0
+    p [:elapsed, elapsed]
+    timeout = 5 - elapsed
+    timeout = 0 if timeout < 0
+  else
+    timeout = nil
+  end
   r = wait_read(w, timeout)
   p w.res_wait if r
 rescue EOFError
