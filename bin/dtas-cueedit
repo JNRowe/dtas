@@ -44,7 +44,7 @@ ARGV.each do |file|
     backup.write(original) if backup
 
     # user edits the file
-    x!("#{editor} #{tmp.path}")
+    x!("#{editor} #{xs(tmp.path)}")
 
     # avoid an expensive update if the user didn't change anything
     current = File.binread(tmp.path)
