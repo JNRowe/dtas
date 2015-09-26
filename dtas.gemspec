@@ -11,5 +11,5 @@ Gem::Specification.new do |s|
   s.executables = manifest.grep(%r{\Abin/}).map { |s| s.sub(%r{\Abin/}, "") }
   s.files = manifest
   s.homepage = 'http://dtas.80x24.org/'
-  s.licenses = "GPLv3+"
+  s.licenses = "GPL-3.0+"
 end
