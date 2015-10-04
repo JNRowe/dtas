@@ -117,7 +117,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   # returns a wait_ctl arg
-  def sink_handler(io, msg)
+  def dpc_sink(io, msg)
     name = msg[1]
     case msg[0]
     when "ls"
@@ -240,7 +240,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     out_samples(in_samples, @current.format, @format)
   end
 
-  def rg_handler(io, msg)
+  def dpc_rg(io, msg)
     return io.emit(@rg.to_hsh.to_yaml) if msg.empty?
     before = @rg.to_hsh
     msg.each do |kv|
@@ -277,7 +277,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   # show current info about what's playing
   # returns non-blocking iterator retval
-  def current_handler(io, msg)
+  def dpc_current(io, msg)
     tmp = {}
     if @current
       tmp["current"] = s = @current.to_hsh
@@ -321,7 +321,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     @srv.wait_ctl(buf, :wait_readable)
   end
 
-  def skip_handler(io, msg)
+  def dpc_skip(io, msg)
     __current_drop
     wall("skip")
     io.emit("OK")
@@ -371,7 +371,8 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
   end
 
-  def do_seek(io, offset)
+  def dpc_seek(io, msg)
+    offset = msg[0]
     if @current
       if @current.respond_to?(:infile)
         begin
@@ -408,7 +409,12 @@ module DTAS::Player::ClientHandler # :nodoc:
     stop_sinks
   end
 
-  def format_handler(io, msg)
+  def dpc_restart(io, _)
+    restart_pipeline
+    io.emit('OK')
+  end
+
+  def dpc_format(io, msg)
     new_fmt = @format.dup
     msg.each do |kv|
       k, v = kv.split(/=/, 2)
@@ -443,7 +449,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
-  def env_handler(io, msg)
+  def dpc_env(io, msg)
     if msg.empty?
       # this may fail for large envs due to SEQPACKET size restrictions
       # do we care?
@@ -465,7 +471,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
-  def source_handler(io, msg)
+  def dpc_source(io, msg)
     map = @source_map
     op = msg.shift
     case op
@@ -509,7 +515,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
   end
 
-  def chdir_handler(io, msg)
+  def dpc_cd(io, msg)
     msg.size == 1 or return io.emit("ERR usage: cd DIRNAME")
     begin
       Dir.chdir(msg[0])
@@ -520,7 +526,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
-  def state_file_handler(io, msg)
+  def dpc_state(io, msg)
     case msg.shift
     when "dump"
       dest = msg.shift
@@ -546,7 +552,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     __current_drop
   end
 
-  def tl_handler(io, msg)
+  def dpc_tl(io, msg)
     case msg.shift
     when "add"
       path = msg.shift
@@ -663,7 +669,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
-  def cue_handler(io, msg)
+  def dpc_cue(io, msg)
     cur = @current
     if cur.respond_to?(:cuebreakpoints)
       bp = cur.cuebreakpoints
@@ -684,7 +690,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
   end
 
-  def trim_handler(io, msg)
+  def dpc_trim(io, msg)
     case msg.size
     when 0
       io.emit({ 'trim' => @trim }.to_yaml)

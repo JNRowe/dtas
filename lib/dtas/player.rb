@@ -190,7 +190,7 @@ class DTAS::Player # :nodoc:
     io.emit("OK")
   end
 
-  def do_enq_head(io, msg)
+  def dpc_enq_head(io, msg)
     # check @queue[0] in case we have no sinks
     if need_to_queue
       @queue.unshift(msg)
@@ -207,53 +207,31 @@ class DTAS::Player # :nodoc:
     case command
     when "enq"
       enq_handler(io, msg[0])
-    when "enq-head"
-      do_enq_head(io, msg)
     when "enq-cmd"
       enq_handler(io, { "command" => msg[0]})
     when "pause", "play", "play_pause"
       play_pause_handler(io, command)
-    when "seek"
-      do_seek(io, msg[0])
-    when "clear"
-      @queue.clear
-      wall("clear")
-      io.emit("OK")
-    when "rg"
-      rg_handler(io, msg)
-    when "cue"
-      cue_handler(io, msg)
-    when "skip"
-      skip_handler(io, msg)
-    when "sink"
-      sink_handler(io, msg)
-    when "current"
-      current_handler(io, msg)
-    when "watch"
-      @watchers[io] = true
-      io.emit("OK")
-    when "format"
-      format_handler(io, msg)
-    when "env"
-      env_handler(io, msg)
-    when "restart"
-      restart_pipeline
-      io.emit("OK")
-    when "source"
-      source_handler(io, msg)
-    when "state"
-      state_file_handler(io, msg)
-    when "cd"
-      chdir_handler(io, msg)
     when "pwd"
       io.emit(Dir.pwd)
-    when "tl"
-      tl_handler(io, msg)
-    when "trim"
-      trim_handler(io, msg)
-    when "queue"
-      msg[0] == "cat" and io.emit(@queue.to_yaml)
+    else
+      m = "dpc_#{command.tr('-', '_')}"
+      __send__(m, io, msg) if respond_to?(m)
     end
+  end
+
+  def dpc_clear(io, msg)
+    @queue.clear
+    wall('clear')
+    io.emit('OK')
+  end
+
+  def dpc_queue(io, msg)
+    'cat' == msg[0] and io.emit(@queue.to_yaml)
+  end
+
+  def dpc_watch(io, _)
+    @watchers[io] = true
+    io.emit('OK')
   end
 
   def event_loop_iter
@@ -309,7 +287,7 @@ class DTAS::Player # :nodoc:
     return unless sink.active
 
     if (@current || @queue[0]) && !@paused
-      # we get here if source/sinks are all killed in restart_pipeline
+      # we get here if source/sinks are all killed in dpc_restart
       __sink_activate(sink)
       next_source(_next) unless @current
     end
