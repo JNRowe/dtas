@@ -27,10 +27,14 @@ jobs = 1
 repeat = 1
 stats = false
 keep_going = false
+compression = []
 
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
   op.on('-t', '--type [TYPE]', 'FILE-TYPE (default: flac)') { |t| type = t }
+  op.on('-C', '--compression [FACTOR]', 'compression factor for sox') { |c|
+    compression = [ '-C', c ]
+  }
   op.on('-j', '--jobs [JOBS]', Integer) { |j| jobs = j }
   op.on('-S', '--stats', 'save stats on the file') { stats = true }
   op.on('-k', '--keep-going', 'continue after error') { keep_going = true }
@@ -146,7 +150,7 @@ thrs = jobs.times.map do |i|
         end
       end
 
-      cmd = [ 'sox', input, output ]
+      cmd = [ 'sox', input, *compression, output ]
       if stats
         cmd << 'stats'
         cmd = [ *cmd, { err: stats_out } ]
