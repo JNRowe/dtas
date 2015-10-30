@@ -48,7 +48,7 @@ install-man: man
 	$(INSTALL) -m 644 $(man1) $(DESTDIR)$(man1dir)
 	$(INSTALL) -m 644 $(man7) $(DESTDIR)$(man7dir)
 %.1 %.7 : %.txt
-	$(pandoc) -s -t man < $< > $@+ && mv $@+ $@
+	$(pandoc) -s -t man < $< > $@
 
 clean::
 	$(RM) $(man1) $(man7)

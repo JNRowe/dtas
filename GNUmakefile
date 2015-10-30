@@ -46,9 +46,9 @@ pkg_extra := GIT-VERSION-FILE lib/dtas/version.rb NEWS
 NEWS:
 	rake -s $@
 gem-man:
-	$(MAKE) -C Documentation/ gem-man
+	-$(MAKE) -C Documentation/ gem-man
 tgz-man:
-	$(MAKE) -C Documentation/ install-man mandir=$(CURDIR)/man
+	-$(MAKE) -C Documentation/ install-man mandir=$(CURDIR)/man
 .PHONY: tgz-man gem-man
 
 .gem-manifest: .manifest gem-man
