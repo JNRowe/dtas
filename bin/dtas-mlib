@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+usage = "#$0 [-d DATABASE-URI] ACTION [DIRECTORY]"
+Thread.abort_on_exception = $stderr.sync = $stdout.sync = true
+require 'dtas/mlib'
+require 'optparse'
+path = '~/.dtas/mlib.sqlite'
+db = File.expand_path(path)
+OptionParser.new('', 24, '  ') do |op|
+  op.banner = usage
+  op.on('-d', '--database <URI|PATH>', "database (default: #{path}") do |d|
+    db = d
+  end
+  op.on('-h', '--help') do
+    puts(op.to_s)
+    exit
+  end
+  op.parse!(ARGV)
+end
+
+unless db.include?('://')
+  dir = File.dirname(db)
+  unless File.directory?(dir)
+    require 'fileutils'
+    FileUtils.mkpath(dir)
+  end
+end
+
+case action = ARGV.shift
+when 'update'
+  directory = ARGV.shift or abort "DIRECTORY required\n#{usage}"
+else
+  abort usage
+end
+
+mlib = DTAS::Mlib.new(db)
+mlib.migrate
+mlib.__send__(action, directory)
