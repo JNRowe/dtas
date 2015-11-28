@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-usage = "#$0 [-d DATABASE-URI] ACTION [DIRECTORY]"
+usage = "#$0 [-d DATABASE-URI] ACTION [ARGS]"
 Thread.abort_on_exception = $stderr.sync = $stdout.sync = true
 require 'dtas/mlib'
 require 'optparse'
@@ -27,13 +27,19 @@ unless db.include?('://')
   end
 end
 
+def mlib(db, migrate: false)
+  m = DTAS::Mlib.new(db)
+  m.migrate if migrate
+  m
+end
+
 case action = ARGV.shift
-when 'update'
+when 'update', 'up'
   directory = ARGV.shift or abort "DIRECTORY required\n#{usage}"
+  mlib(db, migrate: true).update(directory)
+when 'dump' # mainly for debugging
+  directory = ARGV.shift || '/'
+  mlib(db).dump(directory)
 else
   abort usage
 end
-
-mlib = DTAS::Mlib.new(db)
-mlib.migrate
-mlib.__send__(action, directory)

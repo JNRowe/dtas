@@ -11,6 +11,7 @@ class DTAS::Mlib
   attr_accessor :follow_outside_symlinks
   attr_accessor :follow_inside_symlinks
   attr_accessor :tags
+
   DM_DIR = -1
   DM_IGN = -2
   include DTAS::Process
@@ -240,6 +241,10 @@ class DTAS::Mlib
     node[:id] = node_id
   end
 
+  def node_lookup(parent_id, name)
+    @db[:nodes][name: name, parent_id: parent_id]
+  end
+
   def node_ensure(parent_id, name, tlen, ctime = nil)
     q = { name: name, parent_id: parent_id }
     if node = @db[:nodes][q]
@@ -254,26 +259,31 @@ class DTAS::Mlib
     node
   end
 
-  def scan_dir(path, st, parent_id = nil)
+  def cd(path)
     prev_wd = @pwd
     Dir.chdir(path)
     cur = @pwd = Dir.pwd.b
-
-    # TODO: use parent_id if given
-    dir = dir_vivify(cur.split(%r{/+}n), st.ctime.to_i)
-    Dir.foreach('.', encoding: Encoding::BINARY) do |x|
-      case x
-      when '.', '..', %r{\n}n
-        # files with newlines in them are rare and last I checked (in 2008),
-        # mpd could not support them, either.  So lets not bother for now.
-        next
-      else
-        scan_any(x, dir[:id])
-      end
-    end
+    yield
   ensure
     Dir.chdir(prev_wd) if cur && prev_wd
     @pwd = prev_wd
+  end
+
+  def scan_dir(path, st, parent_id = nil)
+    cd(path) do
+      # TODO: use parent_id if given
+      dir = dir_vivify(@pwd.split(%r{/+}n), st.ctime.to_i)
+      Dir.foreach('.', encoding: Encoding::BINARY) do |x|
+        case x
+        when '.', '..', %r{\n}n
+          # files with newlines in them are rare and last I checked (in 2008),
+          # mpd could not support them, either.  So lets not bother for now.
+          next
+        else
+          scan_any(x, dir[:id])
+        end
+      end
+    end
   end
 
   def send_harder(sock, msg)
@@ -286,5 +296,101 @@ class DTAS::Mlib
     rescue => e
       warn "#{msg.bytesize} too big, dropped #{e.class}"
     end
+  end
+
+  def find_dump_part(cur, base)
+    parts = @pwd.split(%r{/+}n)
+    parts.shift # no first part
+    parts << base if base
+    parts.each do |name|
+      if cur = node_lookup(cur[:id], name)
+        case cur[:tlen]
+        when DM_DIR then next # keep going
+        when DM_IGN then return [ :ignored, cur ]
+        else # regular audio
+          return cur if name.object_id == parts[-1].object_id
+          return [ :notdir, cur ]
+        end
+      else
+        return [ :missing, name ]
+      end
+    end
+    cur
+  end
+
+  # returns an array on error
+  def dump(path)
+    dir = path
+    base = nil
+    retried = false
+    begin
+      found = cd(dir) { find_dump_part(root_node, base) }
+    rescue Errno::ENOTDIR
+      raise if retried || found
+      dir, base = File.split(path)
+      retried = true
+      retry
+    end
+    return found if Array === found # error
+
+    # success
+    load_tags
+    require 'yaml'
+    @tag_rmap = @tag_map.invert
+    if found[:tlen] == DM_DIR
+      emit_recurse(found)
+    else
+      parent = @db[:nodes][id: found[:parent_id]]
+      parent or abort "missing parent for #{found.inspect}"
+      parent[:dirname] ||= path_of(parent)
+      emit_1(found, parent)
+    end
+  end
+
+  def path_of(node)
+    return '/' if node[:name] == ''
+    parts = [ node[:name], '' ]
+    begin
+      node = @db[:nodes][id: node[:parent_id]]
+      break if node[:id] == node[:parent_id]
+      parts.unshift node[:name]
+    end while true
+    parts.unshift('')
+    parts.join('/')
+  end
+
+  def emit_recurse(node)
+    node[:dirname] ||= path_of(node)
+    @db[:nodes].where(parent_id: node[:id]).order(:name).each do |nd|
+      next if nd[:id] == node[:id] # root_node
+      case nd[:tlen]
+      when DM_DIR then emit_recurse(nd)
+      when DM_IGN then next
+      else
+        emit_1(nd, node)
+      end
+    end
+  end
+
+  def emit_1(node, parent)
+    comments = Hash.new { |h,k| h[k] = [] }
+    @db['SELECT c.tag_id, v.val FROM comments c ' \
+        'LEFT JOIN vals v ON v.id = c.val_id ' \
+        "WHERE c.node_id = #{node[:id]} ORDER BY c.tag_id"].map do |c|
+      comments[@tag_rmap[c[:tag_id]]] << c[:val]
+    end
+    puts "Path: #{parent[:dirname]}#{node[:name]}"
+    puts "Length: #{node[:tlen]}"
+    return if comments.empty?
+    puts 'Comments:'
+    comments.each do |k,v|
+      if v.size == 1
+        puts "\t#{k}: #{v[0]}"
+      else
+        v << ''
+        puts "\t#{k}:\n\t\t#{v.join("\t\t\n")}"
+      end
+    end
+    puts
   end
 end
