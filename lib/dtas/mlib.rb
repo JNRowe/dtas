@@ -273,6 +273,12 @@ class DTAS::Mlib
     cd(path) do
       # TODO: use parent_id if given
       dir = dir_vivify(@pwd.split(%r{/+}n), st.ctime.to_i)
+      dir_id = dir[:id]
+
+      @db[:nodes].where(parent_id: dir_id).each do |node|
+        File.exist?(node[:name]) or remove_entry(node)
+      end
+
       Dir.foreach('.', encoding: Encoding::BINARY) do |x|
         case x
         when '.', '..', %r{\n}n
@@ -280,7 +286,7 @@ class DTAS::Mlib
           # mpd could not support them, either.  So lets not bother for now.
           next
         else
-          scan_any(x, dir[:id])
+          scan_any(x, dir_id)
         end
       end
     end
@@ -392,5 +398,22 @@ class DTAS::Mlib
       end
     end
     puts
+  end
+
+  def remove_entry(node)
+    root_id = root_node[:id]
+    node_id = node[:id]
+    q = { parent_id: node_id }
+    nodes = @db[:nodes]
+    nodes.where(q).each do |nd|
+      next if nd[:id] == root_id
+      case nd[:tlen]
+      when DM_DIR, DM_IGN
+        remove_entry(nd)
+      end
+    end
+    nodes.where(q).delete
+    @db[:comments].where(node_id: node_id).delete
+    nodes.where(id: node_id).delete
   end
 end
