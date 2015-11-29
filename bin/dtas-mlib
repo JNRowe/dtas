@@ -3,6 +3,8 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 usage = "#$0 [-d DATABASE-URI] ACTION [ARGS]"
 Thread.abort_on_exception = $stderr.sync = $stdout.sync = true
+trap(:INT, 'SYSTEM_DEFAULT')
+trap(:PIPE, 'SYSTEM_DEFAULT')
 require 'dtas/mlib'
 require 'optparse'
 path = '~/.dtas/mlib.sqlite'
