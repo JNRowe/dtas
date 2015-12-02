@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
+# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# MPD protocol emulation proxy in front of dtas-player
+require 'socket'
+require 'dtas/mpd_emu_client'
+require 'dtas/server_loop'
+l = TCPServer.new('127.0.0.1', 2100)
+svc = DTAS::ServerLoop.new([l], DTAS::MpdEmuClient)
+svc.run_forever
