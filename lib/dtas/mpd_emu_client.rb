@@ -46,15 +46,42 @@ class DTAS::MpdEmuClient # :nodoc:
   def dispatch(argv)
     cmd = argv.shift or return err(:ERROR_UNKNOWN)
     cmd = "mpdcmd_#{cmd}"
-    respond_to?(cmd) ? __send__(cmd, argv) : err(:ERROR_UNKNOWN)
+    if respond_to?(cmd)
+      m = method(cmd)
+      params = m.parameters
+      rest = params.any? { |x| x[0] == :rest }
+      req = params.count { |x| x[0] == :req }
+      opt = params.count { |x| x[0] == :opt }
+      argc = argv.size
+      return err(:ERROR_ARG) if argc < req
+      return err(:ERROR_ARG) if !rest && (argc > (req + opt))
+      m.call(*argv)
+    else
+      err(:ERROR_UNKNOWN)
+    end
   end
 
   def err(sym)
     "[#{ACK[sym]}@#@cmd_listnum {}"
   end
 
-  def mpdcmd_ping(argv)
+  def mpdcmd_ping; out("OK\n"); end
+  def mpdcmd_close(*); nil; end
+
+  def mpdcmd_clearerror
+    # player_clear_error
     out("OK\n")
+  end
+
+  def mpdcmd_stats
+    out("artists: \n" \
+        "albums: \n" \
+        "songs: \n" \
+        "uptime: \n" \
+        "playtime: \n" \
+        "db_playtime: \n" \
+        "db_update: \n" \
+        "OK\n")
   end
 
   # returns true on complete, :wait_writable when blocked, or nil on error

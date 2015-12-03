@@ -46,6 +46,8 @@ class TestMlib < Testcase
     @c.write "ping\n"
     assert_equal "OK\n", @c.gets
     assert_nil IO.select([@c], nil, nil, 0)
+    @c.write "close\n"
+    assert_nil @c.read(1)
   end
 
   # to ensure output buffering works:
