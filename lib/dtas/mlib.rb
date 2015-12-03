@@ -341,7 +341,6 @@ class DTAS::Mlib
 
     # success
     load_tags
-    require 'yaml'
     @tag_rmap = @tag_map.invert
     if found[:tlen] == DM_DIR
       emit_recurse(found)
@@ -351,6 +350,27 @@ class DTAS::Mlib
       parent[:dirname] ||= path_of(parent)
       emit_1(found, parent)
     end
+  end
+
+  def count_distinct(tag)
+    s = 'SELECT COUNT(DISTINCT(val_id)) FROM comments WHERE tag_id = ?'
+    @db.fetch(s, @tag_map[tag]).single_value
+  end
+
+  def count_songs
+    @db.fetch('SELECT COUNT(*) FROM nodes WHERE tlen >= 0').single_value
+  end
+
+  def db_playtime
+    @db.fetch('SELECT SUM(tlen) FROM nodes WHERE tlen >= 0').single_value
+  end
+
+  def stats
+    %w(artist album).each do |k|
+      puts "#{k}s: #{count_distinct(k)}"
+    end
+    puts "songs: #{count_songs}"
+    puts "db_playtime: #{db_playtime}"
   end
 
   def path_of(node)
