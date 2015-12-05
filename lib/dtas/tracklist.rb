@@ -2,6 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 require_relative 'serialize'
+require_relative 'track'
 
 # the a tracklist object for -player
 # this is inspired by the MPRIS 2.0 TrackList spec
@@ -19,7 +20,7 @@ class DTAS::Tracklist # :nodoc:
   def self.load(hash)
     obj = new
     obj.instance_eval do
-      list = hash["list"] and @list.replace(list)
+      list = hash["list"] and @list.replace(list.map! { |s| new_track(s) })
       @pos = hash["pos"] || -1
       @repeat = hash["repeat"] || false
     end
@@ -27,13 +28,27 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def to_hsh
-    ivars_to_hash(SIVS).delete_if { |k,v| TL_DEFAULTS[k] == v }
+    h = ivars_to_hash(SIVS)
+    h.delete_if { |k,v| TL_DEFAULTS[k] == v }
+    list = h['list'] and list.map!(&:to_path)
+    h
   end
 
   def initialize
     TL_DEFAULTS.each { |k,v| instance_variable_set("@#{k}", v) }
     @list = []
     @goto_off = @goto_pos = nil
+    @track_nr = 0
+  end
+
+  def new_track(path)
+    n = @track_nr += 1
+
+    # nobody needs a billion tracks in their tracklist, right?
+    # avoid promoting to Bignum on 32-bit
+    @track_nr = n = 1 if n >= 0x3fffffff
+
+    DTAS::Track.new(n, path)
   end
 
   def reset
@@ -49,7 +64,7 @@ class DTAS::Tracklist # :nodoc:
   # a few tens of tracks, maybe a hundred at most.
   def _track_id_map
     by_track_id = {}
-    @list.each_with_index { |t,i| by_track_id[t.object_id] = i }
+    @list.each_with_index { |t,i| by_track_id[t.track_id] = i }
     by_track_id
   end
 
@@ -58,12 +73,12 @@ class DTAS::Tracklist # :nodoc:
     track_ids.map do |track_id|
       idx = by_track_id[track_id]
       # dtas-mpris fills in the metadata, we just return a path
-      [ track_id, idx ? @list[idx] : nil ]
+      [ track_id, idx ? @list[idx].to_path : nil ]
     end
   end
 
   def tracks
-    @list.map(&:object_id)
+    @list.map(&:track_id)
   end
 
   def advance_track(repeat_ok = true)
@@ -80,7 +95,7 @@ class DTAS::Tracklist # :nodoc:
     else
       return
     end
-    [ @list[next_pos], next_off ]
+    [ @list[next_pos].to_path, next_off ]
   end
 
   def cur_track
@@ -88,6 +103,7 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def add_track(track, after_track_id = nil, set_as_current = false)
+    track = new_track(track)
     if after_track_id
       by_track_id = _track_id_map
       idx = by_track_id[after_track_id] or
@@ -106,27 +122,26 @@ class DTAS::Tracklist # :nodoc:
         @pos += 1 if @pos >= 0
       end
     end
-    track.object_id
+    track.track_id
   end
 
   def remove_track(track_id)
     by_track_id = _track_id_map
     idx = by_track_id.delete(track_id) or return false
-    @list[idx] = nil
-    @list.compact!
+    track = @list.delete_at(idx)
     len = @list.size
     if @pos >= len
       @pos = len == 0 ? TL_DEFAULTS["pos"] : len
     end
     @goto_pos = @goto_pos = nil # TODO: reposition?
-    true
+    track.to_path
   end
 
   def go_to(track_id, offset_hhmmss = nil)
     by_track_id = _track_id_map
     if idx = by_track_id[track_id]
       @goto_off = offset_hhmmss
-      return @list[@goto_pos = idx]
+      return @list[@goto_pos = idx].to_path
     end
     @goto_pos = nil
     # noop if track_id is invalid

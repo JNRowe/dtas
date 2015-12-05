@@ -587,15 +587,16 @@ module DTAS::Player::ClientHandler # :nodoc:
     when "remove"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
       track_id = track_id.to_i
-      @tl.remove_track(track_id) or return io.emit("MISSING")
+      rm = @tl.remove_track(track_id) or return io.emit("MISSING")
+      rm = rm.object_id
 
       # skip if we're removing the currently playing track
       if @current && @current.respond_to?(:infile) &&
-         @current.infile.object_id == track_id
+         @current.infile.object_id == rm
         _tl_skip
       end
       # drop it from the queue, too, in case it just got requeued or paused
-      @queue.delete_if { |t| Array === t && t[0].object_id == track_id }
+      @queue.delete_if { |t| Array === t && t[0].object_id == rm }
       io.emit("OK")
     when "get"
       res = @tl.get_tracks(msg.map!(&:to_i))
@@ -615,11 +616,11 @@ module DTAS::Player::ClientHandler # :nodoc:
         io.emit("MISSING")
       end
     when "current"
-      path = @tl.cur_track
-      io.emit(path ? path : "NONE")
+      track = @tl.cur_track
+      io.emit(track ? track.to_path : "NONE")
     when "current-id"
-      path = @tl.cur_track
-      io.emit(path ? path.object_id.to_s : "NONE")
+      track = @tl.cur_track
+      io.emit(track ? track.track_id.to_s : "NONE")
     when "next"
       _tl_skip
       io.emit("OK")

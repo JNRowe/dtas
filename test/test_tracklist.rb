@@ -3,10 +3,19 @@
 require_relative 'helper'
 require 'dtas/tracklist'
 class TestTracklist < Testcase
+
+  def list_to_path(tl)
+    tl.instance_variable_get(:@list).map(&:to_path)
+  end
+
+  def list_add(tl, ary)
+    ary.reverse_each { |x| tl.add_track(x) }
+  end
+
   def test_tl_add_tracks
     tl = DTAS::Tracklist.new
     tl.add_track("/foo.flac")
-    assert_equal(%w(/foo.flac), tl.instance_variable_get(:@list))
+    assert_equal(%w(/foo.flac), list_to_path(tl))
 
     oids = tl.tracks
     assert_kind_of Array, oids
@@ -14,26 +23,24 @@ class TestTracklist < Testcase
     assert_equal [ [ oids[0], "/foo.flac" ] ], tl.get_tracks(oids)
 
     tl.add_track("/bar.flac")
-    assert_equal(%w(/bar.flac /foo.flac), tl.instance_variable_get(:@list))
+    assert_equal(%w(/bar.flac /foo.flac), list_to_path(tl))
 
     tl.add_track("/after.flac", oids[0])
-    assert_equal(%w(/bar.flac /foo.flac /after.flac),
-                 tl.instance_variable_get(:@list))
+    assert_equal(%w(/bar.flac /foo.flac /after.flac), list_to_path(tl))
   end
 
   def test_add_current
     tl = DTAS::Tracklist.new
-    tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
+    list_add(tl, %w(a b c d e f g))
     tl.add_track('/foo.flac', nil, true)
-    assert_equal '/foo.flac', tl.cur_track
+    assert_equal '/foo.flac', tl.cur_track.to_path
   end
 
   def test_advance_track
     tl = DTAS::Tracklist.new
-    tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
-    %w(a b c d e f g).each do |t|
-      assert_equal t, tl.advance_track[0]
-    end
+    ary = %w(a b c d e f g)
+    list_add(tl, ary)
+    ary.each { |t| assert_equal t, tl.advance_track[0] }
     assert_nil tl.advance_track
     tl.repeat = true
     assert_equal 'a', tl.advance_track[0]
@@ -46,7 +53,7 @@ class TestTracklist < Testcase
 
   def test_goto
     tl = DTAS::Tracklist.new
-    tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
+    list_add(tl, %w(a b c d e f g))
     mapping = _build_mapping(tl)
     assert_equal 'f', tl.go_to(mapping['f'])
     assert_equal 'f', tl.advance_track[0]
@@ -56,21 +63,22 @@ class TestTracklist < Testcase
 
   def test_remove_track
     tl = DTAS::Tracklist.new
-    tl.instance_variable_get(:@list).replace(%w(a b c d e f g))
+    ary = %w(a b c d e f g)
+    list_add(tl, ary)
     mapping = _build_mapping(tl)
-    %w(a b c d e f g).each { |t| assert_kind_of Integer, mapping[t] }
+    ary.each { |t| assert_kind_of Integer, mapping[t] }
 
     tl.remove_track(mapping['a'])
-    assert_equal %w(b c d e f g), tl.instance_variable_get(:@list)
+    assert_equal %w(b c d e f g), list_to_path(tl)
 
     tl.remove_track(mapping['d'])
-    assert_equal %w(b c e f g), tl.instance_variable_get(:@list)
+    assert_equal %w(b c e f g), list_to_path(tl)
 
     tl.remove_track(mapping['g'])
-    assert_equal %w(b c e f), tl.instance_variable_get(:@list)
+    assert_equal %w(b c e f), list_to_path(tl)
 
     # it'll be a while before OIDs require >128 bits, right?
     tl.remove_track(1 << 128)
-    assert_equal %w(b c e f), tl.instance_variable_get(:@list), "no change"
+    assert_equal %w(b c e f), list_to_path(tl), "no change"
   end
 end
