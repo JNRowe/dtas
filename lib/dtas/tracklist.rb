@@ -30,7 +30,7 @@ class DTAS::Tracklist # :nodoc:
   def to_hsh
     h = ivars_to_hash(SIVS)
     h.delete_if { |k,v| TL_DEFAULTS[k] == v }
-    list = h['list'] and list.map!(&:to_path)
+    list = h['list'] and h['list'] = list.map(&:to_path)
     h
   end
 
