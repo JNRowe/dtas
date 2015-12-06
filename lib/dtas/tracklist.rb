@@ -56,25 +56,14 @@ class DTAS::Tracklist # :nodoc:
     @pos = TL_DEFAULTS["pos"]
   end
 
-  def size
-    @list.size
-  end
-
-  # caching this probably isn't worth it.  a tracklist is usually
-  # a few tens of tracks, maybe a hundred at most.
-  def _track_id_map
-    by_track_id = {}
-    @list.each_with_index { |t,i| by_track_id[t.track_id] = i }
-    by_track_id
-  end
-
   def get_tracks(track_ids)
-    by_track_id = _track_id_map
-    track_ids.map do |track_id|
-      idx = by_track_id[track_id]
-      # dtas-mpris fills in the metadata, we just return a path
-      [ track_id, idx ? @list[idx].to_path : nil ]
+    want = {}
+    track_ids.each { |i| want[i] = i }
+    rv = []
+    @list.each do |t|
+      i = want[t.track_id] and rv << [ i, t.to_path ]
     end
+    rv
   end
 
   def tracks
@@ -105,8 +94,7 @@ class DTAS::Tracklist # :nodoc:
   def add_track(track, after_track_id = nil, set_as_current = false)
     track = new_track(track)
     if after_track_id
-      by_track_id = _track_id_map
-      idx = by_track_id[after_track_id] or
+      idx = _idx_of(after_track_id) or
         raise ArgumentError, "after_track_id invalid"
       @list[idx, 1] = [ @list[idx], track ]
       if set_as_current
@@ -125,9 +113,12 @@ class DTAS::Tracklist # :nodoc:
     track.track_id
   end
 
+  def _idx_of(track_id)
+    @list.index { |t| t.track_id == track_id }
+  end
+
   def remove_track(track_id)
-    by_track_id = _track_id_map
-    idx = by_track_id.delete(track_id) or return false
+    idx = _idx_of(track_id) or return false
     track = @list.delete_at(idx)
     len = @list.size
     if @pos >= len
@@ -138,8 +129,7 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def go_to(track_id, offset_hhmmss = nil)
-    by_track_id = _track_id_map
-    if idx = by_track_id[track_id]
+    if idx = _idx_of(track_id)
       @goto_off = offset_hhmmss
       return @list[@goto_pos = idx].to_path
     end
