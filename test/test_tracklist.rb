@@ -106,4 +106,16 @@ class TestTracklist < Testcase
     tl.remove_track(1 << 128)
     assert_equal %w(b c e f), list_to_path(tl), "no change"
   end
+
+  def test_max
+    tl = DTAS::Tracklist.new
+    assert_kind_of Integer, tl.add_track('z')
+    assert_kind_of Integer, tl.max
+    tl.max = 1
+    assert_equal false, tl.add_track('y')
+    assert_equal 1, tl.instance_variable_get(:@list).size
+    tl.max = 2
+    assert_kind_of Integer, tl.add_track('y')
+    assert_equal 2, tl.instance_variable_get(:@list).size
+  end
 end

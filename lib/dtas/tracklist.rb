@@ -10,20 +10,27 @@ class DTAS::Tracklist # :nodoc:
   include DTAS::Serialize
   attr_accessor :repeat # true, false, 1
   attr_reader :shuffle  # false or shuffled @list
+  attr_accessor :max # integer
 
-  SIVS = %w(list pos repeat)
   TL_DEFAULTS = {
-    "list" => [],
-    "pos" => -1,
-    "repeat" => false,
+    'list' => [],
+    'pos' => -1,
+    'repeat' => false,
+    'max' => 20_000,
   }
+  SIVS = TL_DEFAULTS.keys
 
   def self.load(hash)
     obj = new
     obj.instance_eval do
-      list = hash["list"] and @list.replace(list.map { |s| new_track(s) })
-      @pos = hash["pos"] || -1
-      @repeat = hash["repeat"] || false
+      list = hash['list'] and @list.replace(list.map { |s| new_track(s) })
+      %w(pos repeat max).each do |k|
+        instance_variable_set("@#{k}", hash[k] || TL_DEFAULTS[k])
+      end
+
+      # n.b.: we don't check @list.size against max here in case people
+      # are migrating
+
       if hash['shuffle']
         @shuffle = @list.shuffle
         @pos = _idx_of(@shuffle, @list[@pos].track_id) if @pos >= 0
@@ -121,6 +128,8 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def add_track(track, after_track_id = nil, set_as_current = false)
+    return false if @list.size >= @max
+
     track = new_track(track)
     if after_track_id
       idx = _idx_of(@list, after_track_id) or

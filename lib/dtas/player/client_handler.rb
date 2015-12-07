@@ -566,6 +566,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       end
       begin
         track_id = @tl.add_track(path, after_track_id, set_as_current)
+        return io.emit('ERR FULL') unless track_id
       rescue ArgumentError => e
         return io.emit("ERR #{e.message}")
       end
@@ -592,6 +593,13 @@ module DTAS::Player::ClientHandler # :nodoc:
       else
         set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
         io.emit('OK')
+      end
+    when 'max'
+      case v = msg.shift
+      when nil then io.emit("tl max #{@tl.max}")
+      when %r{\A(\d[\d_]*)\z} then io.emit("tl max #{@tl.max = $1.to_i}")
+      else
+        return io.emit('ERR tl max must a non-negative integer')
       end
     when "remove"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
