@@ -9,6 +9,7 @@ require_relative 'track'
 class DTAS::Tracklist # :nodoc:
   include DTAS::Serialize
   attr_accessor :repeat # true, false, 1
+  attr_reader :shuffle  # false or shuffled @list
 
   SIVS = %w(list pos repeat)
   TL_DEFAULTS = {
@@ -20,9 +21,13 @@ class DTAS::Tracklist # :nodoc:
   def self.load(hash)
     obj = new
     obj.instance_eval do
-      list = hash["list"] and @list.replace(list.map! { |s| new_track(s) })
+      list = hash["list"] and @list.replace(list.map { |s| new_track(s) })
       @pos = hash["pos"] || -1
       @repeat = hash["repeat"] || false
+      if hash['shuffle']
+        @shuffle = @list.shuffle
+        @pos = _idx_of(@shuffle, @list[@pos].track_id) if @pos >= 0
+      end
     end
     obj
   end
@@ -31,6 +36,10 @@ class DTAS::Tracklist # :nodoc:
     h = ivars_to_hash(SIVS)
     h.delete_if { |k,v| TL_DEFAULTS[k] == v }
     list = h['list'] and h['list'] = list.map(&:to_path)
+    if @shuffle
+      h['shuffle'] = true
+      h['pos'] = _idx_of(@list, @shuffle[@pos].track_id) if @pos >= 0
+    end
     h
   end
 
@@ -39,6 +48,7 @@ class DTAS::Tracklist # :nodoc:
     @list = []
     @goto_off = @goto_pos = nil
     @track_nr = 0
+    @shuffle = false
   end
 
   def new_track(path)
@@ -54,6 +64,7 @@ class DTAS::Tracklist # :nodoc:
   def reset
     @goto_off = @goto_pos = nil
     @pos = TL_DEFAULTS["pos"]
+    @shuffle.shuffle! if @shuffle
   end
 
   def get_tracks(track_ids)
@@ -66,37 +77,66 @@ class DTAS::Tracklist # :nodoc:
     rv
   end
 
+  def _update_pos(pos, prev, list)
+    old = prev[pos]
+    _idx_of(list, old.track_id)
+  end
+
+  def shuffle=(bool)
+    prev = @shuffle
+    if bool
+      list = @shuffle = (prev ||= @list).shuffle
+    else
+      list = @list
+      @shuffle = false
+    end
+    @pos = _update_pos(@pos, prev, list) if @pos >= 0
+    @goto_pos = _update_pos(@goto_pos, prev, list) if @goto_pos
+  end
+
   def tracks
     @list.map(&:track_id)
   end
 
   def advance_track(repeat_ok = true)
-    return if @list.empty?
+    cur = @shuffle || @list
+    return if cur.empty?
     # @repeat == 1 for single track repeat
     repeat = repeat_ok ? @repeat : false
     next_pos = @goto_pos || @pos + (repeat == 1 ? 0 : 1)
     next_off = @goto_off # nil by default
     @goto_pos = @goto_off = nil
-    if @list[next_pos]
+    if cur[next_pos]
       @pos = next_pos
     elsif repeat
       next_pos = @pos = 0
     else
       return
     end
-    [ @list[next_pos].to_path, next_off ]
+    [ cur[next_pos].to_path, next_off ]
   end
 
   def cur_track
-    @pos >= 0 ? @list[@pos] : nil
+    @pos >= 0 ? (@shuffle || @list)[@pos] : nil
   end
 
   def add_track(track, after_track_id = nil, set_as_current = false)
     track = new_track(track)
     if after_track_id
-      idx = _idx_of(after_track_id) or
-        raise ArgumentError, "after_track_id invalid"
+      idx = _idx_of(@list, after_track_id) or
+                                  raise ArgumentError, 'after_track_id invalid'
+      if @shuffle
+        _idx_of(@shuffle, after_track_id) or
+                                  raise ArgumentError, 'after_track_id invalid'
+      end
       @list[idx, 1] = [ @list[idx], track ]
+
+      # add into random position if shuffling
+      if @shuffle
+        idx = rand(@shuffle.size)
+        @shuffle[idx, 1] = [ @shuffle[idx], track ]
+      end
+
       if set_as_current
         @pos = idx + 1
       else
@@ -104,21 +144,37 @@ class DTAS::Tracklist # :nodoc:
       end
     else # nil = first_track
       @list.unshift(track)
-      if set_as_current
-        @pos = 0
+
+      if @shuffle
+        if @shuffle.empty?
+          @shuffle << track
+          @pos = 0 if set_as_current
+        else
+          idx = rand(@shuffle.size)
+          @shuffle[idx, 1] = [ @shuffle[idx], track ]
+          @pos = idx + 1 if set_as_current
+        end
       else
-        @pos += 1 if @pos >= 0
+        if set_as_current
+          @pos = 0
+        else
+          @pos += 1 if @pos >= 0
+        end
       end
     end
     track.track_id
   end
 
-  def _idx_of(track_id)
-    @list.index { |t| t.track_id == track_id }
+  def _idx_of(list, track_id)
+    list.index { |t| t.track_id == track_id }
   end
 
   def remove_track(track_id)
-    idx = _idx_of(track_id) or return false
+    idx = _idx_of(@list, track_id) or return false
+    if @shuffle
+      si = _idx_of(@shuffle, track_id) or return false
+      @shuffle.delete_at(si)
+    end
     track = @list.delete_at(idx)
     len = @list.size
     if @pos >= len
@@ -129,9 +185,10 @@ class DTAS::Tracklist # :nodoc:
   end
 
   def go_to(track_id, offset_hhmmss = nil)
-    if idx = _idx_of(track_id)
+    list = @shuffle || @list
+    if idx = _idx_of(list, track_id)
       @goto_off = offset_hhmmss
-      return @list[@goto_pos = idx].to_path
+      return list[@goto_pos = idx].to_path
     end
     @goto_pos = nil
     # noop if track_id is invalid

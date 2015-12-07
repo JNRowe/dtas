@@ -61,6 +61,31 @@ class TestTracklist < Testcase
     assert_equal 'g', tl.advance_track[0]
   end
 
+  def test_shuffle
+    tl = DTAS::Tracklist.new
+    exp = %w(a b c d e f g)
+    list_add(tl, exp)
+    tl.shuffle = true
+    assert_equal(exp, list_to_path(tl))
+    assert_equal exp.size, tl.shuffle.size
+    assert_equal exp, tl.shuffle.map(&:to_path).sort
+    tl.shuffle = false
+    assert_equal false, tl.shuffle
+
+    tl.instance_variable_set :@pos, 3
+    before = tl.cur_track
+    3.times do
+      tl.shuffle = true
+      assert_equal before, tl.cur_track
+    end
+    x = tl.to_hsh
+    assert_equal true, x['shuffle']
+    3.times do
+      loaded = DTAS::Tracklist.load(x.dup)
+      assert_equal before.to_path, loaded.cur_track.to_path
+    end
+  end
+
   def test_remove_track
     tl = DTAS::Tracklist.new
     ary = %w(a b c d e f g)

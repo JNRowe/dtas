@@ -584,6 +584,15 @@ module DTAS::Player::ClientHandler # :nodoc:
         return io.emit("repeat #{@tl.repeat.to_s}")
       end
       io.emit("OK")
+    when 'shuffle'
+      v = msg.shift
+      case v
+      when nil then io.emit("shuffle #{(!!@tl.shuffle).to_s}")
+      when 'debug' then io.emit(@tl.shuffle.to_yaml) # TODO: remove
+      else
+        set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
+        io.emit('OK')
+      end
     when "remove"
       track_id = msg.shift or return io.emit("ERR track_id not specified")
       track_id = track_id.to_i
