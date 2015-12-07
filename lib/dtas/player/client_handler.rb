@@ -583,16 +583,18 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def _dpc_tl_repeat(io, msg)
+    prev = @tl.repeat.to_s
     case msg.shift
     when 'true' then @tl.repeat = true
     when 'false' then @tl.repeat = false
     when '1' then @tl.repeat = 1
     when nil
     end
-    io.emit("repeat #{@tl.repeat.to_s}")
+    io.emit("tl repeat #{prev}")
   end
 
   def _dpc_tl_shuffle(io, msg)
+    prev = (!!@tl.shuffle).to_s
     v = msg.shift
     case v
     when 'debug' then return io.emit(@tl.shuffle.to_yaml) # TODO: remove
@@ -600,16 +602,18 @@ module DTAS::Player::ClientHandler # :nodoc:
     else
       set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
     end
-    io.emit("shuffle #{(!!@tl.shuffle).to_s}")
+    io.emit("tl shuffle #{prev}")
   end
 
   def _dpc_tl_max(io, msg)
+    prev = @tl.max
     case msg.shift
-    when nil then io.emit("tl max #{@tl.max}")
-    when %r{\A(\d[\d_]*)\z} then io.emit("tl max #{@tl.max = $1.to_i}")
+    when nil
+    when %r{\A(\d[\d_]*)\z} then @tl.max = $1.to_i
     else
       return io.emit('ERR tl max must a non-negative integer')
     end
+    io.emit("tl max #{prev}")
   end
 
   def _dpc_tl_remove(io, msg)
@@ -733,9 +737,9 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def dpc_trim(io, msg)
+    t = @trim
     case msg.size
-    when 0
-      io.emit({ 'trim' => @trim }.to_yaml)
+    when 0 # OK
     when 1, 2
       case msg[0]
       when 'off'
@@ -754,8 +758,10 @@ module DTAS::Player::ClientHandler # :nodoc:
         end
       end
       __current_requeue
-      io.emit('OK')
+    else
+      return io.emit('ERR usage: trim [off|TBEG [TLEN]]')
     end
+    io.emit(t ? t.map(&:to_s).join(' ') : 'off')
   end
 end
 # :startdoc:

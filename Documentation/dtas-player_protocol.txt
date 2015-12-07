@@ -284,10 +284,10 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * tl repeat [BOOLEAN|1] - show/or change repeat status of the tracklist.
   With no args, this will show "true", "false", or "1"
   If set to "1", dtas-player will repeat the current track.
-  Returns current repeat status.
+  Returns the previous repeat status.
 
 * tl shuffle [BOOLEAN] - show/or change the current shuffle status of
-  the tracklist
+  the tracklist.  Returns the previous shuffle status.
 
 * tl tracks
   returns a list of all TRACKIDS in the tracklist
