@@ -220,4 +220,25 @@ class DTAS::Tracklist # :nodoc:
     end
     @goto_pos = prev_idx
   end
+
+  def swap(a_id, b_id)
+    ok = { a_id => a_idx = [], b_id => b_idx = [] }
+    @list.each_with_index do |t,i|
+      ary = ok.delete(t.track_id) or next
+      ary[0] = i
+      break if ok.empty?
+    end
+    a_idx = a_idx[0] or return
+    b_idx = b_idx[0] or return
+    @list[a_idx], @list[b_idx] = @list[b_idx], @list[a_idx]
+    unless @shuffle
+      [ :@goto_pos, :@pos ].each do |v|
+        case instance_variable_get(v)
+        when a_idx then instance_variable_set(v, b_idx)
+        when b_idx then instance_variable_set(v, a_idx)
+        end
+      end
+    end
+    true
+  end
 end

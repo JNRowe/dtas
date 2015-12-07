@@ -696,6 +696,14 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit('OK')
   end
 
+  def _dpc_tl_swap(io, msg)
+    usage = 'ERR usage: "tl swap TRACK_ID_A TRACK_ID_B"'
+    a_id = msg.shift or return io.emit(usage)
+    b_id = msg.shift or return io.emit(usage)
+    @tl.swap(a_id.to_i, b_id.to_i) or return io.emit('MISSING')
+    io.emit('OK')
+  end
+
   def __bp_prev_next(io, msg, cur, bp)
     case type = msg[1]
     when nil, "track"

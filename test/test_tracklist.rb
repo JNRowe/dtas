@@ -120,4 +120,15 @@ class TestTracklist < Testcase
     assert_kind_of Integer, tl.add_track('y')
     assert_equal 2, tl.instance_variable_get(:@list).size
   end
+
+  def test_swap
+    tl = DTAS::Tracklist.new
+    list_add(tl, %w(a b c d e f g))
+    mapping = _build_mapping(tl)
+    assert tl.swap(mapping['a'], mapping['g'])
+    assert_equal %w(g b c d e f a), list_to_path(tl)
+
+    assert_nil tl.swap(-2, -3), 'no swap on invalid'
+    assert_equal %w(g b c d e f a), list_to_path(tl)
+  end
 end
