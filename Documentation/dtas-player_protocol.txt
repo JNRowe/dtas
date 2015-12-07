@@ -268,14 +268,14 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * tl current-id - display the TRACKID of the currently playing track
 
 * tl remove TRACKID - remove the track with the given TRACKID from
-  the track list
+  the track list and returns the FILENAME if successful
 
 * tl get [TRACKIDS]
   returns a list of TRACKIDS mapped to shell-escaped filenames.
 
 * tl goto TRACKID [TIMESTAMP] - plays the given TRACKID
   An optional timestamp may be added to prevent playing the
-  same part(s) repeated.y
+  same part(s) repeatedly
 
 * tl next - jump to the next track in the tracklist
 
@@ -284,6 +284,10 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 * tl repeat [BOOLEAN|1] - show/or change repeat status of the tracklist.
   With no args, this will show "true", "false", or "1"
   If set to "1", dtas-player will repeat the current track.
+  Returns current repeat status.
+
+* tl shuffle [BOOLEAN] - show/or change the current shuffle status of
+  the tracklist
 
 * tl tracks
   returns a list of all TRACKIDS in the tracklist

@@ -553,99 +553,123 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def dpc_tl(io, msg)
-    case msg.shift
-    when "add"
-      path = msg.shift
-      after_track_id = msg.shift
-      after_track_id = after_track_id.to_i if after_track_id
-      case set_as_current = msg.shift
-      when "true" then set_as_current = true
-      when "false", nil then set_as_current = false
-      else
-        return io.emit("ERR tl add PATH [after_track_id] [true|false]")
-      end
-      begin
-        track_id = @tl.add_track(path, after_track_id, set_as_current)
-        return io.emit('ERR FULL') unless track_id
-      rescue ArgumentError => e
-        return io.emit("ERR #{e.message}")
-      end
+    sub = msg.shift
+    m = "_dpc_tl_#{sub.tr('-', '_')}"
+    __send__(m, io, msg) if respond_to?(m)
+  end
 
-      _tl_skip if set_as_current # if @current is playing, it will restart soon
-
-      # start playing if we're currently idle
-      next_source(_next) unless need_to_queue
-      io.emit("#{track_id}")
-    when "repeat"
-      case msg.shift
-      when "true" then @tl.repeat = true
-      when "false" then @tl.repeat = false
-      when "1" then @tl.repeat = 1
-      when nil
-        return io.emit("repeat #{@tl.repeat.to_s}")
-      end
-      io.emit("OK")
-    when 'shuffle'
-      v = msg.shift
-      case v
-      when nil then io.emit("shuffle #{(!!@tl.shuffle).to_s}")
-      when 'debug' then io.emit(@tl.shuffle.to_yaml) # TODO: remove
-      else
-        set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
-        io.emit('OK')
-      end
-    when 'max'
-      case v = msg.shift
-      when nil then io.emit("tl max #{@tl.max}")
-      when %r{\A(\d[\d_]*)\z} then io.emit("tl max #{@tl.max = $1.to_i}")
-      else
-        return io.emit('ERR tl max must a non-negative integer')
-      end
-    when "remove"
-      track_id = msg.shift or return io.emit("ERR track_id not specified")
-      track_id = track_id.to_i
-      rm = @tl.remove_track(track_id) or return io.emit("MISSING")
-      rm = rm.object_id
-
-      # skip if we're removing the currently playing track
-      if @current && @current.respond_to?(:infile) &&
-         @current.infile.object_id == rm
-        _tl_skip
-      end
-      # drop it from the queue, too, in case it just got requeued or paused
-      @queue.delete_if { |t| Array === t && t[0].object_id == rm }
-      io.emit("OK")
-    when "get"
-      res = @tl.get_tracks(msg.map!(&:to_i))
-      res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
-      io.emit("#{res.size} #{res.join(' ')}")
-    when "tracks"
-      tracks = @tl.tracks
-      io.emit("#{tracks.size} " << tracks.map!(&:to_s).join(' '))
-    when "goto"
-      track_id = msg.shift or return io.emit("ERR track_id not specified")
-      offset = msg.shift # may be nil
-      if @tl.go_to(track_id.to_i, offset)
-        _tl_skip
-        next_source(_next) unless need_to_queue
-        io.emit("OK")
-      else
-        io.emit("MISSING")
-      end
-    when "current"
-      track = @tl.cur_track
-      io.emit(track ? track.to_path : "NONE")
-    when "current-id"
-      track = @tl.cur_track
-      io.emit(track ? track.track_id.to_s : "NONE")
-    when "next"
-      _tl_skip
-      io.emit("OK")
-    when "prev"
-      @tl.previous!
-      _tl_skip
-      io.emit("OK")
+  def _dpc_tl_add(io, msg)
+    path = msg.shift
+    after_track_id = msg.shift
+    after_track_id = after_track_id.to_i if after_track_id
+    case set_as_current = msg.shift
+    when 'true' then set_as_current = true
+    when 'false', nil then set_as_current = false
+    else
+      return io.emit('ERR tl add PATH [after_track_id] [true|false]')
     end
+    begin
+      track_id = @tl.add_track(path, after_track_id, set_as_current)
+      return io.emit('ERR FULL') unless track_id
+    rescue ArgumentError => e
+      return io.emit("ERR #{e.message}")
+    end
+
+    _tl_skip if set_as_current # if @current is playing, it will restart soon
+
+    # start playing if we're currently idle
+    next_source(_next) unless need_to_queue
+    io.emit(track_id.to_s)
+  end
+
+  def _dpc_tl_repeat(io, msg)
+    case msg.shift
+    when 'true' then @tl.repeat = true
+    when 'false' then @tl.repeat = false
+    when '1' then @tl.repeat = 1
+    when nil
+    end
+    io.emit("repeat #{@tl.repeat.to_s}")
+  end
+
+  def _dpc_tl_shuffle(io, msg)
+    v = msg.shift
+    case v
+    when 'debug' then return io.emit(@tl.shuffle.to_yaml) # TODO: remove
+    when nil
+    else
+      set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
+    end
+    io.emit("shuffle #{(!!@tl.shuffle).to_s}")
+  end
+
+  def _dpc_tl_max(io, msg)
+    case msg.shift
+    when nil then io.emit("tl max #{@tl.max}")
+    when %r{\A(\d[\d_]*)\z} then io.emit("tl max #{@tl.max = $1.to_i}")
+    else
+      return io.emit('ERR tl max must a non-negative integer')
+    end
+  end
+
+  def _dpc_tl_remove(io, msg)
+    track_id = msg.shift or return io.emit('ERR track_id not specified')
+    track_id = track_id.to_i
+    path = @tl.remove_track(track_id) or return io.emit('MISSING')
+    rm = path.object_id
+
+    # skip if we're removing the currently playing track
+    if @current && @current.respond_to?(:infile) &&
+       @current.infile.object_id == rm
+      _tl_skip
+    end
+    # drop it from the queue, too, in case it just got requeued or paused
+    @queue.delete_if { |t| Array === t && t[0].object_id == rm }
+    io.emit(path)
+  end
+
+  def _dpc_tl_get(io, msg)
+    res = @tl.get_tracks(msg.map!(&:to_i))
+    res.map! { |tid, file| "#{tid}=#{file ? Shellwords.escape(file) : ''}" }
+    io.emit("#{res.size} #{res.join(' ')}")
+  end
+
+  def _dpc_tl_tracks(io, msg)
+    tracks = @tl.tracks
+    io.emit("#{tracks.size} " << tracks.map!(&:to_s).join(' '))
+  end
+
+  def _dpc_tl_goto(io, msg)
+    track_id = msg.shift or return io.emit('ERR track_id not specified')
+    offset = msg.shift # may be nil
+    if @tl.go_to(track_id.to_i, offset)
+      _tl_skip
+      next_source(_next) unless need_to_queue
+      io.emit('OK')
+    else
+      io.emit('MISSING')
+    end
+  end
+
+  def _dpc_tl_current(io, msg)
+    track = @tl.cur_track
+    io.emit(track ? track.to_path : 'NONE')
+  end
+
+  def _dpc_tl_current_id(io, msg)
+    track = @tl.cur_track
+    io.emit(track ? track.track_id.to_s : 'NONE')
+  end
+
+  def _dpc_tl_next(io, msg)
+    _tl_skip
+    io.emit('OK')
+  end
+
+  def _dpc_tl_prev(io, msg)
+    @tl.previous!
+    _tl_skip
+    io.emit('OK')
   end
 
   def __bp_prev_next(io, msg, cur, bp)
