@@ -129,11 +129,14 @@ class DTAS::Mlib
     end
   end
 
-  def update(path, jobs: 8)
+  def update(path, opts = nil)
     # n.b. "jobs" is for CPU concurrency.  Audio media is typically stored
     # on high-latency media or slow network file systems; so we use a high
     # number of jobs by default to compensate for the seek-heavy workload
     # this generates
+    opts ||= {}
+    jobs = opts[:jobs] || 8
+
     init_suffixes
     st = File.stat(path) # we always follow the first dir even if it's a symlink
     st.directory? or
