@@ -39,6 +39,7 @@ class DTAS::Mlib
     if db.class.to_s.downcase.include?('sqlite')
       db.transaction_mode = :immediate
       db.synchronous = :off
+      db.case_sensitive_like = false
     end
     @db = db
     @pwd = nil
@@ -164,6 +165,7 @@ class DTAS::Mlib
   end
 
   def load_tags
+    return @tag_map if @tag_map
     tag_map = {}
     tags = @db[:tags]
     @tags.each do |lc, mc|
@@ -178,7 +180,7 @@ class DTAS::Mlib
     %w(track disc).each do |x|
       tag_id = tag_map[x] and tag_map["#{x}number"] = tag_id
     end
-    @tag_map = tag_map
+    @tag_map = tag_map.freeze
   end
 
   def scan_any(path, parent_id)
@@ -376,16 +378,21 @@ class DTAS::Mlib
     puts "db_playtime: #{db_playtime}"
   end
 
-  def path_of(node)
-    return '/' if node[:name] == ''
-    parts = [ node[:name], '' ]
+  def path_of(node, cache = {})
+    base = node[:name]
+    return '/' if base == ''
+    parent_id = node[:parent_id]
+    ppath = cache[parent_id] and return "#{ppath}#{base}"
+    parts = []
+    base += '/' unless node[:tlen] >= 0
     begin
       node = @db[:nodes][id: node[:parent_id]]
       break if node[:id] == node[:parent_id]
       parts.unshift node[:name]
     end while true
     parts.unshift('')
-    parts.join('/')
+    parts << base
+    cache[parent_id] = parts.join('/')
   end
 
   def emit_recurse(node)
@@ -438,5 +445,70 @@ class DTAS::Mlib
     nodes.where(q).delete
     @db[:comments].where(node_id: node_id).delete
     nodes.where(id: node_id).delete
+  end
+
+  def offset_limit(q, offset, limit)
+    offset = offset.to_s
+    limit = limit.to_s
+    if limit =~ %r{\A\d+\z}
+      q << "LIMIT #{limit}"
+      q << "OFFSET #{offset}" if offset =~ %r{\A\d+\z} && offset != '0'
+    end
+    q
+  end
+
+  # based on the MPD command of the same name, unstable API
+  def find(type, what, offset = 0, limit = nil)
+    load_tags
+    type = type.downcase
+    q = []
+    case type
+    when 'any'
+      # TODO: add path name matches
+      q << 'SELECT DISTINCT(n.id),n.* FROM nodes n ' \
+           'LEFT JOIN comments c ON c.node_id = n.id ' \
+           'LEFT JOIN vals v ON v.id = c.val_id ' \
+           'WHERE v.val = ?'
+    when *(@tags.keys)
+      tag_id = @tag_map[type]
+      q << 'SELECT DISTINCT(n.id),n.* FROM nodes n ' \
+           'LEFT JOIN comments c ON c.node_id = n.id ' \
+           'LEFT JOIN vals v ON v.id = c.val_id ' \
+           'LEFT JOIN tags t ON t.id = c.tag_id ' \
+           "WHERE v.val = ? AND t.id = #{tag_id}"
+    else
+      raise ArgumentError, "invalid type=#{type.inspect}"
+    end
+    q << 'ORDER by n.parent_id,n.name'
+    offset_limit(q, offset, limit)
+    @db[q.join(' '), what].each { |node| yield node }
+  end
+
+  # based on the MPD command of the same name
+  def search(type, what, offset = 0, limit = nil)
+    load_tags
+    type = type.downcase
+    q = []
+    what = @db.literal(%Q(%#{what}%))
+    case type
+    when 'any'
+      # TODO: add path name matches
+      q << 'SELECT DISTINCT(n.id),n.* FROM nodes n ' \
+           'LEFT JOIN comments c ON c.node_id = n.id ' \
+           'LEFT JOIN vals v ON v.id = c.val_id ' \
+           "WHERE v.val LIKE #{what}"
+    when *(@tags.keys)
+      tag_id = @tag_map[type]
+      q << 'SELECT DISTINCT(n.id),n.* FROM nodes n ' \
+           'LEFT JOIN comments c ON c.node_id = n.id ' \
+           'LEFT JOIN vals v ON v.id = c.val_id ' \
+           'LEFT JOIN tags t ON t.id = c.tag_id ' \
+           "WHERE t.id = #{tag_id} AND v.val LIKE #{what}"
+    else
+      raise ArgumentError, "invalid type=#{type.inspect}"
+    end
+    q << 'ORDER by n.parent_id,n.name'
+    offset_limit(q, offset, limit)
+    @db[q.join(' ')].each { |node| yield node }
   end
 end
