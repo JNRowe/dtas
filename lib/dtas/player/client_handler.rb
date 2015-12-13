@@ -526,9 +526,27 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
+  def state_file_dump_async(io, sf)
+    on_death = lambda { |_| @srv.wait_ctl(io, :wait_readable) }
+    pid = fork do
+      begin
+        begin
+          sf.dump(self)
+          res = 'OK'
+        rescue => e
+          res = "ERR dumping to #{xs(sf.path)} #{e.message}"
+        end
+        io.to_io.send(res, Socket::MSG_EOR)
+      ensure
+        exit!(0)
+      end
+    end
+    DTAS::Process::PIDS[pid] = on_death
+  end
+
   def dpc_state(io, msg)
     case msg.shift
-    when "dump"
+    when 'dump'
       dest = msg.shift
       if dest
         sf = DTAS::StateFile.new(dest, false)
@@ -538,13 +556,9 @@ module DTAS::Player::ClientHandler # :nodoc:
       else
         return io.emit("ERR no state file configured")
       end
-      begin
-        sf.dump(self)
-      rescue => e
-        return io.emit("ERR dumping to #{xs(dest)} #{e.message}")
-      end
+      state_file_dump_async(io, sf)
+      :ignore
     end
-    io.emit("OK")
   end
 
   def _tl_skip
