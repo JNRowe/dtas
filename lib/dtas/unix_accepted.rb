@@ -18,9 +18,12 @@ class DTAS::UNIXAccepted # :nodoc:
     buffered = @send_buf.size
     if buffered == 0
       case rv = sendmsg_nonblock(msg)
-      when :wait_writable then @send_buf << msg
+      when :wait_writable
+        @send_buf << msg
+        rv
+      else
+        :wait_readable
       end
-      rv
     else # buffered > 0
       @send_buf << msg
       :wait_writable
