@@ -330,7 +330,7 @@ class DTAS::Mlib
   end
 
   # returns an array on error
-  def dump(path)
+  def dump(path, cache, cb)
     dir = path
     base = nil
     retried = false
@@ -348,12 +348,12 @@ class DTAS::Mlib
     load_tags
     @tag_rmap = @tag_map.invert
     if found[:tlen] == DM_DIR
-      emit_recurse(found)
+      emit_recurse(found, cache, cb)
     else
       parent = @db[:nodes][id: found[:parent_id]]
       parent or abort "missing parent for #{found.inspect}"
-      parent[:dirname] ||= path_of(parent)
-      emit_1(found, parent)
+      parent[:dirname] ||= path_of(parent, cache)
+      emit_1(found, parent, cache, cb)
     end
   end
 
@@ -371,20 +371,18 @@ class DTAS::Mlib
   end
 
   def stats
-    %w(artist album).each do |k|
-      puts "#{k}s: #{count_distinct(k)}"
-    end
-    puts "songs: #{count_songs}"
-    puts "db_playtime: #{db_playtime}"
+    rv = { songs: count_songs, db_playtime: db_playtime }
+    %w(artist album).each { |k| rv[:"#{k}s"] = count_distinct(k) }
+    rv
   end
 
-  def path_of(node, cache = {})
+  def path_of(node, cache)
     base = node[:name]
     return '/' if base == ''
     parent_id = node[:parent_id]
+    base += '/' unless node[:tlen] >= 0
     ppath = cache[parent_id] and return "#{ppath}#{base}"
     parts = []
-    base += '/' unless node[:tlen] >= 0
     begin
       node = @db[:nodes][id: node[:parent_id]]
       break if node[:id] == node[:parent_id]
@@ -395,39 +393,27 @@ class DTAS::Mlib
     cache[parent_id] = parts.join('/')
   end
 
-  def emit_recurse(node)
-    node[:dirname] ||= path_of(node)
+  def emit_recurse(node, cache, cb)
+    node[:dirname] ||= path_of(node, cache)
     @db[:nodes].where(parent_id: node[:id]).order(:name).each do |nd|
       next if nd[:id] == node[:id] # root_node
       case nd[:tlen]
-      when DM_DIR then emit_recurse(nd)
+      when DM_DIR then emit_recurse(nd, cache, cb)
       when DM_IGN then next
       else
-        emit_1(nd, node)
+        emit_1(nd, node, cb)
       end
     end
   end
 
-  def emit_1(node, parent)
+  def emit_1(node, parent, cb)
     comments = Hash.new { |h,k| h[k] = [] }
     @db['SELECT c.tag_id, v.val FROM comments c ' \
         'LEFT JOIN vals v ON v.id = c.val_id ' \
         "WHERE c.node_id = #{node[:id]} ORDER BY c.tag_id"].map do |c|
       comments[@tag_rmap[c[:tag_id]]] << c[:val]
     end
-    puts "Path: #{parent[:dirname]}#{node[:name]}"
-    puts "Length: #{node[:tlen]}"
-    return if comments.empty?
-    puts 'Comments:'
-    comments.each do |k,v|
-      if v.size == 1
-        puts "\t#{k}: #{v[0]}"
-      else
-        v << ''
-        puts "\t#{k}:\n\t\t#{v.join("\t\t\n")}"
-      end
-    end
-    puts
+    cb.call(parent, node, comments)
   end
 
   def remove_entry(node)
