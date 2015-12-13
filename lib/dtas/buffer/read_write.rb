@@ -3,6 +3,7 @@
 require 'io/nonblock'
 require_relative '../../dtas'
 require_relative '../pipe'
+require_relative '../nonblock'
 
 # compatibility code for systems lacking "splice" support via the
 # "io-splice" RubyGem.  Used only by -player
@@ -28,13 +29,11 @@ module DTAS::Buffer::ReadWrite # :nodoc:
   # always block when we have a single target
   def broadcast_one(targets, limit = nil)
     buf = _rbuf
-    @to_io.read_nonblock(limit || MAX_AT_ONCE, buf)
+    case rv = @to_io.read_nonblock(limit || MAX_AT_ONCE, buf, exception: false)
+    when nil, :wait_readable then return rv
+    end
     n = targets[0].write(buf) # IO#write has write-in-full behavior
     @bytes_xfer += n
-    :wait_readable
-  rescue EOFError
-    nil
-  rescue Errno::EAGAIN
     :wait_readable
   rescue Errno::EPIPE, IOError => e
     __dst_error(targets[0], e)
@@ -71,14 +70,15 @@ module DTAS::Buffer::ReadWrite # :nodoc:
     targets.delete_if do |dst|
       begin
         if dst.nonblock?
-          w = dst.write_nonblock(buf)
-          again[dst] = buf.byteslice(w, n) if w < n
+          case w = dst.write_nonblock(buf, exception: false)
+          when :wait_writable
+            blocked << dst
+          else
+            again[dst] = buf.byteslice(w, n) if w < n
+          end
         else
           dst.write(buf)
         end
-        false
-      rescue Errno::EAGAIN
-        blocked << dst
         false
       rescue IOError, Errno::EPIPE => e
         again.delete(dst)
@@ -90,17 +90,19 @@ module DTAS::Buffer::ReadWrite # :nodoc:
     # try to write as much as possible
     again.delete_if do |dst, sbuf|
       begin
-        w = dst.write_nonblock(sbuf)
-        n = sbuf.bytesize
-        if w < n
-          again[dst] = sbuf.byteslice(w, n)
-          false
-        else
+        case w = dst.write_nonblock(sbuf, exception: false)
+        when :wait_writable
+          blocked << dst
           true
+        else
+          n = sbuf.bytesize
+          if w < n
+            again[dst] = sbuf.byteslice(w, n)
+            false
+          else
+            true
+          end
         end
-      rescue Errno::EAGAIN
-        blocked << dst
-        true
       rescue IOError, Errno::EPIPE => e
         __dst_error(dst, e)
         true

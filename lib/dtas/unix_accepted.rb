@@ -17,55 +17,48 @@ class DTAS::UNIXAccepted # :nodoc:
   def emit(msg)
     buffered = @send_buf.size
     if buffered == 0
-      begin
-        @to_io.sendmsg_nonblock(msg, Socket::MSG_EOR)
-        return :wait_readable
-      rescue Errno::EAGAIN
-        @send_buf << msg
-        return :wait_writable
-      rescue => e
-        return e
+      case rv = sendmsg_nonblock(msg)
+      when :wait_writable then @send_buf << msg
       end
+      rv
     elsif buffered > 100
-      return RuntimeError.new("too many messages buffered")
+      RuntimeError.new("too many messages buffered")
     else # buffered > 0
       @send_buf << msg
-      return :wait_writable
+      :wait_writable
     end
+  rescue => e
+    e
   end
 
   # flushes pending data if it got buffered
   def writable_iter
-    begin
-      msg = @send_buf.shift or return :wait_readable
-      @to_io.send_nonblock(msg, Socket::MSG_EOR)
-    rescue Errno::EAGAIN
-      @send_buf.unshift(msg)
-      return :wait_writable
-    rescue => e
-      return e
-    end while true
+    case sendmsg_nonblock(@send_buf[0])
+    when :wait_writable then return :wait_writable
+    else
+      @send_buf.shift
+    end until @send_buf.empty?
+    :wait_readable
+  rescue => e
+    e
   end
 
   def readable_iter
-    io = @to_io
-    nread = io.nread
+    nread = @to_io.nread
 
     # EOF, assume no spurious wakeups for SOCK_SEQPACKET
     return nil if nread == 0
 
-    begin
-      begin
-        msg = io.recv_nonblock(nread)
-      rescue Errno::EAGAIN
-        return :wait_readable
-      rescue EOFError, SystemCallError
-        return nil
-      end
+    case msg = recv_nonblock(nread)
+    when :wait_readable then return msg
+    when '', nil then return nil # EOF
+    else
       yield(self, msg) # DTAS::Player deals with this
-      nread = io.nread
+      nread = @to_io.nread
     end while nread > 0
     :wait_readable
+  rescue SystemCallError
+    nil
   end
 
   def close
@@ -74,5 +67,29 @@ class DTAS::UNIXAccepted # :nodoc:
 
   def closed?
     @to_io.closed?
+  end
+
+  if RUBY_VERSION.to_f >= 2.3
+    def sendmsg_nonblock(msg)
+      @to_io.sendmsg_nonblock(msg, Socket::MSG_EOR, exception: false)
+    end
+
+    def recv_nonblock(len)
+      @to_io.recv_nonblock(len, exception: false)
+    end
+  else
+    def sendmsg_nonblock(msg)
+      @to_io.sendmsg_nonblock(msg, Socket::MSG_EOR)
+    rescue IO::WaitWritable
+      :wait_writable
+    end
+
+    def recv_nonblock(len)
+      @to_io.recv_nonblock(len)
+    rescue IO::WaitReadable
+      :wait_readable
+    rescue EOFError
+      nil
+    end
   end
 end

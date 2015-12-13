@@ -6,9 +6,10 @@ rescue LoadError
 end
 require_relative '../dtas'
 require_relative 'writable_iter'
+require_relative 'nonblock'
 
 # pipe wrapper for -player sinks
-class DTAS::Pipe < IO # :nodoc:
+class DTAS::Pipe < DTAS::Nonblock # :nodoc:
   include DTAS::WritableIter
   attr_accessor :sink
 

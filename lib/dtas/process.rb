@@ -4,6 +4,7 @@ require 'io/wait'
 require 'shellwords'
 require_relative '../dtas'
 require_relative 'xs'
+require_relative 'nonblock'
 
 # process management helpers
 module DTAS::Process # :nodoc:
@@ -86,12 +87,13 @@ module DTAS::Process # :nodoc:
       cmd, opts = env, cmd
       env = {}
     end
-    r, w = IO.pipe
+    buf = ''
+    r, w = DTAS::Nonblock.pipe
     opts = opts.merge(out: w)
     r.binmode
     no_raise = opts.delete(:no_raise)
     if err_str = opts.delete(:err_str)
-      re, we = IO.pipe
+      re, we = DTAS::Nonblock.pipe
       re.binmode
       opts[:err] = we
     end
@@ -105,12 +107,11 @@ module DTAS::Process # :nodoc:
       begin
         readable = IO.select(want.keys) or next
         readable[0].each do |io|
-          begin
-            want[io] << io.read_nonblock(2000)
-          rescue Errno::EAGAIN
-            # spurious wakeup, bytes may be zero
-          rescue EOFError
-            want.delete(io)
+          case rv = io.read_nonblock(2000, buf, exception: false)
+          when :wait_readable # spurious wakeup, bytes may be zero
+          when nil then want.delete(io)
+          else
+            want[io] << rv
           end
         end
       end until want.empty?

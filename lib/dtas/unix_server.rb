@@ -58,12 +58,10 @@ class DTAS::UNIXServer # :nodoc:
 
   def readable_iter
     # we do not do anything with the block passed to us
-    begin
-      sock, _ = @to_io.accept_nonblock
-      @readers[DTAS::UNIXAccepted.new(sock)] = true
-    rescue Errno::ECONNABORTED # ignore this, it happens
-    rescue Errno::EAGAIN
-      return :wait_readable
+    case rv = accept_nonblock
+    when :wait_readable then return rv
+    else
+      @readers[DTAS::UNIXAccepted.new(rv[0])] = true
     end while true
   end
 
@@ -88,9 +86,7 @@ class DTAS::UNIXServer # :nodoc:
       # - a consumer (e.g. DTAS::Sink) just became writable, but the
       #   corresponding DTAS::Buffer was already readable in a previous
       #   call.
-    when nil
-      io.close
-    when StandardError
+    when nil, StandardError
       io.close
     else
       raise "BUG: wait_ctl invalid: #{io} #{err.inspect}"
@@ -115,6 +111,18 @@ class DTAS::UNIXServer # :nodoc:
     r[0].each do |io|
       @readers.delete(io)
       wait_ctl(io, io.readable_iter { |_io, msg| yield(_io, msg) })
+    end
+  end
+
+  if RUBY_VERSION.to_f >= 2.3
+    def accept_nonblock
+      @to_io.accept_nonblock(exception: false)
+    end
+  else
+    def accept_nonblock
+      @to_io.accept_nonblock
+    rescue Errno::EAGAIN, Errno::ECONNABORTED, Errno::EPROTO
+      :wait_readable
     end
   end
 end

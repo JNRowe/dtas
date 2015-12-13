@@ -3,11 +3,13 @@
 
 # used in various places for safe wakeups from IO.select via signals
 # A fallback for non-Linux systems lacking the "sleepy_penguin" RubyGem
+require_relative 'nonblock'
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io
 
   def initialize
-    @to_io, @wr = IO.pipe
+    @to_io, @wr = DTAS::Nonblock.pipe
+    @rbuf = ''
   end
 
   def signal
@@ -15,11 +17,10 @@ class DTAS::Sigevent # :nodoc:
   end
 
   def readable_iter
-    begin
-      @to_io.read_nonblock(11)
+    case @to_io.read_nonblock(11, @rbuf, exception: false)
+    when :wait_readable then return :wait_readable
+    else
       yield self, nil # calls DTAS::Process.reaper
-    rescue Errno::EAGAIN
-      return :wait_readable
     end while true
   end
 
