@@ -27,7 +27,7 @@ unless db.include?('://')
   end
 end
 
-def mlib(db, migrate: false)
+def mlib(db, migrate = false)
   m = DTAS::Mlib.new(db)
   m.migrate if migrate
   m
@@ -36,7 +36,7 @@ end
 case action = ARGV.shift
 when 'update', 'up'
   directory = ARGV.shift or abort "DIRECTORY required\n#{usage}"
-  mlib(db, migrate: true).update(directory)
+  mlib(db, migrate = true).update(directory)
 when 'dump' # mainly for debugging
   directory = ARGV.shift || '/'
   mlib(db).dump(directory)
