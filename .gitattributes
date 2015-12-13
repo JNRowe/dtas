@@ -1,0 +1,4 @@
+*.gemspec diff=ruby
+*.rb diff=ruby
+Rakefile diff=ruby
+bin/* diff=ruby
