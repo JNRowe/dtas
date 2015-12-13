@@ -21,8 +21,6 @@ class DTAS::UNIXAccepted # :nodoc:
       when :wait_writable then @send_buf << msg
       end
       rv
-    elsif buffered > 100
-      RuntimeError.new("too many messages buffered")
     else # buffered > 0
       @send_buf << msg
       :wait_writable
@@ -37,8 +35,8 @@ class DTAS::UNIXAccepted # :nodoc:
     when :wait_writable then return :wait_writable
     else
       @send_buf.shift
-    end until @send_buf.empty?
-    :wait_readable
+      @send_buf.empty? ? :wait_readable : :wait_writable
+    end
   rescue => e
     e
   end
@@ -54,9 +52,8 @@ class DTAS::UNIXAccepted # :nodoc:
     when '', nil then return nil # EOF
     else
       yield(self, msg) # DTAS::Player deals with this
-      nread = @to_io.nread
-    end while nread > 0
-    :wait_readable
+    end
+    @send_buf.empty? ? :wait_readable : :wait_writable
   rescue SystemCallError
     nil
   end
