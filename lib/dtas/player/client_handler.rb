@@ -676,6 +676,12 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit('OK')
   end
 
+  def _dpc_tl_clear(io, msg)
+    @tl.clear
+    _tl_skip
+    io.emit('OK')
+  end
+
   def __bp_prev_next(io, msg, cur, bp)
     case type = msg[1]
     when nil, "track"

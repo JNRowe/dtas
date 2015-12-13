@@ -24,10 +24,6 @@ when "cat"
     res.sub!(/\A1 /, '')
     print "#{res}\n"
   end
-when "clear"
-  get_track_ids(c).each do |track_id|
-    print("#{track_id} " << c.req("tl remove #{track_id}") << "\n")
-  end
 when "addhead"
   ARGV.shift
   ARGV.reverse.each do |path|

@@ -195,6 +195,12 @@ class DTAS::Tracklist # :nodoc:
     track.to_path
   end
 
+  def clear
+    @list.clear
+    @shuffle.clear if @shuffle
+    reset
+  end
+
   def go_to(track_id, offset_hhmmss = nil)
     list = @shuffle || @list
     if idx = _idx_of(list, track_id)
