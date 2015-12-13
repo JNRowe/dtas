@@ -73,6 +73,8 @@ class TestTracklist < Testcase
     assert_equal false, tl.shuffle
 
     tl.instance_variable_set :@pos, 3
+    assert_equal false, tl.shuffle = false
+
     before = tl.cur_track
     3.times do
       tl.shuffle = true

@@ -93,9 +93,11 @@ class DTAS::Tracklist # :nodoc:
     prev = @shuffle
     if bool
       list = @shuffle = (prev ||= @list).shuffle
-    else
-      list = @list
+    elsif prev
       @shuffle = false
+      list = @list
+    else
+      return false
     end
     @pos = _update_pos(@pos, prev, list) if @pos >= 0
     @goto_pos = _update_pos(@goto_pos, prev, list) if @goto_pos
