@@ -50,16 +50,5 @@ class TestUNIXServer < Testcase
     c = clients[0]
     c.emit "HIHI"
     assert_equal "HIHI", client.recv(4)
-
-    err = nil
-    500.times do
-      rc = c.emit "SPAM"
-      case rc
-      when StandardError
-        err = rc
-        break
-      end
-    end
-    assert_kind_of RuntimeError, err
   end
 end
