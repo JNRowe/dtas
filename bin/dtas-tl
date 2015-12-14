@@ -5,7 +5,6 @@
 # WARNING: totally unstable API, use dtas-ctl for scripting (but the protocol
 # itself is also unstable, but better than this one probably).
 require 'dtas/unix_client'
-require 'yaml'
 require 'shellwords'
 
 def get_track_ids(c)
@@ -14,6 +13,86 @@ def get_track_ids(c)
   track_ids = track_ids.split(/ /)
   track_ids.shift
   track_ids
+end
+
+def do_edit(c)
+  require 'dtas/edit_client'
+  require 'yaml'
+  require 'tempfile'
+  extend DTAS::EditClient
+  tmp = Tempfile.new(%w(dtas-tl-edit .txt))
+  tmp.binmode
+  tmp_path = tmp.path
+  orig = []
+  orig_idx = {}
+
+  get_track_ids(c).each_slice(128) do |track_ids|
+    res = c.req("tl get #{track_ids.join(' ')}")
+    res = Shellwords.split(res.sub!(/\A\d+ /, ''))
+    while line = res.shift
+      line.sub!(/\A(\d+)=/, '') or abort "unexpected line=#{line.inspect}\n"
+      track_id = $1.to_i
+      orig_idx[track_id] = orig.size
+      orig << track_id
+      tmp.write("#{Shellwords.escape(line)} =#{track_id}\n")
+    end
+  end
+  tmp.flush
+
+  ed = editor
+  # jump to the line of the currently playing track if using vi or vim
+  # Patches for other editors welcome: dtas-all@nongnu.org
+  if ed =~ /vim?\z/
+    cur = YAML.load(c.req('current'))
+    if tl = cur['tracklist']
+      if pos = tl['pos']
+        ed += " +#{pos + 1}"
+      end
+    end
+  end
+  # Run the editor and let the user edit!
+  system("#{ed} #{Shellwords.escape tmp_path}") or return
+
+  edit = []
+  edit_idx = {}
+  add = []
+  # editor may rename/link a new file into place
+  File.open(tmp_path) do |fp|
+    while line = fp.gets
+      line.chomp!
+      if line.sub!(/ =(\d+)\z/, '') # existing tracks
+        track_id = $1.to_i
+        if edit_idx[track_id] # somebody copy+pasted an existing line
+          add << [ File.expand_path(line), edit.last ]
+        else # moved line
+          edit_idx[track_id] = edit.size
+          edit << track_id
+        end
+      else # entirely new line
+        add << [ File.expand_path(line), edit.last ]
+      end
+    end
+  end
+  edit.each_with_index do |track_id, i|
+    oi = orig_idx[track_id] or warn("unknown track_id=#{track_id}") or next
+    next if oi == i # no change, yay!
+    prev_track_id = orig[i] or warn("unknown index at #{i}") or next
+    c.req("tl swap #{track_id} #{prev_track_id}")
+    orig_idx[track_id] = i
+    orig_idx[prev_track_id] = oi
+    orig[i] = track_id
+    orig[oi] = prev_track_id
+  end
+  orig.each do |track_id|
+    edit_idx[track_id] or c.req("tl remove #{track_id}")
+  end
+  add.each do |path, after_id|
+    cmd = %W(tl add #{path})
+    cmd << after_id.to_s if after_id
+    c.req(cmd)
+  end
+ensure
+  tmp.close! if tmp
 end
 
 c = DTAS::UNIXClient.new
@@ -63,6 +142,7 @@ when "reto"
   end
   warn "#{re.inspect} not found"
   exit 1
+when 'edit' then do_edit(c)
 else
   # act like dtas-ctl for now...
   puts c.req([ "tl", *ARGV ])

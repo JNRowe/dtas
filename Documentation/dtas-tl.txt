@@ -26,6 +26,8 @@ client).
 * cat - display a newline-delimited list of TRACK_ID=PATH output
   Note: this is shell-escaped, multibyte characters may not show up properly.
 * clear - remove all tracks from the tracklist
+* edit - spawn an editor to allow editing the tracklist as a text file
+  See EDITING for more information.
 * goto TRACKID [POS] - play TRACKID immediately, optionally seek to POS
 TRACKID may be looked up via cat, and POS should be a timestamp in
 HH:MM:SS.FRAC format.
@@ -57,7 +59,21 @@ to skip backwards in the tracklist
 
         $ dtas-tl prev
 
+# EDITING
+
+It is possible to edit the player tracklist from your favorite text
+editor.  Existing lines denoting tracks may be rearranged, deleted,
+copied or entirely new lines with path names (without a trailing "
+=TRACK_ID") may be added.
+
+Changes to the tracklist are sent to the player when the user exits the
+editor.  This functionality only works when there is one user editing
+the tracklist at a time, and when no files in the tracklist contain rare
+newline characters.
+
 # ENVIRONMENT
+
+VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
 
 DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
 This defaults to ~/.dtas/player.sock
