@@ -12,4 +12,5 @@ Gem::Specification.new do |s|
   s.files = manifest
   s.homepage = 'http://dtas.80x24.org/'
   s.licenses = "GPL-3.0+"
+  s.required_ruby_version = '>= 1.9.3'
 end
