@@ -51,6 +51,7 @@ Familiarity with the Ruby programming language is absolutely NOT required.
 
 Coming:
 
+* mpd (Music Player Daemon) bridge for partial dtas-player control
 * MPRIS/MPRIS 2.0 bridge for partial dtas-player control
 * whatever command-line tools come to mind...
 * better error handling, many bugfixes, etc...
