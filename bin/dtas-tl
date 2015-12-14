@@ -105,7 +105,7 @@ when "cat"
   end
 when "addhead"
   ARGV.shift
-  ARGV.reverse.each do |path|
+  ARGV.reverse_each do |path|
     path = File.expand_path(path)
     res = c.req(%W(tl add #{path}))
     print "#{path} #{res}\n"
@@ -114,13 +114,11 @@ when "addtail"
   ARGV.shift
   track_ids = get_track_ids(c)
   last_id = track_ids.pop
-  ARGV.each do |path|
+  ARGV.reverse_each do |path|
     path = File.expand_path(path)
     req = %W(tl add #{path})
-    req << last_id.to_s if last_id
     res = c.req(req)
     print "#{path} #{res}\n"
-    last_id = res if res =~ /\A\d+\z/
   end
 when "reto"
   fixed = ARGV.delete("-F")
