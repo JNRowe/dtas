@@ -24,6 +24,7 @@ class DTAS::Tracklist # :nodoc:
     obj = new
     obj.instance_eval do
       list = hash['list'] and @list.replace(list.map { |s| new_track(s) })
+      _inc_version
       SIVS.each do |k|
         instance_variable_set("@#{k}", hash[k] || TL_DEFAULTS[k])
       end
@@ -62,6 +63,7 @@ class DTAS::Tracklist # :nodoc:
     @goto_off = @goto_pos = nil
     @track_nr = 0
     @shuffle = false
+    @version = 0
   end
 
   def new_track(path)
@@ -71,7 +73,7 @@ class DTAS::Tracklist # :nodoc:
     # avoid promoting to Bignum on 32-bit
     @track_nr = n = 1 if n >= 0x3fffffff
 
-    DTAS::Track.new(n, path)
+    DTAS::Track.new(n, path, @version)
   end
 
   def reset
@@ -147,6 +149,7 @@ class DTAS::Tracklist # :nodoc:
         _idx_of(@shuffle, after_track_id) or
                                   raise ArgumentError, 'after_track_id invalid'
       end
+      _inc_version
       @list[idx, 1] = [ @list[idx], track ]
 
       # add into random position if shuffling
@@ -161,6 +164,7 @@ class DTAS::Tracklist # :nodoc:
         @pos += 1 if @pos > idx
       end
     else # nil = first_track
+      _inc_version
       @list.unshift(track)
 
       if @shuffle
@@ -197,6 +201,7 @@ class DTAS::Tracklist # :nodoc:
     len = @list.size
     @pos = len - 1 if @pos >= len
     @goto_pos = @goto_pos = nil # TODO: reposition?
+    _inc_version
     track.to_path
   end
 
@@ -244,6 +249,12 @@ class DTAS::Tracklist # :nodoc:
         end
       end
     end
+    _inc_version
     true
+  end
+
+  def _inc_version
+    @version += 1
+    @version = 0 if @version > 0xffffffff
   end
 end

@@ -6,9 +6,11 @@ require_relative '../dtas'
 class DTAS::Track # :nodoc:
   attr_reader :track_id
   attr_reader :to_path
+  attr_reader :version
 
-  def initialize(track_id, path)
+  def initialize(track_id, path, version)
     @track_id = track_id
     @to_path = path
+    @version = version
   end
 end
