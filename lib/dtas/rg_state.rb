@@ -85,9 +85,10 @@ class DTAS::RGState # :nodoc:
 
   # returns a DB argument to the "gain" effect
   def rg_vol_norm(val)
-    diff = @norm_level - val.to_f + @volume
-    return if (@norm_level - diff).abs < @norm_threshold
-    diff += @norm_level
+    n = @norm_level == 1.0 ? @volume : @norm_level
+    diff = n - val.to_f
+    return if (n - diff).abs < @norm_threshold
+    diff += n
     to_sox_gain(linear_to_db(diff))
   end
 
