@@ -116,7 +116,7 @@ when "addtail"
   last_id = track_ids.pop
   ARGV.reverse_each do |path|
     path = File.expand_path(path)
-    req = %W(tl add #{path})
+    req = %W(tl add #{path} #{last_id})
     res = c.req(req)
     print "#{path} #{res}\n"
   end
