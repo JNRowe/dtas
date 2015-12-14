@@ -13,7 +13,6 @@ class DTAS::Tracklist # :nodoc:
   attr_accessor :max # integer
 
   TL_DEFAULTS = {
-    'list' => [],
     'pos' => -1,
     'repeat' => false,
     'max' => 20_000,
@@ -24,7 +23,7 @@ class DTAS::Tracklist # :nodoc:
     obj = new
     obj.instance_eval do
       list = hash['list'] and @list.replace(list.map { |s| new_track(s) })
-      %w(pos repeat max).each do |k|
+      SIVS.each do |k|
         instance_variable_set("@#{k}", hash[k] || TL_DEFAULTS[k])
       end
 
@@ -39,10 +38,16 @@ class DTAS::Tracklist # :nodoc:
     obj
   end
 
-  def to_hsh
+  def to_hsh(full_list = true)
     h = ivars_to_hash(SIVS)
     h.delete_if { |k,v| TL_DEFAULTS[k] == v }
-    list = h['list'] and h['list'] = list.map(&:to_path)
+    unless @list.empty?
+      if full_list
+        h['list'] = @list.map(&:to_path)
+      else
+        h['size'] = @list.size
+      end
+    end
     if @shuffle
       h['shuffle'] = true
       h['pos'] = _idx_of(@list, @shuffle[@pos].track_id) if @pos >= 0

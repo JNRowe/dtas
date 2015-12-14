@@ -312,6 +312,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         h
       end
     end
+    tmp['tracklist'] = @tl.to_hsh(false)
     io.emit(tmp.to_yaml)
   end
 
