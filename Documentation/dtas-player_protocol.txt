@@ -20,9 +20,7 @@ This must stay over Unix sockets because filesystem permissions are
 needed to enforce code execution permissions.  dtas-player is really a
 shell in disguise, after all.
 
-Protocol feedback greatly appreciated email me at
-
-e@80x24.org
+Protocol feedback greatly appreciated email us at dtas-all@nongnu.org
 
 *********************************************************
 
@@ -263,6 +261,8 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   currently playing track with the newly-added one.
   Returns the TRACKID of the newly added track
 
+* tl clear - clear current tracklist
+
 * tl current - display the pathname to the currently playing track
 
 * tl current-id - display the TRACKID of the currently playing track
@@ -277,6 +277,9 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
   An optional timestamp may be added to prevent playing the
   same part(s) repeatedly
 
+* tl max [MAXIMUM] - sets or gets the maximum number of tracks
+  allowed in the tracklist
+
 * tl next - jump to the next track in the tracklist
 
 * tl prev - jump to the previous track in the tracklist
@@ -288,6 +291,8 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 
 * tl shuffle [BOOLEAN] - show/or change the current shuffle status of
   the tracklist.  Returns the previous shuffle status.
+
+* tl swap TRACKID_A TRACKID_B - swaps the positions of two tracks.
 
 * tl tracks
   returns a list of all TRACKIDS in the tracklist
