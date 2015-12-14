@@ -114,6 +114,7 @@ def may_fail(res, events)
   events << res if res != "OK"
 end
 
+pre_mute_vol = 1.0
 enc_locale = Encoding.find("locale")
 $stdout.set_encoding(enc_locale)
 enc_opts = { undef: :replace, invalid: :replace, replace: '?' }
@@ -163,11 +164,17 @@ begin
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
     end
-
-    rgs = rg_string(cur["rg"] || {}, current)
+    rg = cur['rg'] || {}
+    rgs = rg_string(rg, current)
     Curses.setpos(lineno += 1, 0)
     Curses.clrtoeol
     Curses.addstr(rgs)
+
+    Curses.setpos(lineno += 1, 0)
+    Curses.clrtoeol
+    cur_vol = rg['volume'] || 1.0
+    Curses.addstr("volume=#{cur_vol}")
+    pre_mute_vol = cur_vol if cur_vol != 0
 
     show_events(lineno, screen, events)
 
@@ -206,8 +213,12 @@ begin
         # yes, some of us have long audio files
         when Curses::KEY_PPAGE then c.req_ok("seek +600")
         when Curses::KEY_NPAGE then c.req_ok("seek -600")
-        when "9" then c.req_ok("rg preamp-=1")
-        when "0" then c.req_ok("rg preamp+=1")
+        when '9' then c.req_ok('rg volume-=0.01')
+        when '0' then c.req_ok('rg volume+=0.01')
+        when '=' then c.req_ok('rg volume=1')
+        when '7' then c.req_ok('rg preamp-=1')
+        when '8' then c.req_ok('rg preamp+=1')
+        when 'm' then c.req_ok("rg volume=#{cur_vol == 0 ? pre_mute_vol : 0}")
         when "F" then c.req_ok("rg fallback_gain+=1")
         when "f" then c.req_ok("rg fallback_gain-=1")
         when ">" then c.req_ok("tl next")

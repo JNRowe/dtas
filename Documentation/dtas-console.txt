@@ -29,7 +29,10 @@ Key bindings are inspired partially by mplayer(1)
 - SPACE - toggle play/pause state of the playback
 - 'p'/'P' - decrease/increase timer resolution
 - BACKSPACE - seek to the beginning of the track
-- 9/0 - decrease/increase ReplayGain preamp
+- 7/8 - decrease/increase ReplayGain preamp
+- 9/0 - decrease/increase software volume
+- '=' - set software volume to 1.0 (no adjustment)
+- 'm' - mute set software volume to 0.0 (mute)
 - 'f'/'F' - decrease/increase ReplayGain fallback_gain value
 - 'r'/'R' - cycle forward/backwards through ReplayGain modes
 - 'q'/Ctrl-C - exit dtas-console

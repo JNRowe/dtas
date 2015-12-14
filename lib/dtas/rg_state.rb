@@ -19,6 +19,7 @@ class DTAS::RGState # :nodoc:
   }
 
   RG_DEFAULT = {
+    "volume" => 1.0,
     # skip the effect if the adjustment is too small to be noticeable
     "gain_threshold" => 0.00000001, # in dB
     "norm_threshold" => 0.00000001,
@@ -33,6 +34,13 @@ class DTAS::RGState # :nodoc:
 
   SIVS = RG_DEFAULT.keys
   SIVS.each { |iv| attr_accessor iv }
+
+  undef_method :volume=
+
+  def volume=(val)
+    val = 0 if val.to_i < 0
+    @volume = val.round(4)
+  end
 
   def initialize
     RG_DEFAULT.each do |k,v|
@@ -50,24 +58,37 @@ class DTAS::RGState # :nodoc:
     ivars_to_hash(SIVS)
   end
 
+  def vol_db
+    linear_to_db(@volume)
+  end
+
   def to_hsh
     # no point in dumping default values, it's just a waste of space
     to_hash.delete_if { |k,v| RG_DEFAULT[k] == v }
   end
 
+  def to_sox_gain(val)
+    case val.infinite?
+    when -1 then return 'gain -192'
+    when 1 then return 'gain 192'
+    else
+      sprintf('gain %0.8g', val)
+    end
+  end
+
   # returns a dB argument to the "gain" effect, nil if nothing found
   def rg_vol_gain(val)
-    val = val.to_f + @preamp
+    val = val.to_f + @preamp + vol_db
     return if val.abs < @gain_threshold
-    sprintf('gain %0.8g', val)
+    to_sox_gain(val)
   end
 
   # returns a DB argument to the "gain" effect
   def rg_vol_norm(val)
-    diff = @norm_level - val.to_f
+    diff = @norm_level - val.to_f + @volume
     return if (@norm_level - diff).abs < @norm_threshold
     diff += @norm_level
-    sprintf('gain %0.8g', linear_to_db(diff))
+    to_sox_gain(linear_to_db(diff))
   end
 
   # The ReplayGain fallback adjustment value (in dB), in case a file is
@@ -75,18 +96,19 @@ class DTAS::RGState # :nodoc:
   # eardrums and amplifiers in case a file without then necessary ReplayGain
   # tag slips into the queue
   def rg_fallback_effect(reason)
-    @fallback_gain or return
-    val = @fallback_gain + @preamp
+    val = (@fallback_gain || 0) + @preamp + vol_db
     return if val.abs < @gain_threshold
     warn(reason) if $DEBUG
-    "gain #{val}"
+    to_sox_gain(val)
   end
 
   # returns an array (for command-line argument) for the effect needed
   # to apply ReplayGain
   # this may return nil
   def effect(source)
-    return unless @mode
+    unless @mode
+      return @volume == 1.0 ? nil : to_sox_gain(vol_db)
+    end
     rg = source.replaygain or
       return rg_fallback_effect("ReplayGain tags missing")
     val = rg.__send__(@mode)
