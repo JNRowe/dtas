@@ -3,7 +3,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
-module DTAS::ParseTime
+module DTAS::ParseTime # :nodoc:
   # convert a string time to seconds, returning a Floot or Integer
   def parse_time(time)
     case time

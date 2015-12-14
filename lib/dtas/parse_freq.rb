@@ -2,7 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 
 require_relative '../dtas'
-module DTAS::ParseFreq
+module DTAS::ParseFreq # :nodoc:
 
   # may return a negative frequency meaning lowpass
   def parse_freq(val, round = true)

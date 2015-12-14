@@ -2,7 +2,7 @@
 # License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
 require_relative '../dtas'
 
-class DTAS::Track
+class DTAS::Track # :nodoc:
   attr_reader :track_id
   attr_reader :to_path
 

@@ -7,7 +7,7 @@ require_relative 'process'
 require 'socket'
 
 # For the DTAS Music Library, based on what MPD uses.
-class DTAS::Mlib
+class DTAS::Mlib # :nodoc:
   attr_accessor :follow_outside_symlinks
   attr_accessor :follow_inside_symlinks
   attr_accessor :tags

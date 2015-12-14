@@ -3,7 +3,7 @@
 require_relative '../dtas'
 
 # embedded CUE sheet representation for -player
-class DTAS::CueIndex
+class DTAS::CueIndex # :nodoc:
   attr_reader :offset
   attr_reader :index
 

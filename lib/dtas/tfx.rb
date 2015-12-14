@@ -7,7 +7,7 @@ require 'shellwords'
 
 # this will represent a trim section inside -splitfx for applying
 # effects to only a part of the output
-class DTAS::TFX
+class DTAS::TFX # :nodoc:
   include DTAS::ParseTime
 
   attr_reader :tbeg
@@ -85,7 +85,7 @@ class DTAS::TFX
   end
 
   # for stable sorting
-  class TFXSort < Struct.new(:tfx, :idx)
+  class TFXSort < Struct.new(:tfx, :idx) # :nodoc:
     def <=>(other)
       cmp = tfx <=> other.tfx
       0 == cmp ? idx <=> other.idx : cmp

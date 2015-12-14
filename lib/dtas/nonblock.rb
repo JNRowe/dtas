@@ -1,7 +1,7 @@
 # Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
 
-class DTAS::Nonblock < IO
+class DTAS::Nonblock < IO # :nodoc:
   if RUBY_VERSION.to_f <= 2.0
     EX = {}.freeze
     def read_nonblock(len, buf = nil, opts = EX)

@@ -1,14 +1,12 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
 # License: GPLv3 or later <https://www.gnu.org/licenses/gpl-3.0.txt>
 begin
-  require 'sleepy_penguin'
-rescue LoadError
-end
+require 'sleepy_penguin'
 
 # used to restart DTAS::Source::SplitFX processing in dtas-player
 # if the YAML file is edited
-module DTAS::Watchable
-  class InotifyReadableIter < SleepyPenguin::Inotify
+module DTAS::Watchable # :nodoc:
+  class InotifyReadableIter < SleepyPenguin::Inotify # :nodoc:
     def self.new
       super(:CLOEXEC)
     end
@@ -62,4 +60,7 @@ module DTAS::Watchable
     srv.wait_ctl(@ino, :delete)
     @ino = @ino.close
   end
-end if defined?(SleepyPenguin::Inotify)
+end
+
+rescue LoadError
+end

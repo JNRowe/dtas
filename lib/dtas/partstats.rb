@@ -8,14 +8,14 @@ require_relative 'sigevent'
 
 # backend for the dtas-partstats(1) command
 # Unlike the stuff for dtas-player, dtas-partstats is fairly tied to sox
-class DTAS::PartStats
+class DTAS::PartStats # :nodoc:
   CMD = 'sox "$INFILE" -n $TRIMFX $SOXFX stats $STATSOPTS'
   include DTAS::Process
   include DTAS::SpawnFix
   attr_reader :key_idx
   attr_reader :key_width
 
-  class TrimPart < Struct.new(:tbeg, :tlen, :rate)
+  class TrimPart < Struct.new(:tbeg, :tlen, :rate) # :nodoc:
     def sec
       tbeg / rate
     end
