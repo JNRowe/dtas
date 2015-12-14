@@ -3,6 +3,7 @@
 /GIT-VERSION-FILE
 /Manifest.txt
 /NEWS
+/NEWS.atom
 /pkg
 /lib/dtas/version.rb
 /coverage.dump
