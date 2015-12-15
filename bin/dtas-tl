@@ -99,6 +99,17 @@ ensure
   tmp.close! if tmp
 end
 
+def add_after(c, argv, last_id)
+  argv.each do |path|
+    path = File.expand_path(path)
+    req = %W(tl add #{path})
+    req << last_id.to_s if last_id
+    res = c.req(req)
+    print "#{path} #{res}\n"
+    last_id = res if res =~ /\A\d+\z/
+  end
+end
+
 c = DTAS::UNIXClient.new
 case cmd = ARGV[0]
 when "cat"
@@ -107,6 +118,11 @@ when "cat"
     res.sub!(/\A1 /, '')
     print "#{res}\n"
   end
+when 'aac' # add-after-current
+  ARGV.shift
+  rv = c.req(%w(tl current-id))
+  last_id = rv =~ %r{\A\d+\z} ? rv.to_i : nil
+  add_after(c, ARGV, last_id)
 when "addhead"
   ARGV.shift
   ARGV.reverse_each do |path|
@@ -118,14 +134,7 @@ when "addtail"
   ARGV.shift
   track_ids = get_track_ids(c)
   last_id = track_ids.pop
-  ARGV.each do |path|
-    path = File.expand_path(path)
-    req = %W(tl add #{path})
-    req << last_id.to_s if last_id
-    res = c.req(req)
-    print "#{path} #{res}\n"
-    last_id = res if res =~ /\A\d+\z/
-  end
+  add_after(c, ARGV, last_id)
 when "reto"
   fixed = ARGV.delete("-F")
   ignorecase = ARGV.delete("-i")
