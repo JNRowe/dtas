@@ -86,10 +86,14 @@ def do_edit(c)
   orig.each do |track_id|
     edit_idx[track_id] or c.req("tl remove #{track_id}")
   end
-  add.reverse_each do |path, after_id|
+
+  prev_added_id = last_after_id = nil
+  add.each do |path, after_id|
     cmd = %W(tl add #{path})
-    cmd << after_id.to_s if after_id
-    c.req(cmd)
+    id = after_id == last_after_id ? prev_added_id : after_id
+    cmd << id.to_s if id
+    prev_added_id = c.req(cmd).to_i
+    last_after_id = after_id
   end
 ensure
   tmp.close! if tmp
