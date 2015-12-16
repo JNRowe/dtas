@@ -212,6 +212,7 @@ class DTAS::Mlib # :nodoc:
     q = {
       parent_id: 1, # self
       name: '',
+      dirname: '',
     }
     node = @db[:nodes][q] and return (@root_node = node)
     begin
@@ -378,10 +379,10 @@ class DTAS::Mlib # :nodoc:
 
   def path_of(node, cache)
     base = node[:name]
-    return '/' if base == ''
+    return '/' if base == '' # root_node
     parent_id = node[:parent_id]
     base += '/' unless node[:tlen] >= 0
-    ppath = cache[parent_id] and return "#{ppath}#{base}"
+    ppath = cache[parent_id] and return "#{ppath}/#{base}"
     parts = []
     begin
       node = @db[:nodes][id: node[:parent_id]]
@@ -389,8 +390,9 @@ class DTAS::Mlib # :nodoc:
       parts.unshift node[:name]
     end while true
     parts.unshift('')
-    parts << base
     cache[parent_id] = parts.join('/')
+    parts << base
+    parts.join('/')
   end
 
   def emit_recurse(node, cache, cb)

@@ -39,9 +39,30 @@ case action = ARGV.shift
 when 'update', 'up'
   directory = ARGV.shift or abort "DIRECTORY required\n#{usage}"
   mlib(db, migrate = true).update(directory)
+when 'stats'
+  s = mlib(db, true).stats
+  %w(artists albums songs db_playtime).each { |k| puts "#{k}: #{s[k.to_sym]}" }
 when 'dump' # mainly for debugging
   directory = ARGV.shift || '/'
-  mlib(db).dump(directory)
+  mlib(db).dump(directory, {}, lambda do |parent, node, comments|
+    puts "Path: #{parent[:dirname]}/#{node[:name]}"
+    puts "Length: #{node[:tlen]}"
+    return if comments.empty?
+    puts 'Comments:'
+    comments.each do |k,v|
+      if v.size == 1
+        puts "\t#{k}: #{v[0]}"
+      else
+        v << ''
+        puts "\t#{k}:\n\t\t#{v.join("\t\t\n")}"
+      end
+    end
+    puts
+  end)
+when 'find', 'search'
+  m = mlib(db)
+  cache = {}
+  m.__send__(action, *ARGV) { |node| puts m.path_of(node, cache) }
 else
   abort usage
 end
