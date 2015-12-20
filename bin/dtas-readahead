@@ -95,9 +95,9 @@ def do_ra(fp, pos, w)
   pp({start_ra: File.basename(path),
       len: '%.3f' % (len / (1024 * 1024.0)),
       pos: pos })
-  Process.spawn('soxi', path, @redir)
-  Process.spawn('avprobe', path, @redir)
-  Process.spawn('ffprobe', path, @redir)
+  spawn('soxi', path, @redir)
+  spawn('avprobe', path, @redir)
+  spawn('ffprobe', path, @redir)
   fp.advise(:sequential, pos, len)
   Thread.new(fp.dup) { |d| d.advise(:willneed, pos, len); d.close }
 
