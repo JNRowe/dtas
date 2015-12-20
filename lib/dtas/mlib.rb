@@ -212,9 +212,13 @@ class DTAS::Mlib # :nodoc:
     q = {
       parent_id: 1, # self
       name: '',
-      dirname: '',
     }
-    node = @db[:nodes][q] and return (@root_node = node)
+    node = @db[:nodes][q]
+    if node
+      node[:dirname] = ''
+      @root_node = node
+      return node
+    end
     begin
       q[:tlen] = DM_DIR
       q[:id] = @db[:nodes].insert(q)
