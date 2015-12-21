@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require 'io/wait'
 require 'shellwords'
 require_relative '../dtas'
@@ -87,7 +88,7 @@ module DTAS::Process # :nodoc:
       cmd, opts = env, cmd
       env = {}
     end
-    buf = ''
+    buf = ''.b
     r, w = DTAS::Nonblock.pipe
     opts = opts.merge(out: w)
     r.binmode
@@ -102,7 +103,7 @@ module DTAS::Process # :nodoc:
     w.close
     if err_str
       we.close
-      res = "".b
+      res = ''.b
       want = { r => res, re => err_str }
       begin
         readable = IO.select(want.keys) or next

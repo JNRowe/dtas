@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 #
 # Note: no idea what I'm doing, especially w.r.t. curses
 require 'dtas'
@@ -99,7 +100,7 @@ def fmt_to_s(f)
 end
 
 def rg_string(rg, current)
-  rv = "rg mode=#{rg['mode']||'off'}"
+  rv = "rg mode=#{rg['mode']||'off'}".dup
   defaults = DTAS::RGState::RG_DEFAULT
   # don't show things that are too rare
   %w(preamp fallback_gain).each do |param|

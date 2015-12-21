@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../dtas'
 require_relative 'format'
 require_relative 'process'
@@ -35,7 +36,7 @@ class DTAS::SplitFX # :nodoc:
   class T < Struct.new(:env, :comments, :tbeg, :fade_in, :fade_out) # :nodoc:
     def commit(advance_track_samples)
       tlen = advance_track_samples - tbeg
-      trimfx = "trim #{tbeg}s #{tlen}s"
+      trimfx = "trim #{tbeg}s #{tlen}s".dup
       if fade_in
         trimfx << " #{fade_in}"
       end

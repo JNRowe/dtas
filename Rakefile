@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>.
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require 'tempfile'
 include Rake::DSL
 
@@ -11,7 +12,7 @@ def tags
       header = header.split(/\n/)
       tagger = header.grep(/\Atagger /).first
       {
-        time: Time.at(tagger.split(/ /)[-2].to_i).utc.strftime(timefmt),
+        time: Time.at(tagger.split(' ')[-2].to_i).utc.strftime(timefmt),
         tagger_name: %r{^tagger ([^<]+)}.match(tagger)[1].strip,
         tagger_email: %r{<([^>]+)>}.match(tagger)[1].strip,
         id: `git rev-parse refs/tags/#{tag}`.chomp!,
@@ -41,7 +42,7 @@ task "NEWS" do
   fp.puts "Unreleased" unless fp.size > 0
   fp.puts "# COPYRIGHT"
   fp.puts "Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>"
-  fp.puts "License: GPLv3 or later (http://www.gnu.org/licenses/gpl-3.0.txt)"
+  fp.puts "License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>"
   fp.rewind
   assert_equal fp.read, File.read("NEWS") rescue nil
   fp.chmod 0644

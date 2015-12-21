@@ -1,5 +1,7 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
+# encoding: binary
 require_relative '../../dtas'
 require_relative '../source'
 require_relative '../replaygain'
@@ -39,7 +41,7 @@ class DTAS::Source::Sox # :nodoc:
   end
 
   def try(infile, offset = nil, trim = nil)
-    err = ""
+    err = "".b
     cmd = %W(soxi -s #{infile})
     s = qx(@env.dup, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
@@ -65,8 +67,8 @@ class DTAS::Source::Sox # :nodoc:
     tmp = {}
     case @infile
     when String
-      qx(@env, %W(soxi -a #@infile)).split(/\n/n).each do |line|
-        key, value = line.split(/=/n, 2)
+      qx(@env, %W(soxi -a #@infile)).split("\n").each do |line|
+        key, value = line.split('=', 2)
         key && value or next
         # TODO: multi-line/multi-value/repeated tags
         tmp[key.upcase] = value

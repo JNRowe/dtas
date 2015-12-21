@@ -1,5 +1,5 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
 Gem::Specification.new do |s|
   manifest = File.read('.gem-manifest').split(/\n/)
   s.name = %q{dtas}

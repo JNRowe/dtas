@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 
 # Represents ReplayGain metadata for a DTAS::Source, only used by -player
 # cleanup/validate values to prevent malicious files from making us

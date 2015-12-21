@@ -1,5 +1,6 @@
 # Copyright (C) 2014-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later <https://www.gnu.org/licenses/gpl-3.0.txt>
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
+# frozen_string_literal: true
 require 'yaml'
 require_relative 'sox'
 require_relative '../splitfx'
@@ -27,7 +28,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     return false if !st.file? || st.size > MAX_YAML_SIZE
 
     # read 4 bytes first to ensure we have a YAML file with a hash:
-    buf = ""
+    buf = "".dup
     File.open(ymlfile, "rb") do |fp|
       return false if fp.read(4, buf) != "---\n"
       buf << fp.read

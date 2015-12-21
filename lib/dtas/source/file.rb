@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../../dtas'
 require_relative '../source'
 require_relative '../command'
@@ -67,7 +68,7 @@ module DTAS::Source::File # :nodoc:
   # creates the effect to fill the TRIMFX env
   def trimfx
     return unless @offset || @trim
-    fx = "trim #{offset_samples}s"
+    fx = "trim #{offset_samples}s".dup
     if @trim && @trim[1]
       fx << sprintf(' =%0.9gs', (@trim[0] + @trim[1]) * format.rate)
     end

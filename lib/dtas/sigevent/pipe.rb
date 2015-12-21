@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 
 # used in various places for safe wakeups from IO.select via signals
 # A fallback for non-Linux systems lacking the "sleepy_penguin" RubyGem
@@ -9,7 +10,7 @@ class DTAS::Sigevent # :nodoc:
 
   def initialize
     @to_io, @wr = DTAS::Nonblock.pipe
-    @rbuf = ''
+    @rbuf = ''.b
   end
 
   def signal

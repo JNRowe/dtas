@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 CONSTANT = "DTAS::VERSION"
 RVF = "lib/dtas/version.rb"
 GVF = "GIT-VERSION-FILE"
@@ -22,8 +23,8 @@ if File.exist?(".git")
   end
 end
 
-vn = vn.sub!(/\Av/, "")
-new_ruby_version = "#{CONSTANT} = '#{vn}' # :nodoc:\n"
+vn = vn.sub(/\Av/, "")
+new_ruby_version = "#{CONSTANT} = '#{vn}'.freeze # :nodoc:\n"
 cur_ruby_version = File.read(RVF) rescue nil
 if new_ruby_version != cur_ruby_version
   File.open(RVF, "w") { |fp| fp.write(new_ruby_version) }

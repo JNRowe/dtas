@@ -1,6 +1,7 @@
 # -*- encoding: binary -*-
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../dtas'
 require_relative 'xs'
 require_relative 'process'
@@ -73,7 +74,7 @@ class DTAS::PartStats # :nodoc:
     fails = []
     do_spawn = lambda do |trim_part|
       pid, rpipe = partstats_spawn(trim_part, opts)
-      rset[rpipe] = [ trim_part, "" ]
+      rset[rpipe] = [ trim_part, ''.b ]
       pids[pid] = [ trim_part, rpipe ]
     end
 

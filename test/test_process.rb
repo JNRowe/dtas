@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require './test/helper'
 require 'dtas/process'
 class TestProcess < Testcase
@@ -7,7 +8,7 @@ class TestProcess < Testcase
 
   def test_encoding
     assert_equal Encoding::BINARY, qx('echo HIHIH').encoding
-    s = ""
+    s = "".b
     a = qx('echo HIHIHI; echo >&2 BYEBYE', err_str: s)
     assert_equal Encoding::BINARY, a.encoding
   end
@@ -23,7 +24,7 @@ class TestProcess < Testcase
   end
 
   def test_qx_err_str
-    s = ""
+    s = "".b
     assert_equal "", qx('echo HELLO >&2', err_str: s)
     assert_equal "HELLO\n", s
   end

@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 #
 # provides support for generating appropriate effects for ReplayGain
 # MAYBE: account for non-standard reference loudness (89.0 dB is standard)
@@ -72,7 +73,7 @@ class DTAS::RGState # :nodoc:
     when -1 then return 'gain -192'
     when 1 then return 'gain 192'
     else
-      sprintf('gain %0.8g', val)
+      sprintf('gain %0.8g', val).freeze
     end
   end
 

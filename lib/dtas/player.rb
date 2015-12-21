@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require 'yaml'
 require 'shellwords'
 require_relative '../dtas'
@@ -76,7 +77,7 @@ class DTAS::Player # :nodoc:
         end
       end
     end
-    $stdout.write(msg << "\n")
+    $stdout.write("#{msg}\n")
   end
 
   # used for state file

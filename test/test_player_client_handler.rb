@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require './test/helper'
 require 'dtas/player'
 
@@ -88,7 +89,7 @@ class TestPlayerClientHandler < Testcase
     res = @io[0]
     result = {}
     Shellwords.split(res).each do |kv|
-      k, v = kv.split(/=/, 2)
+      k, v = kv.split('=', 2)
       result[k] = v
     end
     expect = ENV.to_hash

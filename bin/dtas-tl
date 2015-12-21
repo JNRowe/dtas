@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-#
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 # WARNING: totally unstable API, use dtas-ctl for scripting (but the protocol
 # itself is also unstable, but better than this one probably).
 require 'dtas/unix_client'
@@ -10,7 +10,7 @@ require 'shellwords'
 def get_track_ids(c)
   track_ids = c.req("tl tracks")
   # we could get more, but SEQPACKET limits size...
-  track_ids = track_ids.split(/ /)
+  track_ids = track_ids.split(' ')
   track_ids.shift
   track_ids
 end

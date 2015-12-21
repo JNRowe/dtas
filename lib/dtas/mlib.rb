@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 # Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
-
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
+#
 require_relative '../dtas'
 require_relative 'process'
 require 'socket'
@@ -97,9 +98,9 @@ class DTAS::Mlib # :nodoc:
     return ignore(job) unless String === buf
 
     # no, we don't support comments with newlines in them
-    buf = buf.split("\n".freeze)
+    buf = buf.split("\n")
     while line = buf.shift
-      tag, value = line.split('='.freeze, 2)
+      tag, value = line.split('=', 2)
       tag && value or next
       tag.downcase!
       tag_id = @tag_map[tag] or next
@@ -396,7 +397,7 @@ class DTAS::Mlib # :nodoc:
     parts.unshift('')
     cache[parent_id] = parts.join('/')
     parts << base
-    parts.join('/')
+    parts.join('/').freeze
   end
 
   def emit_recurse(node, cache, cb)

@@ -1,12 +1,13 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require './test/helper'
 require 'dtas/source/sox'
 require 'tempfile'
 
 class TestSource < Testcase
   def teardown
-    @tempfiles.each { |tmp| tmp.close! }
+    @tempfiles.each(&:close!)
   end
 
   def setup
@@ -134,7 +135,7 @@ class TestSource < Testcase
 
   def test_flac_cuesheet_48
     return if `which metaflac`.strip.size == 0
-    ver = `flac --version`.split(/ /)[1].strip
+    ver = `flac --version`.split(' ')[1].strip
     ver.to_f >= 1.3 or return # flac 1.3.0 fixed non-44.1k rate support
 
     tmp = Tempfile.new(%W(tmp .flac))

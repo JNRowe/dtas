@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../../dtas'
 require_relative '../source'
 require_relative '../replaygain'
@@ -75,7 +76,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
       cmd.concat(%W(-show_streams -show_format #@infile))
       break if cmd == prev_cmd
 
-      err = ""
+      err = "".b
       s = qx(@env, cmd, err_str: err, no_raise: true)
       return false unless probe_ok?(s, err)
       s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn) do |_|
@@ -93,10 +94,10 @@ module DTAS::Source::AvFfCommon # :nodoc:
     end while incomplete.compact[0]
 
     s.scan(%r{^\[FORMAT\]\n(.*?)\n\[/FORMAT\]\n}m) do |_|
-      f = $1
+      f = $1.dup
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
-      f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase] = $2 }
+      f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase.freeze] = $2 }
     end
     ! @astreams.compact.empty?
   end

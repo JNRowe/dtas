@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../xs'
 require_relative '../parse_time'
 
@@ -139,7 +140,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
       # multiple changes may be made at once
       msg[2..-1].each do |kv|
-        k, v = kv.split(/=/, 2)
+        k, v = kv.split('=', 2)
         case k
         when %r{\Aenv\.([^=]+)\z}
           sink.env[$1] = v
@@ -244,7 +245,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     return io.emit(@rg.to_hsh.to_yaml) if msg.empty?
     before = @rg.to_hsh
     msg.each do |kv|
-      k, v = kv.split(/=/, 2)
+      k, v = kv.split('=', 2)
       case k
       when "mode"
         case v

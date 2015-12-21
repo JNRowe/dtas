@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright 2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+# License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+# frozen_string_literal: true
 contact = %q{
 All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
 Mailing list archives available at <http://80x24.org/dtas-all/> and
@@ -10,7 +11,7 @@ No subscription is necessary to post to the mailing list.
 
 copyright = %q{
 Copyright %s all contributors <dtas-all@nongnu.org>.\
-License: GPLv3 or later <http://www.gnu.org/licenses/gpl-3.0.txt>
+License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
 }
 
 ENV['TZ'] = 'UTC'

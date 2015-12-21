@@ -1,5 +1,6 @@
 # Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# frozen_string_literal: true
 require_relative '../dtas'
 require_relative 'parse_time'
 require_relative 'xs'
@@ -94,7 +95,7 @@ class DTAS::FadeFX # :nodoc:
   def parse!(str)
     return nil if str.empty?
     type = "t"
-    str.sub!(/\A([a-z])/, "") and type = $1
+    str.sub!(/\A([a-z])/, "") and type = $1.freeze
     F.new(type, parse_time(str))
   end
 end
