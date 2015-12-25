@@ -75,7 +75,7 @@ pull-requests) via plain-text mail to the mailing list is very much
 appreciated.
 
 Please send plain-text mail to the list at <dtas-all@nongnu.org>\
-HTML will not be read.  dtas is for GUI-phobes, by GUI-phobes.\
+HTML mail will not be read.  dtas is for GUI-phobes, by GUI-phobes.\
 Mailing list archives available at <ftp://lists.gnu.org/dtas-all>
 or <http://80x24.org/dtas-all/>
 No subscription is necessary to post to the mailing list.
@@ -105,6 +105,6 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, see https://www.gnu.org/licenses/gpl-3.0.txt
 
 Note: The GPL does not and can not apply to external commands run by
-dtas scripts, so users _may_ run any non-Free Software you want via dtas
+dtas scripts, so users _may_ run any non-Free Software they want via dtas
 (just like one may do so via bash).  However, the dtas project does not
-endorse nor support the use of any non-Free Software.
+endorse or support the use of any non-Free Software.

@@ -11,11 +11,12 @@ dtas-archive [OPTIONS] SOURCE DESTINATION
 
 # DESCRIPTION
 
-dtas-archive is intended for archiving audio data to/from laptops and
-computers without ECC memory, attempting to read data multiple times in
-an attempt to detect memory corruption.  dtas-archive may only be
-effective on machines running the Linux kernel where posix_fadvise(2)
-can be used to drop caches for a particular file after fsync(2).
+dtas-archive is intended for archiving audio data to/from laptops,
+marginal USB ports, and computers without ECC memory, attempting
+to read data multiple times in an attempt to detect memory or
+bus corruption.  dtas-archive may only be effective on machines
+running the Linux kernel where posix_fadvise(2) can be used to
+drop caches for a particular file after fsync(2).
 
 dtas-archive spawns sox(1) to archive audio data (likely uncompressed
 WAVE) to FLAC and verifies the result using sndfile-cmp(1), a tool

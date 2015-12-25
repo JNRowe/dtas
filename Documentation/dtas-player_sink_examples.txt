@@ -11,8 +11,6 @@ dtas-sinkedit SINKNAME
 
 # EXAMPLES
 
-
-
 ## Streaming Ogg-Vorbis to Icecast
 
 To use oggfwd(1) and Icecast, the following sink works.

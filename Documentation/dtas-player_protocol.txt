@@ -20,7 +20,7 @@ This must stay over Unix sockets because filesystem permissions are
 needed to enforce code execution permissions.  dtas-player is really a
 shell in disguise, after all.
 
-Protocol feedback greatly appreciated email us at dtas-all@nongnu.org
+Protocol feedback greatly appreciated, email us at dtas-all@nongnu.org
 
 *********************************************************
 
