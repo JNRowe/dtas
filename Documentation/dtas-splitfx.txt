@@ -160,11 +160,6 @@ Additional targets supported by default.
 * flac-cdda - this encodes the audio to "flac" format while being
   easily decompressible to a format suitable for being burned to audio CD.
 
-* opusenc - encodes to 16-bit, 48000 Hz Opus format using opusenc(1).
-  This uses sox(1) to dither/resample/apply effects as necessary.
-  This target exists as sox (as of v14.4.1) does not currently have
-  native opus encoding support.
-
 Custom targets may easily be defined to apply effects and gain.  For
 example, the following "flac24" target raises the volume of the left
 channel by 9.5dB and the right one by 8.5dB to compensate for channel
@@ -183,22 +178,6 @@ imbalance in a live concert recording from the audience:
           bits: 24
           rate: 48000
 
-For reference, the "opusenc" default target is implemented as follows:
-
-    targets:
-      opusenc:
-        command: sox "$INFILE" $COMMENTS $OUTFMT -
-           $TRIMFX $RATEFX $DITHERFX | opusenc --music
-           --raw-bits $BITS_PER_SAMPLE
-           $OPUSENC_BITRATE --raw-rate $RATE --raw-chan $CHANNELS
-           --raw-endianness $ENDIAN_OPUSENC
-           $OPUSENC_COMMENTS - $OUTDIR$TRACKNUMBER.opus
-        format:
-          bits: 16
-          rate: 48000
-          type: s16
-          channels: 2
-
 # COPYRIGHT
 
 Copyright 2013-2015 all contributors <dtas-all@nongnu.org>.\
@@ -206,4 +185,4 @@ License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO
 
-sox(1), ecasound(1), flac(1), opusenc(1), dtas-player(1)
+sox(1), ecasound(1), flac(1), dtas-player(1)
