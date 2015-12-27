@@ -231,7 +231,7 @@ class DTAS::SplitFX # :nodoc:
       }
       env['SOXFMT'] = '-tsox'
       sub_env['OUTFMT'] = env.delete('OUTFMT')
-      sub_env_s = sub_env.inject("") { |s,(k,v)| s << "#{k}=\"#{v}\" " }
+      sub_env_s = sub_env.map { |k,v| "#{k}=\"#{v}\"" }.join(' ')
       show_cmd = [ expand_cmd(env, player_cmd), '|', '(', "#{sub_env_s};",
                    expand_cmd(env.merge(sub_env), command), ')' ].flatten
       command = "#{player_cmd} | (#{sub_env_s}; #{command})"
