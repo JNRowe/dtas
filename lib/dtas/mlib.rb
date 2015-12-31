@@ -41,6 +41,8 @@ class DTAS::Mlib # :nodoc:
       db.transaction_mode = :immediate
       db.synchronous = :off
       db.case_sensitive_like = false
+    else
+      warn 'non-SQLite databases may not work in the future'
     end
     @db = db
     @pwd = nil
