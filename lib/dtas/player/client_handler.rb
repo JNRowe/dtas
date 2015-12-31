@@ -302,6 +302,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     tmp["current_inflight"] = @sink_buf.inflight
     tmp["format"] = @format.to_hash.delete_if { |_,v| v.nil? }
     tmp["bypass"] = @bypass.sort!
+    t = @trim and tmp['trim'] = t.join(' ')
     if tmp['paused'] = @paused
       first = @queue[0] and tmp['current_paused'] = first
     end
@@ -602,12 +603,15 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   def _dpc_tl_repeat(io, msg)
     prev = @tl.repeat.to_s
+    do_wall = true
     case msg.shift
     when 'true' then @tl.repeat = true
     when 'false' then @tl.repeat = false
     when '1' then @tl.repeat = 1
     when nil
+      do_wall = false
     end
+    __wall("tl repeat #{@tl.repeat}") if do_wall
     io.emit("tl repeat #{prev}")
   end
 
@@ -793,7 +797,9 @@ module DTAS::Player::ClientHandler # :nodoc:
     else
       return io.emit('ERR usage: trim [off|TBEG [TLEN]]')
     end
-    io.emit(t ? t.map(&:to_s).join(' ') : 'off')
+    t = t ? t.map(&:to_s).join(' ') : 'off'
+    __wall("trim #{t}")
+    io.emit(t)
   end
 end
 # :startdoc:

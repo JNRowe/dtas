@@ -149,16 +149,14 @@ begin
         fmt = "(#{fmt} > #{fmt})"
       end
     elsif cur['paused'] && infile = cur['current_paused']
+      fmt = '(paused)'
       paused = true
       if Array === infile
         infile, elapsed = infile
         elapsed = elapsed.to_i
-        samples = qx(%W(soxi -s #{infile})).to_i rescue 0
-        rate = 0
+        samples = rate = 0
         begin
-          fmt = DTAS::Format.from_file({}, infile)
-          rate = fmt.rate
-          fmt = "(#{fmt_to_s(fmt.to_hash)})"
+          rate = qx(%W(soxi -r #{infile})).to_i
         rescue => e
           warn "#{e.message} (#{e.class})"
         end
@@ -174,7 +172,7 @@ begin
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr(infile)
-      total = " [#{Time.at(samples / rate).strftime(tfmt)}]"
+      total = " [#{Time.at(samples / rate).strftime(tfmt)}]" if samples != 0
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
@@ -195,7 +193,13 @@ begin
     Curses.setpos(lineno += 1, 0)
     Curses.clrtoeol
     cur_vol = rg['volume'] || 1.0
-    Curses.addstr("volume=#{cur_vol}")
+    extra = [ "volume=#{cur_vol}" ]
+    repeat = 'false'
+    tl = cur['tracklist'] || {}
+    extra << "repeat=#{tl['repeat'] || 'false'}"
+    trim = cur['trim'] || 'off'
+    extra << "trim=#{trim}"
+    Curses.addstr(extra.join(' '))
     pre_mute_vol = cur_vol if cur_vol != 0
 
     show_events(lineno, screen, events)
