@@ -224,4 +224,9 @@ class TestPlayerIntegration < Testcase
     sox = YAML.load(s.req("source cat sox"))
     assert_equal DTAS::Source::Sox::SOX_DEFAULTS["command"], sox["command"]
   end
+
+  def test_tl_tracks
+    s = client_socket
+    assert_match(%r{\A\d+ }, s.req('tl tracks'))
+  end
 end

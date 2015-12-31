@@ -656,7 +656,7 @@ module DTAS::Player::ClientHandler # :nodoc:
 
   def _dpc_tl_tracks(io, msg)
     tracks = @tl.tracks
-    io.emit("#{tracks.size} " << tracks.map!(&:to_s).join(' '))
+    io.emit("#{tracks.size} #{tracks.map!(&:to_s).join(' ')}")
   end
 
   def _dpc_tl_goto(io, msg)
