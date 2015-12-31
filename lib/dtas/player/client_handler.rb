@@ -302,7 +302,9 @@ module DTAS::Player::ClientHandler # :nodoc:
     tmp["current_inflight"] = @sink_buf.inflight
     tmp["format"] = @format.to_hash.delete_if { |_,v| v.nil? }
     tmp["bypass"] = @bypass.sort!
-    tmp["paused"] = @paused
+    if tmp['paused'] = @paused
+      first = @queue[0] and tmp['current_paused'] = first
+    end
     rg = @rg.to_hsh
     tmp["rg"] = rg unless rg.empty?
     if @targets[0]

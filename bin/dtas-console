@@ -8,6 +8,9 @@ require 'dtas'
 require 'dtas/unix_client'
 require 'dtas/rg_state'
 require 'dtas/sigevent'
+require 'dtas/process'
+require 'dtas/format'
+include DTAS::Process
 require 'yaml'
 begin
   require 'curses'
@@ -130,41 +133,59 @@ begin
   loop do
     lineno = -1
     pfmt = cur['format']
+    elapsed = samples = 0
+    fmt = total = ''
+    paused = false
     if current = cur['current']
-      Curses.setpos(lineno += 1, 0)
-      Curses.clrtoeol
-      if infile = current['infile']
-        # FS encoding != locale encoding, but we need to display an FS path
-        # name to whatever locale the terminal is encoded to, so force
-        # it and risk mojibake...
-        infile.encode(enc_locale, enc_opts)
-        Curses.addstr(infile)
-      else
-        Curses.addstr(current['command'])
-      end
-
+      infile = current['infile'] || current['command']
       elapsed = DTAS.now - current['spawn_at']
       if (nr = cur['current_initial']) && (current_format = current['format'])
         rate = current_format['rate'].to_f
         elapsed += nr / rate
-        total = " [#{Time.at(current['samples'] / rate).strftime(tfmt)}]"
+        samples = current['samples']
         fmt = "(#{fmt_to_s(current_format)} > #{fmt_to_s(pfmt)})"
       else
-        total = ""
         fmt = fmt_to_s(pfmt)
         fmt = "(#{fmt} > #{fmt})"
       end
+    elsif cur['paused'] && infile = cur['current_paused']
+      paused = true
+      if Array === infile
+        infile, elapsed = infile
+        elapsed = elapsed.to_i
+        samples = qx(%W(soxi -s #{infile})).to_i rescue 0
+        rate = 0
+        begin
+          fmt = DTAS::Format.from_file({}, infile)
+          rate = fmt.rate
+          fmt = "(#{fmt_to_s(fmt.to_hash)})"
+        rescue => e
+          warn "#{e.message} (#{e.class})"
+        end
+        elapsed /= rate.to_f if rate != 0
+      end
+    end
 
+    if infile
+      # FS encoding != locale encoding, but we need to display an FS path
+      # name to whatever locale the terminal is encoded to, so force it
+      # and risk mojibake...
+      infile.encode(enc_locale, enc_opts)
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr(infile)
+      total = " [#{Time.at(samples / rate).strftime(tfmt)}]"
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
     else
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr(cur['paused'] ? "paused #{pause}" : 'idle')
+      Curses.addstr('idle')
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
     end
+
     rg = cur['rg'] || {}
     rgs = rg_string(rg, current)
     Curses.setpos(lineno += 1, 0)
