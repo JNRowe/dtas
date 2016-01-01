@@ -151,6 +151,7 @@ begin
     elsif cur['paused'] && infile = cur['current_paused']
       fmt = '(paused)'
       paused = true
+      infile = infile['command'] if Hash === infile
       if Array === infile
         infile, elapsed = infile
         elapsed = elapsed.to_i
