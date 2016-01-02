@@ -180,7 +180,7 @@ imbalance in a live concert recording from the audience:
 
 # COPYRIGHT
 
-Copyright 2013-2015 all contributors <dtas-all@nongnu.org>.\
+Copyright 2013-2016 all contributors <dtas-all@nongnu.org>.\
 License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
 
 # SEE ALSO

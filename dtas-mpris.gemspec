@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
 # License: GPL-2.0+ or later <http://www.gnu.org/licenses/gpl-2.0.txt>
 # This is GPL-2.0+ instead of GPL-3.0+ because ruby-dbus is LGPL-2.1 (only)
 Gem::Specification.new do |s|
