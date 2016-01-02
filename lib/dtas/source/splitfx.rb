@@ -55,7 +55,10 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
   end
 
   def __load_comments
-    @ymlhash["comments"] || @sox.__load_comments
+    if c = @ymlhash["comments"]
+      return c.each { |k,v| c[k] = v.to_s }
+    end
+    @sox.__load_comments
   end
 
   def command_string
