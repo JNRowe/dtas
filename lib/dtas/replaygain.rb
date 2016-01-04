@@ -40,7 +40,7 @@ class DTAS::ReplayGain # :nodoc:
   def initialize(comments)
     comments or return
 
-    # the replaygain standard specifies 89.0 dB, but maybe some apps are
+    # the ReplayGain standard specifies 89.0 dB, but maybe some apps are
     # different...
     @reference_loudness = check_gain(comments["REPLAYGAIN_REFERENCE_LOUDNESS"])
 
@@ -50,8 +50,8 @@ class DTAS::ReplayGain # :nodoc:
     @album_peak = check_float(comments["REPLAYGAIN_ALBUM_PEAK"])
   end
 
-  def self.new(comments)
-    tmp = super
-    tmp.track_gain ? tmp : nil
+  def self.new(comments, field)
+    tmp = super(comments)
+    tmp.__send__(field) ? tmp : nil
   end
 end

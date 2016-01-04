@@ -111,8 +111,8 @@ class DTAS::RGState # :nodoc:
     unless @mode
       return @volume == 1.0 ? nil : to_sox_gain(vol_db)
     end
-    rg = source.replaygain or
-      return rg_fallback_effect("ReplayGain tags missing")
+    rg = source.replaygain(@mode) or
+      return rg_fallback_effect("ReplayGain tags missing for #@mode")
     val = rg.__send__(@mode)
     if ! val && @fallback_track && @mode =~ /\Aalbum_(\w+)/
       tag = "track_#$1"

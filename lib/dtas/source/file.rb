@@ -92,9 +92,9 @@ module DTAS::Source::File # :nodoc:
     rv
   end
 
-  def replaygain
-    @rg ||= DTAS::ReplayGain.new(comments) ||
-            DTAS::ReplayGain.new(mp3gain_comments)
+  def replaygain(mode)
+    @rg ||= DTAS::ReplayGain.new(comments, mode) ||
+            DTAS::ReplayGain.new(mp3gain_comments, mode)
   end
 
   def to_source_cat

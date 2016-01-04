@@ -35,7 +35,7 @@ class TestSourceAv < Testcase
     x(%W(metaflac --add-replay-gain #{tmp.path}))
     source = DTAS::Source::Av.new.try(tmp.path)
     assert_equal source.comments["FOO"], "BAR", source.inspect
-    rg = source.replaygain
+    rg = source.replaygain('track_gain')
     assert_kind_of DTAS::ReplayGain, rg
     assert_in_delta 0.0, rg.track_peak.to_f, 0.00000001
     assert_in_delta 0.0, rg.album_peak.to_f, 0.00000001
@@ -61,7 +61,7 @@ class TestSourceAv < Testcase
     end
 
     source = DTAS::Source::Av.new.try(a.path)
-    rg = source.replaygain
+    rg = source.replaygain('track_gain')
     assert_kind_of DTAS::ReplayGain, rg
     assert_in_delta 0.0, rg.track_peak.to_f, 0.00000001
     assert_in_delta 0.0, rg.album_peak.to_f, 0.00000001

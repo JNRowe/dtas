@@ -35,7 +35,7 @@ class TestSource < Testcase
     x(%W(metaflac --set-tag=FOO=BAR #{tmp.path}))
     x(%W(metaflac --add-replay-gain #{tmp.path}))
     assert_equal source.comments["FOO"], "BAR"
-    rg = source.replaygain
+    rg = source.replaygain('track_gain')
     assert_kind_of DTAS::ReplayGain, rg
     assert_in_delta 0.0, rg.track_peak.to_f, 0.00000001
     assert_in_delta 0.0, rg.album_peak.to_f, 0.00000001
@@ -62,7 +62,7 @@ class TestSource < Testcase
       end
     end
 
-    rg = source.replaygain
+    rg = source.replaygain('track_gain')
     assert_kind_of DTAS::ReplayGain, rg
     assert_in_delta 0.0, rg.track_peak.to_f, 0.00000001
     assert_in_delta 0.0, rg.album_peak.to_f, 0.00000001
