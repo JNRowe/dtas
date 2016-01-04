@@ -149,17 +149,17 @@ begin
         fmt = "(#{fmt} > #{fmt})"
       end
     elsif cur['paused'] && infile = cur['current_paused']
-      fmt = '(paused)'
+      fmt = "[paused] (#{fmt_to_s(pfmt)})"
       paused = true
       infile = infile['command'] if Hash === infile
       if Array === infile
         infile, elapsed = infile
         elapsed = elapsed.to_i
         samples = rate = 0
-        begin
-          rate = qx(%W(soxi -r #{infile})).to_i
-        rescue => e
-          warn "#{e.message} (#{e.class})"
+        if (bypass = cur['bypass']) && bypass.include?('rate')
+          rate = pfmt['rate'].to_f
+        else
+          rate = qx(%W(soxi -r #{infile}), err: DTAS.null).to_i rescue 0
         end
         elapsed /= rate.to_f if rate != 0
       end
@@ -176,7 +176,11 @@ begin
       total = " [#{Time.at(samples / rate).strftime(tfmt)}]" if samples != 0
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
-      Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
+      if rate != 0
+        Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
+      else
+        Curses.addstr("#{elapsed} samples #{total} #{fmt}")
+      end
     else
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
