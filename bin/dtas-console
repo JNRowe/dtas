@@ -199,9 +199,8 @@ begin
     Curses.clrtoeol
     cur_vol = rg['volume'] || 1.0
     extra = [ "volume=#{cur_vol}" ]
-    repeat = 'false'
     tl = cur['tracklist'] || {}
-    extra << "repeat=#{tl['repeat'] || 'false'}"
+    %w(repeat shuffle).each { |x| extra << "#{x}=#{tl[x] || 'false'}" }
     trim = cur['trim'] || 'off'
     extra << "trim=#{trim}"
     Curses.addstr(extra.join(' '))

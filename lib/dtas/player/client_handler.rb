@@ -622,7 +622,10 @@ module DTAS::Player::ClientHandler # :nodoc:
     when 'debug' then return io.emit(@tl.shuffle.to_yaml) # TODO: remove
     when nil
     else
-      set_bool(io, 'tl shuffle', v) { |b| @tl.shuffle = b }
+      set_bool(io, 'tl shuffle', v) do |b|
+        @tl.shuffle = b
+        __wall("tl shuffle #{b}")
+      end
     end
     io.emit("tl shuffle #{prev}")
   end
