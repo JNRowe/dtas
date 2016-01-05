@@ -194,9 +194,7 @@ class DTAS::Tracklist # :nodoc:
     end
     track = @list.delete_at(idx)
     len = @list.size
-    if @pos >= len
-      @pos = len == 0 ? TL_DEFAULTS["pos"] : len
-    end
+    @pos = len - 1 if @pos >= len
     @goto_pos = @goto_pos = nil # TODO: reposition?
     track.to_path
   end
