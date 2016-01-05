@@ -123,10 +123,11 @@ class DTAS::Tracklist # :nodoc:
     @goto_pos = @goto_off = nil
     if cur[next_pos]
       @pos = next_pos
-    elsif repeat
-      next_pos = @pos = 0
     else
-      return
+      # reshuffle the tracklist when we've exhausted it
+      cur.shuffle! if @shuffle
+      return unless repeat
+      next_pos = @pos = 0
     end
     [ cur[next_pos].to_path, next_off ]
   end
