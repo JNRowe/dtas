@@ -430,15 +430,25 @@ class DTAS::Mlib # :nodoc:
     node_id = node[:id]
     q = { parent_id: node_id }
     nodes = @db[:nodes]
+    comments = @db[:comments]
+
+    # remove children, step 1
     nodes.where(q).each do |nd|
-      next if nd[:id] == root_id
+      nd_id = nd[:id]
+      next if nd_id == root_id
       case nd[:tlen]
       when DM_DIR, DM_IGN
         remove_entry(nd)
+      else
+        comments.where(node_id: nd_id).delete
       end
     end
+
+    # remove children, step 2
     nodes.where(q).delete
-    @db[:comments].where(node_id: node_id).delete
+
+    # finally remove ourselves
+    comments.where(node_id: node_id).delete
     nodes.where(id: node_id).delete
   end
 
