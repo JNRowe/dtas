@@ -46,7 +46,7 @@ when 'stats'
 when 'dump' # mainly for debugging
   directory = ARGV.shift || '/'
   mlib(db).dump(directory, {}, lambda do |parent, node, comments|
-    puts "Path: #{parent[:dirname]}/#{node[:name]}"
+    puts "Path: #{parent[:dirname]}#{node[:name]}"
     puts "Length: #{node[:tlen]}"
     return if comments.empty?
     puts 'Comments:'
