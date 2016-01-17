@@ -2,6 +2,7 @@
 # Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
 # frozen_string_literal: true
+# encoding: binary
 # WARNING: totally unstable API, use dtas-ctl for scripting (but the protocol
 # itself is also unstable, but better than this one probably).
 require 'dtas/unix_client'
@@ -15,6 +16,11 @@ def get_track_ids(c)
   track_ids
 end
 
+def fix_enc!(str, enc)
+  str.force_encoding(enc)
+  str.force_encoding(Encoding::ASCII_8BIT) unless str.valid_encoding?
+end
+
 def do_edit(c)
   require 'dtas/edit_client'
   require 'yaml'
@@ -25,12 +31,14 @@ def do_edit(c)
   tmp_path = tmp.path
   orig = []
   orig_idx = {}
+  enc = Encoding.default_external
 
   get_track_ids(c).each_slice(128) do |track_ids|
     res = c.req("tl get #{track_ids.join(' ')}")
     res = Shellwords.split(res.sub!(/\A\d+ /, ''))
     while line = res.shift
-      line.sub!(/\A(\d+)=/, '') or abort "unexpected line=#{line.inspect}\n"
+      line.sub!(/\A(\d+)=/n, '') or abort "unexpected line=#{line.inspect}\n"
+      fix_enc!(line, enc)
       track_id = $1.to_i
       orig_idx[track_id] = orig.size
       orig << track_id
@@ -58,18 +66,19 @@ def do_edit(c)
   add = []
   # editor may rename/link a new file into place
   File.open(tmp_path) do |fp|
+    fp.binmode
     while line = fp.gets
       line.chomp!
-      if line.sub!(/ =(\d+)\z/, '') # existing tracks
+      if line.sub!(/ =(\d+)\z/n, '') # existing tracks
         track_id = $1.to_i
         if edit_idx[track_id] # somebody copy+pasted an existing line
-          add << [ File.expand_path(line), edit.last ]
+          add << [ line, edit.last ]
         else # moved line
           edit_idx[track_id] = edit.size
           edit << track_id
         end
       else # entirely new line
-        add << [ File.expand_path(line), edit.last ]
+        add << [ line, edit.last ]
       end
     end
   end
@@ -88,12 +97,31 @@ def do_edit(c)
   end
 
   prev_added_id = last_after_id = nil
+  non_existent = []
   add.each do |path, after_id|
-    cmd = %W(tl add #{path})
-    id = after_id == last_after_id ? prev_added_id : after_id
-    cmd << id.to_s if id
-    prev_added_id = c.req(cmd).to_i
-    last_after_id = after_id
+    orig = path
+    path = Shellwords.split(path)[0]
+    path = File.expand_path(path)
+    unless File.exist?(path)
+      path = orig.dup
+      fix_enc!(path, enc)
+      path = Shellwords.split(path)[0]
+      path = File.expand_path(path)
+    end
+
+    if File.exist?(path)
+      cmd = %W(tl add #{path})
+      id = after_id == last_after_id ? prev_added_id : after_id
+      cmd << id.to_s if id
+      prev_added_id = c.req(cmd).to_i
+      last_after_id = after_id
+    else
+      non_existent << orig
+    end
+  end
+  if non_existent[0]
+    $stderr.puts "Failed to add #{non_existent.size} paths"
+    non_existent.each { |path| $stderr.puts path }
   end
 ensure
   tmp.close! if tmp
@@ -113,9 +141,11 @@ end
 c = DTAS::UNIXClient.new
 case cmd = ARGV[0]
 when "cat"
+  enc = Encoding.default_external
   get_track_ids(c).each do |track_id|
     res = c.req("tl get #{track_id}")
-    res.sub!(/\A1 /, '')
+    res.sub!(/\A1 /n, '')
+    fix_enc!(res, enc)
     print "#{res}\n"
   end
 when 'aac' # add-after-current
