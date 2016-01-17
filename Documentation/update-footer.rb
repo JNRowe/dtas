@@ -24,13 +24,13 @@ ARGV.each do |file|
   File.open(file, "r+") do |fp|
     state = :top
     sections = [ state ]
-    sec = { state => "" }
+    sec = { state => ''.dup }
     fp.each_line do |l|
       case l
       when /^(#.+)$/
         state = $1.freeze
         sections << state
-        sec[state] = ""
+        sec[state] = ''.dup
       else
         sec[state] << l
       end
