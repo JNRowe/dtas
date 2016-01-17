@@ -142,11 +142,14 @@ c = DTAS::UNIXClient.new
 case cmd = ARGV[0]
 when "cat"
   enc = Encoding.default_external
-  get_track_ids(c).each do |track_id|
-    res = c.req("tl get #{track_id}")
-    res.sub!(/\A1 /n, '')
-    fix_enc!(res, enc)
-    print "#{res}\n"
+  get_track_ids(c).each_slice(128) do |track_ids|
+    res = c.req("tl get #{track_ids.join(' ')}")
+    res = Shellwords.split(res.sub!(/\A\d+ /, ''))
+    while line = res.shift
+      line.sub!(/\A(\d+)=/n, '') or abort "unexpected line=#{line.inspect}\n"
+      fix_enc!(line, enc)
+      print "#{line}\n"
+    end
   end
 when 'aac' # add-after-current
   ARGV.shift
