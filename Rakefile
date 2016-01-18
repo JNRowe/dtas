@@ -101,19 +101,26 @@ task rsync_docs: %w(NEWS NEWS.atom) do
   # Also available at: http://yhbt.net/git-set-file-times
   # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
   sh("git", "set-file-times", "Documentation", "examples", *top)
+  make = ENV['MAKE'] || 'make'
+  sh(%Q(#{make} -C Documentation))
+  examples = `git ls-files examples`.split("\n")
 
-  `git ls-files Documentation/*.txt`.split(/\n/).concat(top).each do |txt|
+  gzip_touch = lambda do |txt|
     gz = "#{txt}.gz"
     tmp = "#{gz}.#$$"
-    sh("gzip -9 < #{txt} > #{tmp}")
+    sh("gzip -9 <#{txt} >#{tmp}")
     st = File.stat(txt)
     File.utime(st.atime, st.mtime, tmp) # make nginx gzip_static happy
     File.rename(tmp, gz)
+    gz
+  end
+
+  Dir['Documentation/*.txt'].to_a.concat(top).each do |txt|
     files << txt
-    files << gz
+    files << gzip_touch[txt]
   end
   sh("rsync --chmod=Fugo=r -av #{files.join(' ')} #{dest}")
 
-  examples = `git ls-files examples`.split("\n")
+  examples = examples.map { |txt| [ txt, gzip_touch[txt] ] }
   sh("rsync --chmod=Fugo=r -av #{examples.join(' ')} #{dest}/examples/")
 end

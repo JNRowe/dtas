@@ -61,12 +61,16 @@ install-man: man
 %.7 : %.pod
 	$(pod2man) -s 7 $< $@+ && mv $@+ $@
 
-all :: $(mantxt)
-
 mantxt = $(addsuffix .txt, $(m1) $(m7))
 
+txt :: $(mantxt)
+
+all :: txt
+
 %.txt : %.pod
-	$(pod2text) $< $@+ && mv $@+ $@
+	$(pod2text) $< $@+
+	touch -r $< $@+ 2>/dev/null || true # GNU-ism
+	mv $@+ $@
 
 clean::
 	$(RM) $(man1) $(man7)
