@@ -1,0 +1,38 @@
+% dtas-cueedit(1) dtas user manual
+
+=head1 NAME
+
+dtas-cueedit - edit embedded cuesheets in audio files
+
+=head1 SYNOPSYS
+
+dtas-cueedit /path/to/audio.flac
+
+=head1 DESCRIPTION
+
+dtas-cueedit spawns an editor to edit the embedded cuesheet in FLAC files.
+In the future, other audio formats with embedded cuesheets may be supported.
+Use with the L<metaflac(1)> is required.
+
+=head1 ENVIRONMENT
+
+VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<metaflac(1)>

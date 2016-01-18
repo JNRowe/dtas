@@ -1,0 +1,454 @@
+% dtas-player_protocol(7) dtas user manual
+
+=head1 NAME
+
+dtas-player_protocol - protocol for controling dtas-player
+
+=head1 DESCRIPTION
+
+NOTE - NOTE - NOTE - NOTE - NOTE - NOTE - NOTE - NOTE
+
+I'm considering a heavy revamp of this protocol.  The "OK" responses for
+a lot of commands may not be necessary since this is Unix sockets and
+not TCP, and I may move away from a request-response model and towards
+an entirely listen/notification model.  I have little experience in
+non-TCP-based application protocols, so this is an area of
+experimentation for me.
+
+This must stay over Unix sockets because filesystem permissions are
+needed to enforce code execution permissions.  dtas-player is really a
+shell in disguise, after all.
+
+Protocol feedback greatly appreciated, email us at L<dtas-all@nongnu.org>
+
+This gives a specification of the dtas-player protocol over a local Unix
+SOCK_SEQPACKET socket.  The dtas-player protocol should NOT be
+considered stable at this point and compatibility will break.
+
+Inspiration is taken from MPRIS and MPRIS 2.0 specifications (e.g.
+play_pause, play, pause), and there will be a proxy in the future to
+support MPRIS/MPRIS 2.0 clients.
+
+The DTAS_PLAYER_SOCK is the standard environment determining the control
+socket for L<dtas-player(1)>.  This defaults to $HOME/.dtas/player.sock
+if unset.
+
+Most low-level commands may be issued using the L<dtas-ctl(1)> command.
+
+Higher-level commands such as L<dtas-console(1)>, L<dtas-sourceedit(1)>,
+L<dtas-sinkedit(1)>, and L<dtas-enq(1)> also implement this protocol.
+
+=head1 ARGUMENT TYPES
+
+=over
+
+=item BOOLEAN - must be "true" or "false"
+
+=item INTEGER - a signed integer in decimal notation (base 10)
+
+=item UNSIGNED - an unsigned integer in decimal or hex notation
+
+=item ENVNAME - must be a suitable environment variable (setenv(3))
+
+=item ENVVALUE - must be a suitable environment variable (setenv(3))
+
+=item COMMAND - command to run
+
+This may be quoted string passed to sh -c "".
+Variable/argument expansion will be performed by the shell
+
+=item SOURCENAME - "sox" or "av", more backends may be supported in the future
+
+=item TIMESTAMP - a time stamp formatted in HH:MM:SS.FRAC (for seeking)
+
+=item TRACKID - a unique unsigned integer in decimal (base-10)
+
+This represents a track in the tracklist
+
+=item FILENAME
+
+An expanded pathname relative to / is recommended since
+dtas-player and the client may run in different directories
+
+=back
+
+=head1 VARIABLE EXPANSION
+
+For source and sink "command" arguments, the $SOXFMT and $ECAFMT
+environment variables are exported automatically to source to ease
+integration with L<sox(1)> and L<ecasound(1)>.
+
+Both $SOXFMT and $ECAFMT are based on the configured "format" of
+the dtas-player (see below).
+
+For all machines, $SOXFMT defaults to: -ts32 -c2 -r44100
+For little-endian machines, $ECAFMT defaults to: -fs32_le,2,44100
+
+=head1 COMMANDS
+
+Commands here should be alphabetized according to `LC_ALL=C sort'
+
+=over
+
+=item cd - change the current working directory of the player
+
+=item clear - clear current queue (current track/command continues running)
+
+PENDING: this may be renamed to "queue clear" or "queue-clear"
+
+=item cue - display the index/offsets of the embedded cue sheet
+
+=item cue next - skip to the next cue sheet offset
+
+This may skip to the next track if there is
+no embedded cue sheet or if playing the last (embedded) track
+
+=item cue prev - skip to the previous cue sheet offset
+
+This may just seek to the beginning
+if there is no embedded cue sheet or if we are playing the first
+(embedded) track.
+
+=item cue goto INTEGER - go to the cue index denoted by INTEGER
+
+0 is first track as returned by "cue".
+Negative values of INTEGER allows selecting track relative to the last
+track (-1 is the last track, -2 is the penultimate, and so on).
+
+=item current - output information about the current track/command in YAML
+
+The structure of this is unstable and subject to change.
+
+=item enq FILENAME - enqueue the given FILENAME for playback
+
+An expanded (full) pathname relative to '/' is recommended, as
+dtas-player and the client may be in different directories.
+PENDING: this may be renamed to "queue add"
+
+=item enq-cmd "COMMAND" - run the following command for playback
+
+The COMMAND is expected to output audio in the audio format matching
+the current audio format of the player.  This may be a shell pipeline
+and include multiple commands.  The $SOXFMT and $ECAFMT variables are
+available here.
+PENDING: this may be renamed to "queue add-cmd"
+
+=item env ENVTOSET=ENVVALUE ENVTOSET2=ENVVALUE2
+
+Set environment variables.  This affects all future source/sink
+processes as well as helper commands dtas-player may spawn
+(e.g. L<soxi(1)>).  Environment variables set this way are currently not
+preserved across invocations of L<dtas-player(1)>, but may change in the
+future.
+
+=item env ENVTOUNSET1# ENVTOUNSET#
+
+Unset the given environment variable.
+PENDING: the '#' is ugly and inconsistent with the per-sink/source.
+env.
+
+=item format FORMATARGS - configure the format between source and sink
+
+Changing this will affect the $SOXFMT and $ECAFMT environments passed
+to source and sink commands.  Changing this implies a "restart"
+Changing rate to 48000 is probably useful if you plan on playing to some
+laptop sound cards.  In all cases where "bypass" is supported, it
+removes the guarantee of gapless playback as the audio device(s)
+will likely need to be restarted.
+
+=over
+
+=item channels=(UNSIGNED|bypass) - (default: 2 (stereo))
+
+number of channels to use internally.  sox will internally invoke the remix
+effect when decoding.  This supports the value "bypass" (without
+quotes) to avoid the automatic remix effect.  Using "bypass" mode
+removes the guarantee of gapless playback, as the audio device will
+likely need to be restarted, introducing an audible gap.
+
+=item endian=(big|little|swap) - (default: native)
+
+there is probably no
+point in changing this unless you output over a network sink to
+a machine of different endianess.
+
+=item bits=(UNSIGNED|bypass) - (default: implied from type)
+
+Sample precision (decoded).
+This may be pointless and removed in the future, since the sample
+precision is implied from type.  This supports the value of "bypass"
+to avoid dither/truncation in later stages.
+
+=item rate=(UNSIGNED|bypass) - (default: 44100) - sample rate of audio
+
+Typical values of rate are 44100, 48000, 88200, 96000.  Not all
+DSP effects are compatible with all sampling rates/channels.
+This supports the value of "bypass" as well to avoid introducing
+software resamplers into the playback chain.
+
+=item type=(s16|s24|s32|u16|u24|u32|f32|f64) - (default: s32)
+
+Change the raw PCM format.  s32 currently offers the best performance
+when only sox/play are used.  f32 may offer better performance if
+piping to/from non-sox applications (e.g. ecasound)
+
+=back
+
+=item pause - pause playback
+
+  Player pause state is preserved across dtas-player invocations.
+
+=item play - restart playback from pause
+
+Playback sinks will yield control of the audio playback device once no
+source is playing.
+
+=item play_pause - toggle the play/pause state
+
+This starts playback if paused, and pauses playback if playing.
+
+=item queue cat - dump the contents of the queue as YAML
+
+This may include arbitrary commands to be executed, filenames,
+and offsets for playback.  The format is not intended to be
+stable and subject to internal changes in dtas-player.
+
+=item restart - restarts all processes in the current pipeline
+
+Playback will be momentarily interrupted while this change occurs.  This is
+necessary if one of the commands (e.g. sox or ecasound) or loaded
+libraries (e.g. a LADSPA plugin) is upgraded.  Use "source restart"
+instead to only restart the source chain, leaving the sinks
+untouched.
+
+=item rg RGARGS - configure ReplayGain support
+
+All FLOAT values may be adjusted via '+=' or '-=' instead of simple
+assignment ('=').  If RGARGS is empty, the current rg state of
+non-default values will be dumped in YAML.
+
+=over
+
+=item fallback_gain=FLOAT (-6.0) - dB value
+
+Adjust the volume by this level (usually negative) for tracks
+missing ReplayGain tags.  This is useful when the queue contains
+a mix of tracks with and without ReplayGain tags.
+
+=item fallback_track=BOOLEAN (true)
+
+When in album_gain mode, fallback to track_gain if the
+REPLAYGAIN_ALBUM_GAIN metadata is missing.
+
+=item mode=(album_gain|track_gain|track_norm|album_norm|off)
+
+This controls the ReplayGain tag to use.  The *_norm options
+are used for peak normalization and not commonly found in other
+players.
+
+=item preamp=FLOAT (0) - dB value
+
+Adjust the album_gain or track_gain amount by this value (in dB).
+
+=item norm_level=FLOAT (1.0 == dBFS)
+
+Controls the level to normalize to when using album_norm or track_norm.
+
+=back
+
+=item seek [+-]TIMESTAMP - seek the current track to a specified time.
+
+This is passed directly as the first argument for the L<sox(1)> "trim"
+command.   See the L<sox(1)> manpage for details.
+Seeking to a relative time is also supported by prefixing the time
+with '+' or '-'
+
+=item skip - abort current track/command
+
+This is accomplished via closing the output pipe.
+Running the "clear" command before this will abort playback.
+
+=item sink ls - list names of current sinks
+
+=item sink cat SINKNAME - dump SINKNAME config in YAML
+
+=item sink rm SINKNAME - remove SINKNAME
+
+=item sink ed SINKNAME SINKARGS - create/edit SINKNAME
+
+This currently does not restart running (active) sinks.
+This will stop active sinks if active is set to false, and start
+active sinks if active is set to true.
+See dtas-sinkedit(1) for an example of using this.
+
+=over
+
+=item command=COMMAND - change the command-line used for playback
+
+=item active=BOOLEAN - whether or not the sink will be in use (default: false)
+
+=item env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the sink process
+
+=item env#ENVNAME - unset ENVNAME in the sink process (only)
+
+=item prio=INTEGER - priority of the sink, lower values run first
+
+=item nonblock=BOOLEAN - drop audio data to avoid holding back other sinks
+
+=item pipe_size=UNSIGNED - set the size of the pipe for the sink (Linux-only)
+
+=back
+
+=item source cat SOURCENAME - dump the current source command and env in YAML
+
+=item source ed SOURCENAME SOURCEARGS - edit the source parameters.
+
+This changes here will immediately restart the source process.
+See the code for dtas-sourceedit(1) for an example of using this.
+
+=over
+
+=item command=COMMAND - change the command-line used to decode audio
+
+=item env.ENVNAME=ENVVALUE - set ENVNAME to ENVVALUE for the source process
+
+=item env#ENVNAME - unset ENVNAME in the source process (only)
+
+=item tryorder=INTEGER - lower values are tried first
+
+=back
+
+PENDING: tryorder here is wrong and may be removed or changed.
+We need to account for at least two variables input file:
+
+=over
+
+=item 1. input type (flac/opus/mp3/etc)
+
+=item 2. transport protocol (local FS/http/ftp/sftp/etc)
+
+=back
+
+=item source ls
+
+Dump the names of sources sorted by tryorder
+
+=item source restart
+
+Restart the current source command.
+This can be useful if the source file is changed during playback
+and the current player process is holding onto an unlinked inode.
+This is advantageous over a full "restart" as there is no audible
+gap on most systems.
+
+=item state dump [FILENAME]
+
+Immediately dump the state of the player.  If a FILENAME is specified,
+the state is written to that file.  Otherwise, the default state file
+(configured via DTAS_PLAYER_STATE environment variable, defaulting
+to ~/.dtas/player_state.yml) is written to.  This does not use
+L<fsync(2)>, users requiring fsync should L<open(2)> that file and
+L<fsync(2)> it themselves if necessary.
+
+=item tl add FILENAME [TRACKID [BOOLEAN]]
+
+Add files to the tracklist with one arg, adds FILENAME to the head
+of the tracklist.
+If TRACKID is specified, FILENAME is added immediately after TRACKID
+on the existing tracklist.  The final BOOLEAN argument replaces the
+currently playing track with the newly-added one.
+Returns the TRACKID of the newly added track
+
+=item tl clear
+
+Clear current tracklist
+
+=item tl current
+
+Display the pathname to the currently playing track
+
+=item tl current-id
+
+Display the TRACKID of the currently playing track
+
+=item tl remove TRACKID
+
+Remove the track with the given TRACKID from
+the track list and returns the FILENAME if successful
+
+=item tl get [TRACKIDS]
+
+Returns a list of TRACKIDS mapped to shell-escaped filenames.
+
+=item tl goto TRACKID [TIMESTAMP]
+
+Plays the given TRACKID.
+An optional timestamp may be added to prevent playing the
+same part(s) repeatedly
+
+=item tl max [MAXIMUM]
+
+Sets or gets the maximum number of tracks allowed in the tracklist
+
+=item tl next
+
+Jump to the next track in the tracklist
+
+=item tl prev
+
+Jump to the previous track in the tracklist
+
+=item tl repeat [BOOLEAN|1]
+
+Show/or change repeat status of the tracklist.
+With no args, this will show "true", "false", or "1"
+If set to "1", dtas-player will repeat the current track.
+Returns the previous repeat status.
+
+=item tl shuffle [BOOLEAN]
+
+Show/or change the current shuffle status of the tracklist.
+Returns the previous shuffle status.
+
+=item tl swap TRACKID_A TRACKID_B
+
+Swaps the positions of two tracks.
+
+=item tl tracks
+
+Returns a list of all TRACKIDS in the tracklist
+
+=item trim [off|TBEG [TLEN]]
+
+Limits playback of all tracks in the tracklist to the time starting
+at TBEG and ending after TLEN has elapsed.  Not specifying TLEN will
+cause sox.  Like the sox "trim" effect, prefixing TLEN with a '='
+will be interpreted as an absolute stop time.
+Both TBEG and TLEN should be specified in seconds, not sample counts.
+Specifying "off" (without quotes) disables trim.
+This feature is intended to allow users to "zoom-in" on a particular
+portion of a track to tweak parameters (either with
+L<dtas-sourceedit(1)> or via playback of splitfx YAML files) and often
+combined with looping the tracklist (via "tl repeat").
+
+=item watch - adds the client to the passive watch list for notifications.
+
+It is recommended clients issue no further commands and open
+another client socket to issue non-watch commands.
+
+=back
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>

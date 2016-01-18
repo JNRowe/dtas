@@ -1,29 +1,28 @@
 % dtas-ctl(1) dtas user manual
-%
 
-# NAME
+=head1 NAME
 
 dtas-ctl - low-level client for dtas-player
 
-# SYNOPSYS
+=head1 SYNOPSYS
 
 dtas-ctl [ARGS...]
 
-# DESCRIPTION
+=head1 DESCRIPTION
 
 dtas-ctl passes command-line arguments as-is to dtas-player.  It is mainly
 useful for simple commands such as ("current", "play_pause", "pause", "play",
 "rg RGARGS", "seek HH:MM:SS", "skip").
 
-See dtas-player_protocol(7) for a detailed description of the protocol.
+See L<dtas-player_protocol(7)> for a detailed description of the protocol.
 
-# EXAMPLES
+=head1 EXAMPLES
 
 display the currently playing track
 
         $ dtas-ctl current
 
-enqueue a file for playback (dtas-enq(1) is easier to use, here)
+enqueue a file for playback (L<dtas-enq(1)> is easier to use, here)
 
         $ dtas-ctl enq /absolute/path/to/file
 
@@ -49,28 +48,31 @@ skip to the next track
         $ dtas-ctl skip
 
 To play the output of an arbitrary command (note the quotes) and usage
-of $SOXFMT (see dtas-player_protocol(7)).
+of $SOXFMT (see L<dtas-player_protocol(7)>).
 
 	$ dtas-ctl enq-cmd 'sox -n $SOXFMT - synth 3 pluck'
 
-# ENVIRONMENT
+=head1 ENVIRONMENT
 
 DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
 This defaults to ~/.dtas/player.sock
 
-# CONTACT
+=head1 CONTACT
 
-All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
-Mailing list archives available at <http://80x24.org/dtas-all/> and
-<ftp://lists.gnu.org/dtas-all/>\
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
 No subscription is necessary to post to the mailing list.
 
-# COPYRIGHT
+=head1 COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>.\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-# SEE ALSO
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
 
-dtas-player(1), dtas-player_protocol(7), dtas-enq(1), dtas-sinkedit(1),
-dtas-sourceedit(1)
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-player_protocol(7)>, L<dtas-enq(1)>,
+L<dtas-sinkedit(1)>, L<dtas-sourceedit(1)>

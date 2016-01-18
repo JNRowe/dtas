@@ -1,0 +1,43 @@
+% dtas-enq(1) dtas user manual
+
+=head1 NAME
+
+dtas-enq - enqueue audio files for playback with dtas-player
+
+=head1 SYNOPSYS
+
+dtas-enq [FILE...]
+
+=head1 DESCRIPTION
+
+dtas-enq will enqueue a list of files given on the command-line to a
+running instance of L<dtas-player(1)>.  dtas-player will start playing
+the newly enqueued files in the order given.
+
+=head1 EXAMPLE
+
+        $ dtas-enq /path/to/your/favorite/album/*.flac
+
+=head1 ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player listen socket.
+This defaults to ~/.dtas/player.sock
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-ctl(1)>

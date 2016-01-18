@@ -1,19 +1,19 @@
 % dtas-msinkctl(1) dtas user manual
 
-# NAME
+=head1 NAME
 
 dtas-msinkctl - activate/deactivate multiple sinks at once
 
-# SYNOPSYS
+=head1 SYNOPSYS
 
 dtas-msinkctl COMMAND
 dtas-msinkctl COMMAND [SINKS...]
 
-# DESCRIPTION
+=head1 DESCRIPTION
 
 dtas-msinkctl is useful for activating/deactivating multiple sinks.
 
-# EXAMPLES
+=head1 EXAMPLES
 
 Display only active sinks (unlike "dtas-ctl sink ls", which shows all sinks)
 
@@ -35,23 +35,27 @@ Remove SINK3 from the active set
 
     dtas-msinkctl active-add SINK3
 
-# ENVIRONMENT
+=head1 ENVIRONMENT
 
 DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
 This defaults to ~/.dtas/player.sock
 
-# CONTACT
+=head1 CONTACT
 
-All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
-Mailing list archives available at <http://80x24.org/dtas-all/> and
-<ftp://lists.gnu.org/dtas-all/>\
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
 No subscription is necessary to post to the mailing list.
 
-# COPYRIGHT
+=head1 COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>.\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-# SEE ALSO
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
 
-dtas-player(1), dtas-player_protocol(7), dtas-ctl(1), dtas-sinkedit(1)
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-player_protocol(7)>, L<dtas-ctl(1)>,
+L<dtas-sinkedit(1)>

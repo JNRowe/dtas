@@ -1,15 +1,14 @@
 % dtas-player(1) dtas user manual
-%
 
-# NAME
+=head1 NAME
 
 dtas-player - playback process for dtas
 
-# SYNOPSYS
+=head1 SYNOPSYS
 
 dtas-player
 
-# DESCRIPTION
+=head1 DESCRIPTION
 
 dtas-player is intended as a music player, but implemented as Unix
 process and pipeline manager, so it may run arbitrary commands and route
@@ -17,21 +16,21 @@ data to just about any process.
 
 dtas-player is currently only queue-based, enqueued tracks are played
 only once.  It only runs in a foreground console, so usage with
-screen(1) or tmux(1) is recommended.
+L<screen(1)> or L<tmux(1)> is recommended.
 
-By default, dtas-player uses the sox(1) command to decode audio, and
-pipes the data to a play(1) process (also distributed with sox).  It may
+By default, dtas-player uses the L<sox(1)> command to decode audio, and
+pipes the data to a L<play(1)> process (also distributed with sox).  It may
 be configured to output to multiple/arbitrary processes, and may invoke
 arbitrary commands for outputting audio (or any other data).
 
-dtas-player is controlled by a Unix socket, see dtas-player_protocol(7)
+dtas-player is controlled by a Unix socket, see L<dtas-player_protocol(7)>
 for details.  Given the power of dtas-player to run arbitrary commands,
 this socket is created with restricted permissions and is only
 accessible by the user who invoked dtas-player.
 
 dtas-player maintains state across restarts with a state file.
 
-# EXAMPLE
+=head1 EXAMPLE
 
 Starting dtas-player is easy, it takes no arguments:
 
@@ -51,39 +50,37 @@ To see information about the currently playing track in YAML:
 As you should be able to see, a "default" sink is automatically
 created and playing the audio.
 
-# TROUBLESHOOTING
+=head1 TROUBLESHOOTING
 
+=head2 Audio playback does not start
 
-
-## Audio playback does not start
-
-The most common problem with dtas-player is the play(1) command
+The most common problem with dtas-player is the L<play(1)> command
 (distributed with SoX) not using the correct audio device/driver.
-Ensuring the play(1) command works with dtas-player is important.
-Consult SoX documentation and mailing lists for getting play(1) to work,
+Ensuring the L<play(1)> command works with dtas-player is important.
+Consult SoX documentation and mailing lists for getting L<play(1)> to work,
 first.
 
 Once you find the correct AUDIODEV/AUDIODRIVER environment variables,
-you may set them via dtas-ctl(1):
+you may set them via L<dtas-ctl(1)>:
 
 To play audio on my favorite USB DAC directly to ALSA, I use:
 
     $ dtas-ctl sink ed default env.AUDIODEV=hw:DAC env.AUDIODRIVER=alsa
 
-## Seeking/playing audio from large video containers (e.g. VOB) fails
+=head2 Seeking/playing audio from large video containers (e.g. VOB) fails
 
 This is a problem with large VOBs.  We recommend breaking up the
-VOB into smaller files or using avconv(1) or ffmpeg(1) to extract
+VOB into smaller files or using L<avconv(1)> or L<ffmpeg(1)> to extract
 the desired audio stream.
 
       avconv -analyzeduration 2G -probesize 2G \
         -i input.vob -vn -sn -c:a copy -map 0:$STREAM_NR output.ext
 
-# ADVANCED EXAMPLES
+=head1 ADVANCED EXAMPLES
 
-See dtas_player-sink_examples(7) for more sink examples.
+See L<dtas_player-sink_examples(7)> for more sink examples.
 
-# ENVIRONMENT
+=head1 ENVIRONMENT
 
 DTAS_PLAYER_SOCK - the path to the dtas-player listen socket.
 This defaults to ~/.dtas/player.sock
@@ -102,24 +99,28 @@ exist in the source file:
     * REPLAYGAIN_ALBUM_PEAK
     * REPLAYGAIN_TRACK_PEAK
 
-# FILES
+=head1 FILES
 
 ~/.dtas/player_state.yml is a human-readable YAML file used to preserve
 state across restarts of dtas-player.
 
-# CONTACT
+=head1 CONTACT
 
-All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
-Mailing list archives available at <http://80x24.org/dtas-all/> and
-<ftp://lists.gnu.org/dtas-all/>\
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
 No subscription is necessary to post to the mailing list.
 
-# COPYRIGHT
+=head1 COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>.\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-# SEE ALSO
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
 
-dtas-player_protocol(7), dtas-ctl(1), dtas-enq(1), dtas-sourceedit(1),
-dtas-sinkedit(1), sox(1), play(1), avconv(1), ffmpeg(1), screen(1), tmux(1)
+=head1 SEE ALSO
+
+L<dtas-player_protocol(7)>, L<dtas-ctl(1)>, L<dtas-enq(1)>,
+L<dtas-sourceedit(1)>, L<dtas-sinkedit(1)>, L<sox(1)>, L<play(1)>,
+L<avconv(1)>, L<ffmpeg(1)>, L<screen(1)>, L<tmux(1)>

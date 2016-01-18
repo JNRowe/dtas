@@ -1,0 +1,96 @@
+% dtas-xdelay(1) dtas user manual
+
+=head1 NAME
+
+dtas-xdelay - play audio with a crossover delay
+
+=head1 SYNOPSYS
+
+dtas-xdelay [OPTIONS] INPUT1 INPUT2 DELAY
+
+=head1 DESCRIPTION
+
+dtas-xdelay will delay an audio band by a given delay (in seconds or
+fractions thereof).  This can be useful for tuning a sub/sat speaker
+system.  It is intended for use a dtas-player sink command as displayed
+in the synopsis.
+
+The INPUT arguments (/dev/fd/lo and /dev/fd/hi) are automatically
+changed by dtas-player to match the given file descriptors of the pipes.
+
+Both descriptors receive the same audio data, but will be split using a
+Linkwitz-Riley crossover.  The high-band (second argument) will be
+delayed by default.
+
+=head1 EXAMPLE
+
+To set this via dtas-player to delay the high frequencies by 20ms.
+
+	dtas-ctl sink ed SINKNAME \
+	   command='dtas-xdelay /dev/fd/lo /dev/fd/hi 0.020'
+
+=head1 OPTIONS
+
+=over
+
+=item -x, --crossover-frequency FREQUENCY
+
+Frequency at which to set the crossover.  This defaults to 80 (Hz).
+
+=item -l, --lowpass-delay
+
+Delay the lowpass frequency instead of the highpass one.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over
+
+=item SOXFMT, CHANNELS
+
+These environment variables are automatically set if
+used as a dtas-player sink
+
+=item DTAS_PLAYER_SOCK - the path to the dtas-player control socket
+
+This defaults to ~/.dtas/player.sock
+
+=item AUDIODEV, AUDIODRIVER
+
+These influence the device/driver used by L<play(1)>.
+Consult L<play(1)> for details.
+
+=item SOX_OPTS
+
+This influences options passed to L<sox(1)> or L<play(1)>
+Consult L<sox(1)> for details.
+
+=back
+
+=head1 NOTES
+
+The author of this (Eric Wong) knows little about signal processing and
+is just parroting things he's learned on the sox documentation and
+mailing list.  Corrections to the L<mailto:dtas-all@nongnu.org> mailing list
+are greatly appreciated.
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-player_protocol(7)>, L<dtas-ctl(1)>,
+L<sox(1)>, L<play(1)>

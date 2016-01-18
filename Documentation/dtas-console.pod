@@ -1,0 +1,94 @@
+% L<dtas-console(1)> dtas user manual
+
+=head1 NAME
+
+dtas-console - rudimentary curses console client for dtas-player
+
+=head1 SYNOPSIS
+
+dtas-console
+
+=head1 DESCRIPTION
+
+dtas-console displays the elapsed decoder time of the track, which can be
+used as an approximation of the current playback time of a track.
+
+It cannot display an accurate playback time due to variable buffering
+in the sinks and pipes.
+
+See L<dtas-player_protocol(7)> for a detailed description of the protocol.
+
+=head1 KEYBOARD CONTROL
+
+Key bindings are inspired partially by L<mplayer(1)>
+
+=over
+
+=item 'j'/'k' - seek backward/forward 5 seconds
+
+=item LEFT/RIGHT - seek backward/forward 10 seconds
+
+=item UP/DOWN - seek forward/backward 1 minute
+
+=item PGUP/PGDWN - seek forward/backward 10 minutes
+
+=item SPACE - toggle play/pause state of the playback
+
+=item 'p'/'P' - decrease/increase timer resolution
+
+=item BACKSPACE - seek to the beginning of the track
+
+=item 7/8 - decrease/increase ReplayGain preamp
+
+=item 9/0 - decrease/increase software volume
+
+=item '=' - set software volume to 1.0 (no adjustment)
+
+=item 'm' - mute set software volume to 0.0 (mute)
+
+=item 'f'/'F' - decrease/increase ReplayGain fallback_gain value
+
+=item 'r'/'R' - cycle forward/backwards through ReplayGain modes
+
+=item 'q'/Ctrl-C - exit dtas-console
+
+=item 'o' - toggle display between HH:MM:SS and absolute seconds
+
+=back
+
+=head1 ENVIRONMENT
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+=head1 CAVEATS
+
+Increasing timer resolution increases the number of CPU wakeups and
+power consumption.   This defeats the efforts of dtas-player
+configurations which use large buffers (especially in the sink) to
+reduce wakeups and power consumption.
+
+In rare cases (or poorly-configured systems), increased wakeups from
+dtas-console will also increase contention with the sound card,
+negatively affecting audio quality even if CPU utilization is not
+a problem.
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-player_protocol(7)>, L<dtas-ctl(1)>,
+L<dtas-sinkedit(1)>, L<dtas-sourceedit(1)>

@@ -3,12 +3,18 @@
 all::
 
 INSTALL = install
-PANDOC = pandoc
-PANDOC_OPTS = -f markdown --email-obfuscation=none
-pandoc = $(PANDOC) $(PANDOC_OPTS)
+POD2MAN = pod2man
+-include ../GIT-VERSION-FILE
+release := dtas $(VERSION)
+POD2MAN_OPTS = -v -r '$(release)' --stderr -d 1994-10-02 -c 'dtas user manual'
+pod2man = $(POD2MAN) $(POD2MAN_OPTS)
+POD2TEXT = pod2text
+POD2TEXT_OPTS = --stderr
+pod2text = $(POD2TEXT) $(POD2TEXT_OPTS)
 
 m1 =
 m1 += dtas-console
+m1 += dtas-cueedit
 m1 += dtas-ctl
 m1 += dtas-enq
 m1 += dtas-msinkctl
@@ -23,6 +29,7 @@ m1 += dtas-archive
 m7 =
 m7 += dtas-player_protocol
 m7 += dtas-player_sink_examples
+m7 += dtas-player_effects
 m7 += dtas-env
 
 man1 := $(addsuffix .1, $(m1))
@@ -47,8 +54,20 @@ install-man: man
 	$(INSTALL) -d -m 755 $(DESTDIR)$(man7dir)
 	$(INSTALL) -m 644 $(man1) $(DESTDIR)$(man1dir)
 	$(INSTALL) -m 644 $(man7) $(DESTDIR)$(man7dir)
-%.1 %.7 : %.txt
-	$(pandoc) -s -t man < $< > $@
+
+%.1 : %.pod
+	$(pod2man) -s 1 $< $@+ && mv $@+ $@
+
+%.7 : %.pod
+	$(pod2man) -s 7 $< $@+ && mv $@+ $@
+
+all :: $(mantxt)
+
+mantxt = $(addsuffix .txt, $(m1) $(m7))
+
+%.txt : %.pod
+	$(pod2text) $< $@+ && mv $@+ $@
 
 clean::
 	$(RM) $(man1) $(man7)
+	$(RM) $(addsuffix .txt.gz, $(m1) $(m7))

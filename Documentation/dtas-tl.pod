@@ -1,0 +1,122 @@
+% dtas-tl(1) dtas user manual
+
+=head1 NAME
+
+dtas-tl - tracklist manipulation for dtas-player (development)
+
+=head1 SYNOPSYS
+
+dtas-tl [COMMANDS]
+
+=head1 DESCRIPTION
+
+dtas-tl provides utility functions for manipulating the tracklist of the
+dtas-player (not the queue, the tracklist is separate from the queue).
+It is mainly intended as a development tool and will likely go away in
+the future or have its functionality merged into another tool (or MPRIS
+client).
+
+=head1 COMMANDS
+
+=over
+
+=item aac - B<A>dd tracks B<A>fter B<C>urrent track in the tracklist
+
+=item addhead - add tracks to the beginning of the tracklist
+
+=item addtail - add tracks to the end of the tracklist
+
+=item current - display the current track, "NONE" if not playing
+
+=item current-id - display the TRACKID of the current track
+
+"NONE" if not playing
+
+=item cat - display a newline-delimited list of TRACK_ID=PATH output
+
+=item clear - remove all tracks from the tracklist
+
+=item edit - spawn an editor to allow editing the tracklist as a text file
+
+See EDITING for more information.
+
+=item goto TRACKID [POS]
+
+Play TRACKID immediately, optionally seek to POS
+TRACKID may be looked up via cat, and POS should be a timestamp in
+HH:MM:SS.FRAC format.
+
+=item reto REGEXP [POS]
+
+Play first track with path matching REGEXP immediately,
+optionally seek to POS.  POS should be a timestamp in HH:MM:SS.FRAC format.
+
+=item next - play the next track in the tracklist
+
+=item prev - play the previous track in the tracklist
+
+=item repeat 1 - repeat the current track
+
+=item repeat false - disable repeat
+
+=item repeat true - enable repeat of the whole tracklist
+
+=back
+
+See L<dtas-player_protocol(7)> for a detailed description of the protocol.
+
+=head1 EXAMPLES
+
+display the current tracklist
+
+        $ dtas-tl cat
+
+to add an an entire directory of FLAC files
+
+        $ dtas-tl addtail /path/to/directory/*.flac
+
+to skip forward in the tracklist
+
+        $ dtas-tl next
+
+to skip backwards in the tracklist
+
+        $ dtas-tl prev
+
+=head1 EDITING
+
+It is possible to edit the player tracklist from your favorite text
+editor.  Existing lines denoting tracks may be rearranged, deleted,
+copied or entirely new lines with path names (without a trailing
+"=TRACK_ID") may be added.
+
+Changes to the tracklist are sent to the player when the user exits the
+editor.  This functionality only works when there is one user editing
+the tracklist at a time, and when no files in the tracklist contain rare
+newline characters.
+
+=head1 ENVIRONMENT
+
+VISUAL / EDITOR - your favorite *nix text editor, defaults to 'vi' if unset.
+
+DTAS_PLAYER_SOCK - the path to the dtas-player control socket.
+This defaults to ~/.dtas/player.sock
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<dtas-player(1)>, L<dtas-player_protocol(7)>, L<dtas-ctl(1)>

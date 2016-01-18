@@ -1,0 +1,75 @@
+% dtas-env(7) dtas user manual
+
+=head1 NAME
+
+dtas-env - environment variables used through DTAS
+
+=head1 DESCRIPTION
+
+As dtas uses Bourne shell and exposes it to users, dtas should have
+a cohesive set of common environment variables across its audio
+production and playback environments.  This attempts to document
+them.  Most of these environments are set and managed by dtas
+itself, but users editing commands (e.g. via L<dtas-sourcedit(1)>
+should be aware of them.
+
+=head1 ENVIRONMENT
+
+=over
+
+=item ECAFMT
+
+A snippet of command-line switches for ecasound describing
+audio format parameters (such as word length, channels, sample rate),
+see L<dtas-player_protocol(7)> for more info. (e.g. "-fs32_le,2,44100")
+
+=item INFILE
+
+The primary input file for playback or processing. (e.g. "/path/to/ex.flac")
+
+=item RGFX
+
+The sox effect used for applying ReplayGain compensation.
+Only used during playback in dtas-player.  (e.g. "gain -6.0").
+Removing this prevents ReplayGain from working and may damage
+playback equipment with loudly mastered music.
+
+=item SOXFMT
+
+A snippet of command-line switches for sox describing
+audio format parameters (such as word length, channels, sample rate),
+see L<dtas-player_protocol(7)> for more info. (e.g. "-ts32 -c2 -r44100")
+
+=item TRIMFX
+
+The sox effect used for seeking during playback with dtas-player
+and track offsets for dtas-splitfx.  (e.g. "trim 36000s")
+
+Additionally, L<dtas-splitfx(1)> documents more environment variables
+which are not used elsewhere.
+
+=back
+
+=head1 ENVIRONMENT FOR OTHER EXECUTABLES
+
+By virtue of running other programs, dtas indirectly uses many
+commonly-accepted environment variables such as EDITOR / VISUAL for
+selecting a text editor, and SOX_OPTS, AUDIODEV, AUDIODRIVER for L<sox(1)>
+and L<play(1)> commands and LADSPA_PATH for anything using LADSPA plugins
+(including sox).  The TMPDIR environment variable controls where
+temporary files are placed for most programs.
+
+=head1 CONTACT
+
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
+No subscription is necessary to post to the mailing list.
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>

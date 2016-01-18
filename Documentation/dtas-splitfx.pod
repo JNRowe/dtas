@@ -1,0 +1,271 @@
+% dtas-splitfx(1) dtas user manual
+
+=head1 NAME
+
+dtas-splitfx - split audio and apply effects to all tracks
+
+=head1 SYNOPSIS
+
+dtas-splitfx SPLITFX_FILE.yml [OPTIONS] [TARGETS] [ARGS...]
+
+=head1 DESCRIPTION
+
+dtas-splitfx reads as YAML file and can apply effects (including
+resampling/dither), split, tag, and encode files in parallel.
+dtas-splitfx is intended for splitting recordings from vinyl and live
+concerts into separate files.  dtas-splitfx is inspired by cuesheets for
+CD audio and the L<make(1)> build tool.
+
+dtas-splitfx primarily uses L<sox(1)>, but it is possible to define targets
+to use L<ecasound(1)>, too.
+
+=head1 OPTIONS
+
+=over
+
+=item -j, --jobs [JOBS]
+
+Number of jobs to run in parallel.  If no number is specified, all
+jobs are run in parallel.
+
+=item -n, --dry-run
+
+Print, but do not run the commands to be executed
+
+=item -s, --quiet, --silent
+
+Silent operation, commands are not printed as executed
+
+=item -D, --no-dither
+
+Disable automatic setting of the DITHERFX env.  This also passes
+the option to L<sox(1)> via SOX_OPTS.
+
+=item -O, --outdir OUTDIR
+
+Set output directory instead of current directory.
+User-created targets must allow a placeholder for the
+(by default, an empty string) $OUTDIR environment variable
+in the output command.
+
+=item -C, --compression FACTOR
+
+Set the compression factor passed to L<sox(1)>.  See L<soxformat(7)>
+for more information on how it works across different formats.
+
+=item -r, --rate RATE
+
+Override the output sample rate in the specified TARGET
+
+=item -b, --bits BITS
+
+Override the output bit depth in the specified TARGET
+
+=item -t, --trim POSITION
+
+Passes a POSITION argument to the sox "trim" effect to allow
+limiting output to only process a portion of the original.
+This bypasses the "tracks" section and of the YAML file and
+outputs the result as a single file with the TRACKNUMBER
+of "000".  For ease-of-typing, commas in this command-line
+argument are automatically expanded to spaces when passed to sox.
+
+=item -p, --sox-pipe
+
+Used in place of an output target to specify outputting audio data in
+the native "sox" format to another L<sox(1)> or L<play(1)> command.  This
+moves printing of output to stderr and disables parallel job invocation.
+
+=back
+
+=head1 FILE FORMAT
+
+=over
+
+=item infile - string, the pathname of the original audio file
+
+=item env - ordered hash of environment variables to set for all commands
+
+    env: !omap
+      FX: gain 3 stats
+
+=item comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
+
+    comments:
+      ARTIST: John Smith
+      ALBUM: Hello World
+      YEAR: 2013
+
+=item track_start - integer, number to start the track count at
+
+default: 1
+
+=item cdda_align - boolean, enforce sector alignment for audio CDs
+
+default: false
+
+=item track_zpad - boolean or integer
+
+Zero-pad the TRACKNUMBER in metadata and
+filenames.  If an integer, this creates a fixed padding even if the
+padding is not necessary.  If true, this only pads as needed for the
+highest-numbered track.  Default: true
+
+=item tracks - array, see "TRACKS" section
+
+=item targets - hash, see "TARGETS" section
+
+=item command - used only by L<dtas-player(1)>
+
+=back
+
+=head1 TRACKS
+
+Tracks may be defined by a start time, with the stop time defined
+automatically by the start of the next track, stop time, or a skip
+segment.
+
+=over
+
+=item t TIME TITLE [fade_in/fade_out=FADE_ARGS]
+
+The start of a new track
+at TIME with TITLE.  An optional fade_in and fade_out may be specified
+for the first/last tracks.
+
+=item skip TIME - skip a segment starting at TIME
+
+"skip" segments are
+useful for skipping long gaps between tracks (such as flipping vinyl
+or intermission at concerts)
+
+=item stop TIME - stop the last track
+
+This should be the last directive in the "tracks" array.
+
+=back
+
+An example of the tracks array for a 4 track EP follows:
+
+    tracks:
+      - t  0:21    "This is the first track of an EP" fade_in='t 1'
+      - t  7:11.6  "Second track of side A of an EP"
+      - skip 9:18  # this is where I flip the record, comments are allowed
+      - t  9:41    "3rd track of an EP"
+      - t 13:36.5  "Final track of the EP" fade_out='t 1'
+      - stop 18:11
+
+=head1 FADES
+
+dtas-splitfx automatically sets up fade-in/fade-out effects for sox(1)
+based on track times.  These are to be used in "t" (track) directives in
+the "tracks" array:
+
+=over
+
+=item fade_in="[TYPE] LENGTH"
+
+=item fade_out="[TYPE] LENGTH"
+
+=back
+
+TYPE is optional, but LENGTH is required.  See L<sox(1)> for a description
+of the fade type.
+
+=head1 ENVIRONMENT
+
+dtas-splitfx sets several default environment variables for commands to
+use in targets:
+
+=over
+
+=item INFILE - this matches the "infile" directive in the YAML file
+
+=item INDIR - the directory INFILE belongs to, without trailing slash
+
+=item INBASE - the basename of INFILE
+
+=item TBEG - the integer sample offset where the L<sox(1)> trim effect starts
+
+=item TLEN - the integer sample count representing the length of the trim
+
+=item TRIMFX - essential
+
+Supplies the necessary L<sox(1)> trim effect to
+each track. In other words, this is: "trim ${TBEG}s ${TLEN}s"
+
+=item COMMENTS - expands to --comment-file=PATH for L<sox(1)>
+
+=item OUTDIR - placeholder for --outdir, defaults to an empty string
+
+=item SUFFIX - the suffix of the output format without "." (e.g. "flac", "ogg")
+
+=item TRACKNUMBER - the track number, useful for comments and filenames
+
+=item RATEFX - rate effect and arguments for L<sox(1)> resampling
+
+=item DITHERFX - dither effect and arguments for L<sox(1)> dithering
+
+=item FX - any user-specified sox effects which encompases the entire file.
+
+(e.g. "highpass 35 gain 3 stats")
+
+=back
+
+=head1 TARGETS
+
+The default targets will split audio and avoid applying any effects.
+They are named after common audio formats supported by L<sox(1)>:
+
+=over
+
+=item flac
+
+=item ogg
+
+=item mp3
+
+=item sox
+
+=back
+
+If not specified, "flac" is the default target.
+
+Additional targets supported by default.
+
+=over
+
+=item flac-cdda
+
+This encodes the audio to "flac" format while being
+easily decompressible to a format suitable for being burned to audio CD.
+
+=back
+
+Custom targets may easily be defined to apply effects and gain.  For
+example, the following "flac24" target raises the volume of the left
+channel by 9.5dB and the right one by 8.5dB to compensate for channel
+imbalance in a live concert recording from the audience:
+
+    targets:
+      flac24:
+        command: sox -M
+          "|sox $INFILE -c1 -p $TRIMFX remix 1v1 gain 9.5"
+          "|sox $INFILE -c1 -p $TRIMFX remix 2v1 gain 8.5"
+          $COMMENTS $OUTFMT
+          ${OUTDIR}bandYYYY-MM-DD.FOO.t0"$TRACKNUMBER.$SUFFIX"
+          $RATEFX $DITHERFX stats
+        format:
+          type: flac
+          bits: 24
+          rate: 48000
+
+=head1 COPYRIGHT
+
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+
+=head1 SEE ALSO
+
+L<sox(1)>, L<ecasound(1)>, L<flac(1)>, L<dtas-player(1)>

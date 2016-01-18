@@ -1,19 +1,20 @@
 % dtas-player_sink_examples(7) dtas user manual
 
-# NAME
+=head1 NAME
 
 dtas-player_sink_examples - sink examples for dtas-player
 
-# SYNOPSIS
+=head1 SYNOPSIS
 
 dtas-ctl sink ed SINKNAME command='...'
+
 dtas-sinkedit SINKNAME
 
-# EXAMPLES
+=head1 EXAMPLES
 
-## Streaming Ogg-Vorbis to Icecast
+=head2 Streaming Ogg-Vorbis to Icecast
 
-To use oggfwd(1) and Icecast, the following sink works.
+To use L<oggfwd(1)> and Icecast, the following sink works.
 Warning: the following example will likely expose your Icecast source
 password to any local users on the system.
 
@@ -22,9 +23,9 @@ password to any local users on the system.
     name: oggfwd
     command: sox $SOXFMT - -t ogg - | oggfwd $HOST $PORT $PASS /dtas.ogg
 
-## Stream to a remote host via ssh
+=head2 Stream to a remote host via ssh
 
-Alternatively, if you have play(1) installed on any remote host and
+Alternatively, if you have L<play(1)> installed on any remote host and
 a slow connection using Ogg-Vorbis:
 
     # Long lines in YAML can be broken up and the subsequent lines
@@ -46,12 +47,12 @@ the above Ogg-Vorbis example.
     name: ssh-remote
     command: ssh $HOST env AUDIODEV=... play -q $SOXFMT -
 
-## Dump audio to a file during playback
+=head2 Dump audio to a file during playback
 
 To configure a dumper sink (in addition to the "default" sink).  Note
 the use of $SOXFMT, this will be automatically expanded to match the
 internal format of the player.  The internal format of the player is
-described in dtas-player_protocol(7).
+described in L<dtas-player_protocol(7)>.
 
     $ dtas-ctl sink ed dumper command='sox $SOXFMT - /tmp/dump.sox'
 
@@ -61,23 +62,26 @@ Non-"default" sinks are not active by default, but may be made active.
 
 Changing it again to "active=false" will deactivate the sink.
 
-## Apply a short delay to low frequencies to improve time-alignment
+=head2 Apply a short delay to low frequencies to improve time-alignment
 
-See dtas-xdelay(1).
+See L<dtas-xdelay(1)>.
 
-# CONTACT
+=head1 CONTACT
 
-All feedback welcome via plain-text mail to: <dtas-all@nongnu.org>\
-Mailing list archives available at <http://80x24.org/dtas-all/> and
-<ftp://lists.gnu.org/dtas-all/>\
+All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
+
+Mailing list archives available at L<http://80x24.org/dtas-all/>
+and L<ftp://lists.gnu.org/dtas-all/>
+
 No subscription is necessary to post to the mailing list.
 
-# COPYRIGHT
+=head1 COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>.\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-# SEE ALSO
+License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
 
-dtas-ctl(1), dtas-sinkedit(1), dtas-xdelay(1),
-sox(1), play(1), oggfwd(1), ssh(1), ssh_config(5), env(1)
+=head1 SEE ALSO
+
+L<dtas-ctl(1)>, L<dtas-sinkedit(1)>, L<dtas-xdelay(1)>,
+L<sox(1)>, L<play(1)>, L<oggfwd(1)>, L<ssh(1)>, L<ssh_config(5)>, L<env(1)>
