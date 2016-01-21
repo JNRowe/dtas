@@ -146,7 +146,6 @@ when "cat"
     res = c.req("tl get #{track_ids.join(' ')}")
     res = Shellwords.split(res.sub!(/\A\d+ /, ''))
     while line = res.shift
-      line.sub!(/\A(\d+)=/n, '') or abort "unexpected line=#{line.inspect}\n"
       fix_enc!(line, enc)
       print "#{line}\n"
     end
