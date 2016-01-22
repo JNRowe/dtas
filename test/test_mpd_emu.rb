@@ -51,6 +51,14 @@ class TestMpdEmu < Testcase
     assert_nil @c.read(1)
   end
 
+  def test_bad_list_states
+    %w(command_list_end).each do |cmd|
+      @c.write "#{cmd}\n"
+      assert_equal %Q![5@0 {} unknown command "#{cmd}"\n!, @c.gets
+      assert_nil IO.select([@c], nil, nil, 0)
+    end
+  end
+
   # to ensure output buffering works:
   module BigOutput
     WAKE = IO.pipe

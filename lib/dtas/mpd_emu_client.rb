@@ -32,6 +32,7 @@ class DTAS::MpdEmuClient # :nodoc:
     @rbuf = ''.b
     @wbuf = nil
     @cmd_listnum = 0
+    @cmd_list = nil
     out("OK #{SERVER}\n")
   end
 
@@ -62,6 +63,10 @@ class DTAS::MpdEmuClient # :nodoc:
     end
   end
 
+  def unknown_cmd(cmd)
+    %Q!#{err(:ERROR_UNKNOWN)} unknown command "#{cmd}"\n!
+  end
+
   def err(sym)
     "[#{ACK[sym]}@#@cmd_listnum {}"
   end
@@ -72,6 +77,26 @@ class DTAS::MpdEmuClient # :nodoc:
   def mpdcmd_clearerror
     # player_clear_error
     out("OK\n")
+  end
+
+  def mpdcmd_command_list_begin
+    if @cmd_list
+      @cmd_list << 'command_list_begin' # will trigger failure
+    else
+      @cmd_list = []
+    end
+  end
+
+  def mpdcmd_command_list_end
+    @cmd_list or return out(unknown_cmd('command_list_end'))
+    list = @cmd_list
+    @cmd_list = nil
+    list.each do |cmd|
+      case cmd
+      when 'command_list_begin', 'command_list_ok_begin'
+        return out(unknown_cmd(cmd))
+      end
+    end
   end
 
   def mpdcmd_stats
