@@ -1,11 +1,12 @@
-# Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
+# frozen_string_literal: true
 require_relative 'helper'
 require 'socket'
 require 'dtas/mpd_emu_client'
 require 'dtas/server_loop'
 
-class TestMlib < Testcase
+class TestMpdEmu < Testcase
   class Quit
     attr_reader :to_io
 

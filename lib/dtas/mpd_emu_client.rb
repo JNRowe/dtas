@@ -1,5 +1,6 @@
-# Copyright (C) 2015 all contributors <dtas-all@nongnu.org>
-# License: GPLv3 or later (https://www.gnu.org/licenses/gpl-3.0.txt)
+# Copyright (C) 2015-2016 all contributors <dtas-all@nongnu.org>
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
+# frozen_string_literal: true
 
 # emulate the MPD protocol
 require_relative '../dtas'
@@ -98,7 +99,7 @@ class DTAS::MpdEmuClient # :nodoc:
         buf.slice!(0, rv).clear
         tot -= rv
       when :wait_writable
-        @wbuf = buf
+        @wbuf = buf.dup
         return rv
       end while tot > 0
       true # all done
@@ -120,7 +121,7 @@ class DTAS::MpdEmuClient # :nodoc:
     tot = @wbuf.size
     case rv = @to_io.write_nonblock(@wbuf, exception: false)
     when Integer
-      @wbuf.slice!(0, rv).clear
+      @wbuf.slice!(0, rv).clear # free the written portion
       tot -= rv
       return :wait_readable if tot == 0
     when :wait_writable then return rv
