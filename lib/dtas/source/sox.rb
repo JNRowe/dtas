@@ -71,7 +71,7 @@ class DTAS::Source::Sox # :nodoc:
         key, value = line.split('=', 2)
         key && value or next
         # TODO: multi-line/multi-value/repeated tags
-        tmp[key.upcase] = value
+        tmp[key.upcase.freeze] = value
       end
     end
     tmp
