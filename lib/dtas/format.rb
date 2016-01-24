@@ -164,7 +164,7 @@ class DTAS::Format # :nodoc:
     end
 
     # deal with HH:MM:SS
-    t = time.split(/:/)
+    t = time.split(':')
     raise ArgumentError, "Bad time format: #{hhmmss}" if t.size > 3
 
     mult = 1

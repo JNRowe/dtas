@@ -16,7 +16,7 @@ module DTAS::Source::Mp3gain # :nodoc:
     case @infile
     when String
       @infile =~ /\.mp[g23]\z/in or return
-      qx(%W(mp3gain -s c #@infile)).split(/\n/).each do |line|
+      qx(%W(mp3gain -s c #@infile)).split("\n").each do |line|
         case line
         when /^Recommended "(Track|Album)" dB change:\s*(\S+)/
           tmp["REPLAYGAIN_#{$1.upcase}_GAIN"] = $2

@@ -160,7 +160,7 @@ becomes:
 
   def parse_stats(stats, trim_part, buf)
     trim_row = [ trim_part ]
-    buf.split(/\n/).each do |line|
+    buf.split("\n").each do |line|
       do_map = true
       case line
       when /\A(\S+ \S+ dB)\s/, /\A(Crest factor)\s+-\s/

@@ -422,7 +422,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   def dpc_format(io, msg)
     new_fmt = @format.dup
     msg.each do |kv|
-      k, v = kv.split(/=/, 2)
+      k, v = kv.split('=', 2)
       case k
       when "type"
         new_fmt.valid_type?(v) or return io.emit("ERR invalid file type")
@@ -497,7 +497,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       before = src.to_state_hash.inspect
       sd = src.source_defaults
       msg.each do |kv|
-        k, v = kv.split(/=/, 2)
+        k, v = kv.split('=', 2)
         case k
         when "command"
           src.command = v.empty? ? sd[k] : v
