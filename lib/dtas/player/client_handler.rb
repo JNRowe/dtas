@@ -122,7 +122,7 @@ module DTAS::Player::ClientHandler # :nodoc:
     name = msg[1]
     case msg[0]
     when "ls"
-      io.emit(xs(@sinks.keys.sort))
+      io.emit(xs(@sinks.keys.sort!))
     when "rm"
       sink = @sinks.delete(name) or return io.emit("ERR #{name} not found")
       drop_sink(sink)
@@ -484,7 +484,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       __current_requeue
       return io.emit("OK")
     when "ls"
-      s = map.keys.sort { |a,b| map[a].tryorder <=> map[b].tryorder }
+      s = map.keys.sort! { |a,b| map[a].tryorder <=> map[b].tryorder }
       return io.emit(s.join(' '))
     end
 

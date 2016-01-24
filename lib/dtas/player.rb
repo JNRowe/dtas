@@ -115,7 +115,7 @@ class DTAS::Player # :nodoc:
     unless @sinks.empty?
       sinks = rv["sinks"] = []
       # sort sinks by name for human viewability
-      @sinks.keys.sort.each do |name|
+      @sinks.keys.sort!.each do |name|
         sinks << @sinks[name].to_hsh
       end
     end
