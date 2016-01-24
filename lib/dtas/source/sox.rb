@@ -21,8 +21,7 @@ class DTAS::Source::Sox # :nodoc:
   )
 
   # we use this to be less noisy when seeking a file
-  @last_failed = nil
-  def self.try_to_fail_harder(infile, s, cmd)
+  def try_to_fail_harder(infile, s, cmd)
     msg = nil
     case s
     when %r{\A0\s*\z} then msg = "detected zero samples"
@@ -37,6 +36,7 @@ class DTAS::Source::Sox # :nodoc:
   end
 
   def initialize
+    @last_failed = nil
     command_init(SOX_DEFAULTS)
   end
 
@@ -45,7 +45,7 @@ class DTAS::Source::Sox # :nodoc:
     cmd = %W(soxi -s #{infile})
     s = qx(@env.dup, cmd, err_str: err, no_raise: true)
     return if err =~ /soxi FAIL formats:/
-    self.class.try_to_fail_harder(infile, s, cmd) or return
+    try_to_fail_harder(infile, s, cmd) or return
     source_file_dup(infile, offset, trim)
   end
 
