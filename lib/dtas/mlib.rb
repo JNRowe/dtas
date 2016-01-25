@@ -5,6 +5,10 @@
 #
 require_relative '../dtas'
 require_relative 'process'
+require_relative 'source/sox'
+require_relative 'source/av'
+require_relative 'source/ff'
+require_relative 'source/splitfx'
 require 'socket'
 
 # For the DTAS Music Library, based on what MPD uses.
@@ -53,12 +57,18 @@ class DTAS::Mlib # :nodoc:
     @tag_map = nil
     @suffixes = nil
     @work = nil
+    @sources = [ # order matters
+      (sox = DTAS::Source::Sox.new),
+      DTAS::Source::Av.new,
+      DTAS::Source::Ff.new,
+      DTAS::Source::SplitFX.new(sox),
+    ]
   end
 
   def init_suffixes
     `sox --help 2>/dev/null` =~ /\nAUDIO FILE FORMATS:\s*([^\n]+)/s
     re = $1.split(/\s+/).map { |x| Regexp.quote(x) }.join('|')
-    @suffixes = Regexp.new("\\.(?:#{re})\\z", Regexp::IGNORECASE)
+    @suffixes = Regexp.new("\\.(?:#{re}|yml)\\z", Regexp::IGNORECASE)
   end
 
   def worker(todo)
@@ -89,22 +99,17 @@ class DTAS::Mlib # :nodoc:
       Dir.chdir(wd)
       @pwd = wd
     end
-    tmp = {}
     path = job.path
-    tlen = qx(%W(soxi -D #{path}), no_raise: true)
-    return ignore(job) unless String === tlen
-    tlen = tlen.to_f
+    found = nil
+    @sources.each do |src|
+      found = src.try(path) and break
+    end
+    return ignore(job) unless found
+    tlen = found.duration
     return ignore(job) if tlen < 0
     tlen = tlen.round
-    buf = qx(%W(soxi -a #{path}), no_raise: true)
-    return ignore(job) unless String === buf
-
-    # no, we don't support comments with newlines in them
-    buf = buf.split("\n")
-    while line = buf.shift
-      tag, value = line.split('=', 2)
-      tag && value or next
-      tag.downcase!
+    tmp = {}
+    found.comments.each do |tag, value|
       tag_id = @tag_map[tag] or next
       value.strip!
 
@@ -183,6 +188,8 @@ class DTAS::Mlib # :nodoc:
     %w(track disc).each do |x|
       tag_id = tag_map[x] and tag_map["#{x}number"] = tag_id
     end
+    @tag_rmap = tag_map.invert.freeze
+    tag_map.merge!(Hash[*(tag_map.map { |k,v| [k.upcase.freeze, v] }.flatten!)])
     @tag_map = tag_map.freeze
   end
 
@@ -354,7 +361,6 @@ class DTAS::Mlib # :nodoc:
 
     # success
     load_tags
-    @tag_rmap = @tag_map.invert
     if found[:tlen] == DM_DIR
       emit_recurse(found, cache, cb)
     else

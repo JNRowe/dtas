@@ -19,6 +19,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
 
   attr_reader :precision # always 32
   attr_reader :format
+  attr_reader :duration
 
   def try(infile, offset = nil, trim = nil)
     rv = source_file_dup(infile, offset, trim)

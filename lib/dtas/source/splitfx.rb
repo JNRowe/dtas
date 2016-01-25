@@ -107,6 +107,10 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
     @sox.samples
   end
 
+  def duration
+    @sox.duration
+  end
+
   def source_defaults
     SPLITFX_DEFAULTS
   end

@@ -53,6 +53,10 @@ class DTAS::Source::Sox # :nodoc:
     @format ||= DTAS::Format.from_file(@env, @infile)
   end
 
+  def duration
+    samples / format.rate.to_f
+  end
+
   # This is the number of samples according to the samples in the source
   # file itself, not the decoded output
   def samples
