@@ -145,6 +145,7 @@ class DTAS::Mlib # :nodoc:
     # this generates
     opts ||= {}
     jobs = opts[:jobs] || 8
+    @force = opts[:force] || false
 
     init_suffixes
     st = File.stat(path) # we always follow the first dir even if it's a symlink
@@ -208,8 +209,10 @@ class DTAS::Mlib # :nodoc:
     return if @suffixes !~ path || st.size == 0
 
     # no-op if no change
-    if node = @db[:nodes][name: path, parent_id: parent_id]
-      return if st.ctime.to_i == node[:ctime] || node[:tlen] == DM_IGN
+    unless @force
+      if node = @db[:nodes][name: path, parent_id: parent_id]
+        return if st.ctime.to_i == node[:ctime] || node[:tlen] == DM_IGN
+      end
     end
 
     job = Job.new(@pwd, st.ctime.to_i, parent_id, path)
