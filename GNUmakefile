@@ -35,7 +35,7 @@ fix-perms:
 gem: $(pkggem)
 
 install-gem: $(pkggem)
-	gem install $(CURDIR)/$<
+	gem install --local $(CURDIR)/$<
 
 $(pkggem): .gem-manifest
 	VERSION=$(VERSION) gem build $(pkg).gemspec
