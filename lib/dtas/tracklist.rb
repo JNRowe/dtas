@@ -12,11 +12,13 @@ class DTAS::Tracklist # :nodoc:
   attr_accessor :repeat # true, false, 1
   attr_reader :shuffle  # false or shuffled @list
   attr_accessor :max # integer
+  attr_accessor :consume # boolean
 
   TL_DEFAULTS = {
     'pos' => -1,
     'repeat' => false,
     'max' => 20_000,
+    'consume' => false,
   }
   SIVS = TL_DEFAULTS.keys
 
@@ -116,20 +118,25 @@ class DTAS::Tracklist # :nodoc:
   def advance_track(repeat_ok = true)
     cur = @shuffle || @list
     return if cur.empty?
+    prev = cur[@pos] if @consume && @pos >= 0
     # @repeat == 1 for single track repeat
     repeat = repeat_ok ? @repeat : false
     next_pos = @goto_pos || @pos + (repeat == 1 ? 0 : 1)
     next_off = @goto_off # nil by default
     @goto_pos = @goto_off = nil
-    if cur[next_pos]
+
+    if nxt = cur[next_pos]
       @pos = next_pos
+      remove_track(prev.track_id) if prev
     else
+      remove_track(prev.track_id) if prev
       # reshuffle the tracklist when we've exhausted it
       cur.shuffle! if @shuffle
-      return unless repeat
+      return if !repeat || cur.empty?
       next_pos = @pos = 0
+      nxt = cur[0]
     end
-    [ cur[next_pos].to_path, next_off ]
+    [ nxt.to_path, next_off ]
   end
 
   def cur_track
@@ -189,14 +196,18 @@ class DTAS::Tracklist # :nodoc:
 
   def remove_track(track_id)
     idx = _idx_of(@list, track_id) or return false
-    if @shuffle
-      si = _idx_of(@shuffle, track_id) or return false
-      @shuffle.delete_at(si)
-    end
     track = @list.delete_at(idx)
+    if @shuffle
+      idx = _idx_of(@shuffle, track_id) or return false
+      @shuffle.delete_at(idx)
+    end
     len = @list.size
-    @pos = len - 1 if @pos >= len
-    @goto_pos = @goto_pos = nil # TODO: reposition?
+    if @pos >= len
+      @pos = len - 1
+    elsif idx <= @pos
+      @pos -= 1
+    end
+    @goto_pos = @goto_off = nil # TODO: reposition?
     track.to_path
   end
 

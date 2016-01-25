@@ -200,7 +200,7 @@ begin
     cur_vol = rg['volume'] || 1.0
     extra = [ "volume=#{cur_vol}" ]
     tl = cur['tracklist'] || {}
-    %w(repeat shuffle).each { |x| extra << "#{x}=#{tl[x] || 'false'}" }
+    %w(repeat shuffle consume).each { |x| extra << "#{x}=#{tl[x] || 'false'}" }
     trim = cur['trim'] || 'off'
     extra << "trim=#{trim}"
     Curses.addstr(extra.join(' '))

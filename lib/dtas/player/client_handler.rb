@@ -630,6 +630,20 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("tl shuffle #{prev}")
   end
 
+  def _dpc_tl_consume(io, msg)
+    prev = (!!@tl.consume).to_s
+    v = msg.shift
+    case v
+    when nil
+    else
+      set_bool(io, 'tl consume', v) do |b|
+        @tl.consume = b
+        __wall("tl consume #{b}")
+      end
+    end
+    io.emit("tl consume #{prev}")
+  end
+
   def _dpc_tl_max(io, msg)
     prev = @tl.max
     case msg.shift
