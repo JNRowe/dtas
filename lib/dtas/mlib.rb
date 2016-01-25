@@ -67,7 +67,7 @@ class DTAS::Mlib # :nodoc:
 
   def init_suffixes
     `sox --help 2>/dev/null` =~ /\nAUDIO FILE FORMATS:\s*([^\n]+)/s
-    re = $1.split(/\s+/).map { |x| Regexp.quote(x) }.join('|')
+    re = $1.split(/\s+/).map! { |x| Regexp.quote(x) }.join('|')
     @suffixes = Regexp.new("\\.(?:#{re}|yml)\\z", Regexp::IGNORECASE)
   end
 
@@ -428,7 +428,7 @@ class DTAS::Mlib # :nodoc:
     comments = Hash.new { |h,k| h[k] = [] }
     @db['SELECT c.tag_id, v.val FROM comments c ' \
         'LEFT JOIN vals v ON v.id = c.val_id ' \
-        "WHERE c.node_id = #{node[:id]} ORDER BY c.tag_id"].map do |c|
+        "WHERE c.node_id = #{node[:id]} ORDER BY c.tag_id"].each do |c|
       comments[@tag_rmap[c[:tag_id]]] << c[:val]
     end
     cb.call(parent, node, comments)
