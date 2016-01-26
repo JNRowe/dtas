@@ -363,6 +363,12 @@ Returns the TRACKID of the newly added track
 
 Clear current tracklist
 
+=item tl consume [BOOLEAN]
+
+Show/or change consume status of the tracklist.  Enabling this causes
+tracks to be deleted from the tracklist after they are played or skipped.
+With no args, this will show "true" or "false
+
 =item tl current
 
 Display the pathname to the currently playing track
