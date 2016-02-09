@@ -9,6 +9,8 @@
 unless RUBY_PLATFORM =~ /linux/
   warn "this relies on Linux /proc and probably does not work well for you"
 end
+@ffprobe = 'ffprobe'
+@avprobe = 'avprobe'
 
 require 'yaml'
 require 'io/wait'
@@ -97,8 +99,17 @@ def do_ra(fp, pos, w)
       len: '%.3f' % (len / (1024 * 1024.0)),
       pos: pos })
   spawn('soxi', path, @redir)
-  spawn('avprobe', path, @redir)
-  spawn('ffprobe', path, @redir)
+  begin
+    spawn(@avprobe, path, @redir)
+  rescue Errno::ENOENT
+    @avprobe = false unless File.exist?(path)
+  end if @avprobe
+  begin
+    spawn(@ffprobe, path, @redir)
+  rescue Errno::ENOENT
+    @ffprobe = false unless File.exist?(path)
+  end if @ffprobe
+
   fp.advise(:sequential, pos, len)
   Thread.new(fp.dup) { |d| d.advise(:willneed, pos, len); d.close }
 
