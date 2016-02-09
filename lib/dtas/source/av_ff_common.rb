@@ -78,28 +78,50 @@ module DTAS::Source::AvFfCommon # :nodoc:
       break if cmd == prev_cmd
 
       err = "".b
-      s = qx(@env, cmd, err_str: err, no_raise: true)
+      begin
+        s = qx(@env, cmd, err_str: err, no_raise: true)
+      rescue Errno::ENOENT # avprobe/ffprobe not installed
+        return false
+      end
       return false unless probe_ok?(s, err)
-      s.scan(%r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn) do |_|
-        __parse_astream(cmd, $1) do |index, as|
-          # incomplete streams may have zero channels
-          if as.channels > 0 && as.rate > 0
-            @astreams[index] = as
-            incomplete[index] = nil
-          else
-            incomplete[index] = as
+
+      # old avprobe
+      [ %r{^\[STREAM\]\n(.*?)\n\[/STREAM\]\n}mn,
+        %r{^\[streams\.stream\.\d+\]\n(.*?)\n\n}mn ].each do |re|
+        s.scan(re) do |_|
+          __parse_astream(cmd, $1) do |index, as|
+            # incomplete streams may have zero channels
+            if as.channels > 0 && as.rate > 0
+              @astreams[index] = as
+              incomplete[index] = nil
+            else
+              incomplete[index] = as
+            end
           end
         end
       end
+
       prev_cmd = cmd
     end while incomplete.compact[0]
 
+    # old avprobe
     s.scan(%r{^\[FORMAT\]\n(.*?)\n\[/FORMAT\]\n}m) do |_|
       f = $1.dup
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
       f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase.freeze] = $2 }
     end
+
+    # new avprobe
+    s.scan(%r{^\[format\.tags\]\n(.*?)\n\n}m) do |_|
+      f = $1.dup
+      f.gsub!(/^([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase.freeze] = $2 }
+    end
+    s.scan(%r{^\[format\]\n(.*?)\n\n}m) do |_|
+      f = $1.dup
+      f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
+    end
+
     ! @astreams.compact.empty?
   end
 
