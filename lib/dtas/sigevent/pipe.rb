@@ -4,7 +4,7 @@
 
 # used in various places for safe wakeups from IO.select via signals
 # A fallback for non-Linux systems lacking the "sleepy_penguin" RubyGem
-require_relative 'nonblock'
+require_relative '../nonblock'
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io
 
