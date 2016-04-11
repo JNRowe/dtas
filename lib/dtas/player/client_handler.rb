@@ -745,9 +745,9 @@ module DTAS::Player::ClientHandler # :nodoc:
       return io.emit("INVALID TYPE")
     end
     fmt = cur.format
+    ds = __current_decoded_samples
     case msg[0]
     when "next"
-      ds = __current_decoded_samples
       bp.each do |ci|
         next if ci.offset_samples(fmt) < ds
         seek_internal(cur, ci.offset)
@@ -756,11 +756,15 @@ module DTAS::Player::ClientHandler # :nodoc:
       # go to the next (real) track if not found
       __current_drop
     when "prev"
-      os = cur.offset_samples # where we currently started
+      prev = nil
       bp.reverse_each do |ci|
-        next if ci.offset_samples(fmt) >= os
-        seek_internal(cur, ci.offset)
-        return io.emit("OK")
+        if prev.nil?
+          next if ci.offset_samples(fmt) >= ds
+          prev = ci
+        else
+          seek_internal(cur, ci.offset)
+          return io.emit("OK")
+        end
       end
       # offset may be nil/zero if we couldn't find a previous breakpoint
       seek_internal(cur, '0')
