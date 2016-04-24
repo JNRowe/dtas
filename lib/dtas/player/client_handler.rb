@@ -186,6 +186,21 @@ module DTAS::Player::ClientHandler # :nodoc:
     bytes = bytes < 0 ? 0 : bytes # maybe negative in case of sink errors
   end
 
+  def __goto_offset_samples(offset)
+    if offset.sub!(/\A\+/, '')
+      __offset_to_samples(offset)
+    elsif offset.sub!(/\A-/, '')
+      __offset_to_samples(offset) * -1
+    else # ignore leading '=' for sox compat with 2nd "trim" arg
+      __offset_to_samples(offset)
+    end
+  end
+
+  def __offset_to_samples(offset)
+    offset.sub!(/s\z/, '') and return offset.to_i
+    @current.format.hhmmss_to_samples(offset)
+  end
+
   # returns seek offset as an Integer in sample count
   def __seek_offset_adj(dir, offset)
     if offset.sub!(/s\z/, '')
@@ -377,7 +392,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def dpc_seek(io, msg)
-    offset = msg[0]
+    offset = msg[0] or return io.emit('ERR usage: seek OFFSET')
     if @current
       if @current.respond_to?(:infile)
         begin
@@ -730,6 +745,7 @@ module DTAS::Player::ClientHandler # :nodoc:
   end
 
   def __bp_prev_next(io, msg, cur, bp)
+    # msg = [ (prev|next) [, (track|pregap|subindex|<digit>|any) ]
     case type = msg[1]
     when nil, "track"
       bp.keep_if(&:track?)
@@ -772,6 +788,47 @@ module DTAS::Player::ClientHandler # :nodoc:
     io.emit("OK")
   end
 
+  def __bp_seek(io, msg, cur, bp)
+    offset = msg[1] or return io.emit('ERR usage: cue seek OFFSET')
+
+    # relative + offset work just like normal, non-CUE "seek"
+    offset =~ /\A[\+-]/ and return dpc_seek(io, [ offset ])
+
+    # "=-" is special, it means go before the current index start:
+    dir = offset.sub!(/\A=-/, '') ? -1 : 1
+
+    begin
+      offset = __offset_to_samples(offset)
+    rescue ArgumentError
+      return io.emit('ERR bad time format')
+    end
+
+    ds = __current_decoded_samples
+    fmt = cur.format
+    prev = 0
+    bp.each do |ci|
+      ci_offset = ci.offset_samples(fmt)
+      break if ci_offset >= ds
+      prev = ci_offset
+    end
+    offset = offset * dir + prev
+    seek_internal(cur, "#{offset < 0 ? 0 : offset}s")
+    io.emit('OK')
+  end
+
+  def __bp_goto(io, msg, cur, bp)
+    index = msg[1] or return io.emit('NOINDEX')
+    ci = bp[index.to_i] or return io.emit('BADINDEX')
+    if offset = msg[2]
+      fmt = cur.format
+      offset = "#{ci.offset_samples(fmt) + __goto_offset_samples(offset)}s"
+    else
+      offset = ci.offset
+    end
+    seek_internal(cur, offset)
+    io.emit('OK')
+  end
+
   def dpc_cue(io, msg)
     cur = @current
     if cur.respond_to?(:cuebreakpoints)
@@ -782,11 +839,8 @@ module DTAS::Player::ClientHandler # :nodoc:
         io.emit(tmp.to_yaml)
       when "next", "prev"
         return __bp_prev_next(io, msg, cur, bp)
-      when "goto"
-        index = msg[1] or return io.emit("NOINDEX")
-        ci = bp[index.to_i] or return io.emit("BADINDEX")
-        seek_internal(cur, ci.offset)
-        return io.emit("OK")
+      when 'seek' then return __bp_seek(io, msg, cur, bp)
+      when 'goto' then return __bp_goto(io, msg, cur, bp)
       end
     else
       io.emit("NOCUE")

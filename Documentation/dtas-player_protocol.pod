@@ -96,7 +96,7 @@ Commands here should be alphabetized according to `LC_ALL=C sort'
 
 PENDING: this may be renamed to "queue clear" or "queue-clear"
 
-=item cue - display the index/offsets of the embedded cue sheet
+=item cue - display the index/offsets of the embedded CUE sheet
 
 =item cue next - skip to the next cue sheet offset
 
@@ -109,11 +109,26 @@ This may just seek to the beginning
 if there is no embedded cue sheet or if we are playing the first
 (embedded) track.
 
-=item cue goto INTEGER - go to the cue index denoted by INTEGER
+=item cue goto INTEGER [TIMESTAMP] - go to the cue index denoted by INTEGER
 
 0 is first track as returned by "cue".
 Negative values of INTEGER allows selecting track relative to the last
 track (-1 is the last track, -2 is the penultimate, and so on).
+The optional TIMESTAMP allows starting the index track at a given
+point, negative values allow going to a set point before the given
+index.   In other words: "cue goto 1 -5" seeks to the last five seconds
+of the first track while "cue goto 1 5" seeks to the fifth second of
+the second track
+
+=item cue seek TIMESTAMP - seek within the current cue index
+
+Like the normal "seek" command, but this confines the seeking
+within the currently playing index.  As with "seek",
+"+" and "-" prefixes allow seeking relative to the currently
+playing position
+
+Using a "=-" prefix allows seeking to the previous track within
+the CUE sheet, relative to the currently playing track.
 
 =item current - output information about the current track/command in YAML
 
