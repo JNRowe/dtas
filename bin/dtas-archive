@@ -133,7 +133,7 @@ thrs = jobs.times.map do |i|
         next
       end
 
-      stats_out = "#{output.sub(/\.[\.]+\z/, '')}.stats" if stats
+      stats_out = "#{output.sub(/\.[^\.]+\z/, '')}.stats" if stats
 
       if dry_run || !silent
         names = job.map { |x| Shellwords.escape(x) }
