@@ -133,6 +133,7 @@ def do_ra(fp, pos, w)
 end
 
 def do_open(path)
+  return unless path # could be a command
   if path =~ /\.ya?ml\z/
     File.open(path) do |fp|
       buf = fp.read(4)
