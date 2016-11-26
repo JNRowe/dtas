@@ -298,8 +298,10 @@ class DTAS::Mlib # :nodoc:
       dir = dir_vivify(@pwd.split(%r{/+}n), st.ctime.to_i)
       dir_id = dir[:id]
 
-      @db[:nodes].where(parent_id: dir_id).each do |node|
-        File.exist?(node[:name]) or remove_entry(node)
+      @db.transaction do
+        @db[:nodes].where(parent_id: dir_id).each do |node|
+          File.exist?(node[:name]) or remove_entry(node)
+        end
       end
 
       Dir.foreach('.', encoding: Encoding::BINARY) do |x|
