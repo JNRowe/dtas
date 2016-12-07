@@ -38,7 +38,14 @@ class DTAS::SplitFX # :nodoc:
       tlen = advance_track_samples - tbeg
       trimfx = "trim #{tbeg}s #{tlen}s".dup
       if fade_in
-        trimfx << " #{fade_in}"
+        # generate fade-in effect
+        # $1 = "t 4" => "fade t 4 0 0"
+        tmp = fade_in.dup
+        fade_in_len = tmp.pop or
+                         raise ArgumentError, 'fade_in needs a time value'
+        fade_type = tmp.pop # may be nil
+        fade = " fade #{fade_type} #{fade_in_len} 0 0"
+        trimfx << fade
       end
       if fade_out
         tmp = fade_out.dup
@@ -287,10 +294,8 @@ class DTAS::SplitFX # :nodoc:
 
       argv.each do |arg|
         case arg
-        when %r{\Afade_in=(.+)\z}
-          # generate fade-in effect
-          # $1 = "t 4" => "fade t 4 0 0"
-          t.fade_in = "fade #$1 0 0"
+        when %r{\Afade_in=(.+)\z} # $1 = "t 4" or just "4"
+          t.fade_in = $1.split(/\s+/)
         when %r{\Afade_out=(.+)\z} # $1 = "t 4" or just "4"
           t.fade_out = $1.split(/\s+/)
         when %r{\A\.(\w+)=(.+)\z} then t.comments[$1] = $2
