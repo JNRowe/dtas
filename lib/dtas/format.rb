@@ -56,10 +56,14 @@ class DTAS::Format # :nodoc:
 
   def self.from_file(env, infile)
     fmt = new
-    fmt.channels = qx(env, %W(soxi -c #{infile})).to_i
-    fmt.type = qx(env, %W(soxi -t #{infile})).strip
-    fmt.rate = qx(env, %W(soxi -r #{infile})).to_i
-    fmt.bits ||= precision(env, infile)
+    out = qx(env, %W(soxi #{infile}), err: DTAS.null)
+    out =~ /^Channels\s*:\s*(\d+)/n
+    fmt.channels = $1.to_i
+    out =~ /^Sample Rate\s*:\s*(\d+)/n
+    fmt.rate = $1.to_i
+    out =~ /Precision\s*:\s*(\d+)-bit/n
+    fmt.bits = $1.to_i
+    fmt.type = qx(env, %W(soxi -t #{infile})).strip # ....
     fmt
   end
 
