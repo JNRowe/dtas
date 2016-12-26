@@ -20,37 +20,73 @@ class DTAS::Source::Sox # :nodoc:
     "tryorder" => 0,
   )
 
-  # we use this to be less noisy when seeking a file
-  def try_to_fail_harder(infile, s, cmd)
-    msg = nil
-    case s
-    when %r{\A0\s*\z} then msg = "detected zero samples"
-    when Process::Status then msg = "failed with #{s.exitstatus}"
+  def soxi_failed(infile, msg)
+    return if @last_failed == infile
+    @last_failed = infile
+    case msg
+    when Process::Status then msg = "failed with #{msg.exitstatus}"
+    when 0 then msg = 'detected zero samples'
     end
-    if msg
-      return if @last_failed == infile
-      @last_failed = infile
-      return warn("`#{xs(cmd)}' #{msg}")
-    end
-    true
+    warn("soxi #{infile}: #{msg}\n")
   end
 
-  def initialize
+  def initialize(mcache = nil)
+    @mcache = nil
     @last_failed = nil
     command_init(SOX_DEFAULTS)
   end
 
+  def mcache_lookup(infile)
+    (@mcache ||= DTAS::Mcache.new).lookup(infile) do |input, dst|
+      err = ''.b
+      out = qx(@env.dup, %W(soxi #{input}), err_str: err, no_raise: true)
+      return soxi_failed(infile, out) if Process::Status === out
+      return soxi_failed(infile, err) if err =~ /soxi FAIL formats:/
+      out =~ /^Duration\s*:[^=]*= (\d+) samples /n
+      samples = dst['samples'] = $1.to_i
+      return soxi_failed(infile, 0) if samples == 0
+
+      out =~ /^Channels\s*:\s*(\d+)/n and dst['channels'] = $1.to_i
+      out =~ /^Sample Rate\s*:\s*(\d+)/n and dst['rate'] = $1.to_i
+      out =~ /^Precision\s*:\s*(\d+)-bit/n and dst['bits'] = $1.to_i
+
+      if out =~ /\nComments\s*:[ \t]*\n?(.*)\z/mn
+        comments = dst['comments'] = {}
+        # we use eval "#{str.inspect}".freeze
+        # take advantage of the VM-wide dedupe in MRI (rb_fstring):
+        key = nil
+        $1.split(/\n/n).each do |line|
+          if line.sub!(/^([a-z]\w*)=/i, '')
+            key = $1.upcase
+            key = eval "#{key.inspect}.freeze"
+          end
+          (comments[key] ||= ''.b) << "#{line}\n" if line.size > 0
+        end
+        comments.each do |k,v|
+          v.chomp!
+          comments[k] = eval "#{v.inspect}.freeze"
+        end
+      end
+      dst
+    end
+  end
+
   def try(infile, offset = nil, trim = nil)
-    err = "".b
-    cmd = %W(soxi -s #{infile})
-    s = qx(@env.dup, cmd, err_str: err, no_raise: true)
-    return if err =~ /soxi FAIL formats:/
-    try_to_fail_harder(infile, s, cmd) or return
-    source_file_dup(infile, offset, trim)
+    ent = mcache_lookup(infile) or return
+    ret = source_file_dup(infile, offset, trim)
+    ret.instance_eval do
+      @samples = ent['samples']
+      @format = DTAS::Format.load(ent)
+      @comments = ent['comments']
+    end
+    ret
   end
 
   def format
-    @format ||= DTAS::Format.from_file(@env, @infile)
+    @format ||= begin
+      ent = mcache_lookup(@infile)
+      ent ? DTAS::Format.load(ent) : nil
+    end
   end
 
   def duration
@@ -60,23 +96,17 @@ class DTAS::Source::Sox # :nodoc:
   # This is the number of samples according to the samples in the source
   # file itself, not the decoded output
   def samples
-    @samples ||= qx(@env, %W(soxi -s #@infile)).to_i
-  rescue => e
-    warn e.message
-    0
+    (@samples ||= begin
+      ent = mcache_lookup(@infile)
+      ent ? ent['samples'] : nil
+     end) || 0
   end
 
-  # just run soxi -a
   def __load_comments
     tmp = {}
     case @infile
     when String
-      qx(@env, %W(soxi -a #@infile)).split("\n").each do |line|
-        key, value = line.split('=', 2)
-        key && value or next
-        # TODO: multi-line/multi-value/repeated tags
-        tmp[key.upcase.freeze] = value
-      end
+      ent = mcache_lookup(@infile) and tmp = ent['comments']
     end
     tmp
   end

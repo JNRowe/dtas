@@ -34,6 +34,7 @@ class TestSource < Testcase
     source = DTAS::Source::Sox.new.try(tmp.path)
     x(%W(metaflac --set-tag=FOO=BAR #{tmp.path}))
     x(%W(metaflac --add-replay-gain #{tmp.path}))
+    source = DTAS::Source::Sox.new.try(tmp.path)
     assert_equal source.comments["FOO"], "BAR"
     rg = source.replaygain('track_gain')
     assert_kind_of DTAS::ReplayGain, rg
