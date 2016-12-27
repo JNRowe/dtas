@@ -77,7 +77,7 @@ a problem.
 
 All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
 
-Mailing list archives available at L<http://80x24.org/dtas-all/>
+Mailing list archives available at L<https://80x24.org/dtas-all/>
 and L<ftp://lists.gnu.org/dtas-all/>
 
 No subscription is necessary to post to the mailing list.
@@ -86,7 +86,7 @@ No subscription is necessary to post to the mailing list.
 
 Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
 =head1 SEE ALSO
 

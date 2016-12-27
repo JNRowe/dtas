@@ -39,7 +39,7 @@ For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
 Grab the latest tarball from our HTTP site:
 
-    http://dtas.80x24.org/2016/dtas-0.14.2.tar.gz
+    https://80x24.org/dtas/2016/dtas-0.14.2.tar.gz
 
     $ tar zxvf dtas-0.14.2.tar.gz
     $ cd dtas-0.14.2
@@ -48,18 +48,18 @@ Grab the latest tarball from our HTTP site:
 GNU/Linux users may optionally install "io_splice" and
 "sleepy_penguin" packages:
 
-    * io_splice - http://bogomips.org/ruby_io_splice/
-    * sleepy_penguin - http://bogomips.org/sleepy_penguin/
+    * io_splice - https://bogomips.org/ruby_io_splice/
+    * sleepy_penguin - https://bogomips.org/sleepy_penguin/
 
 # CONTACT
 
 Please do not hesitate to send plain-text mail to <dtas-all@nongnu.org>
 regarding installation and to share your notes/experiences.
-Mailing list archives available at <http://80x24.org/dtas-all/> or
-<ftp://lists.gnu.org/dtas-all>\
+Mailing list archives available at <https://80x24.org/dtas-all/> or
+<ftp://lists.gnu.org/dtas-all>
 No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+Copyright 2013-2016 all contributors <dtas-all@nongnu.org>
+License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>

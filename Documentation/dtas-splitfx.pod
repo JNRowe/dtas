@@ -264,7 +264,7 @@ imbalance in a live concert recording from the audience:
 
 Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
 
-License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 # Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>.
-# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'tempfile'
 include Rake::DSL
@@ -42,7 +42,7 @@ task "NEWS" do
   fp.puts "Unreleased" unless fp.size > 0
   fp.puts "# COPYRIGHT"
   fp.puts "Copyright (C) 2013-2015 all contributors <dtas-all@nongnu.org>"
-  fp.puts "License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>"
+  fp.puts "License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>"
   fp.rewind
   assert_equal fp.read, File.read("NEWS") rescue nil
   fp.chmod 0644
@@ -52,8 +52,8 @@ end
 desc 'prints news as an Atom feed'
 task 'NEWS.atom' do
   require 'builder' # gem install builder
-  url_base = 'http://dtas.80x24.org/'
-  cgit_url = 'http://80x24.org/dtas.git/'
+  url_base = 'https://80x24.org/dtas/'
+  cgit_url = 'https://80x24.org/dtas.git/'
   new_tags = tags[0,10]
   x = Builder::XmlMarkup.new
   x.instruct! :xml, encoding: 'UTF-8', version: '1.0'
@@ -98,7 +98,7 @@ task rsync_docs: %w(NEWS NEWS.atom) do
   files = []
 
   # git-set-file-times is distributed with rsync,
-  # Also available at: http://yhbt.net/git-set-file-times
+  # Also available at: https://yhbt.net/git-set-file-times
   # on Debian systems: /usr/share/doc/rsync/scripts/git-set-file-times.gz
   sh("git", "set-file-times", "Documentation", "examples", *top)
   make = ENV['MAKE'] || 'make'

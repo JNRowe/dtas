@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 # Copyright 2015-2016 all contributors <dtas-all@nongnu.org>
-# License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 contact = %q{
 All feedback welcome via plain-text mail to: L<mailto:dtas-all@nongnu.org>
 
-Mailing list archives available at L<http://80x24.org/dtas-all/>
+Mailing list archives available at L<https://80x24.org/dtas-all/>
 and L<ftp://lists.gnu.org/dtas-all/>
 
 No subscription is necessary to post to the mailing list.
@@ -14,7 +14,7 @@ No subscription is necessary to post to the mailing list.
 copyright = %q{
 Copyright %s all contributors L<mailto:dtas-all@nongnu.org>
 
-License: GPL-3.0+ L<http://www.gnu.org/licenses/gpl-3.0.txt>
+License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 }
 
 ENV['TZ'] = 'UTC'

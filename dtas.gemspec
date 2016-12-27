@@ -1,5 +1,5 @@
 # Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
-# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 Gem::Specification.new do |s|
   manifest = File.read('.gem-manifest').split(/\n/)
   s.name = %q{dtas}
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email = %q{e@80x24.org}
   s.executables = manifest.grep(%r{\Abin/}).map { |s| s.sub(%r{\Abin/}, "") }
   s.files = manifest
-  s.homepage = 'http://dtas.80x24.org/'
+  s.homepage = 'https://80x24.org/dtas/'
   s.licenses = "GPL-3.0+"
   s.required_ruby_version = '>= 1.9.3'
 end

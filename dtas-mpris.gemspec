@@ -1,5 +1,5 @@
 # Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
-# License: GPL-2.0+ or later <http://www.gnu.org/licenses/gpl-2.0.txt>
+# License: GPL-2.0+ or later <https://www.gnu.org/licenses/gpl-2.0.txt>
 # This is GPL-2.0+ instead of GPL-3.0+ because ruby-dbus is LGPL-2.1 (only)
 Gem::Specification.new do |s|
   s.name = %q{dtas-mpris}
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
     "This is currently a dummy package as dtas-mpris is not implemented"
   s.email = %q{e@80x24.org}
   s.files = []
-  s.homepage = 'http://dtas.80x24.org/'
+  s.homepage = 'https://80x24.org/dtas/'
   s.add_dependency(%q<dtas>)
   s.add_dependency(%q<ruby-dbus>)
   s.licenses = 'GPL-2.0+'

@@ -1,5 +1,5 @@
 # Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
-# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 #
 # this just declares dependencies to make gem installation a little easier
 # for Linux users
@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
                   "via tee(), splice() and eventfd() on Linux"
   s.email = %q{e@80x24.org}
   s.files = []
-  s.homepage = 'http://dtas.80x24.org/'
+  s.homepage = 'https://80x24.org/dtas/'
   s.add_dependency(%q<dtas>)
   s.add_dependency(%q<io_splice>, '~> 4')
   s.add_dependency(%q<sleepy_penguin>, '~> 3')

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # Copyright (C) 2015-2016 all contributors <dtas-all@nongnu.org>
-# License: GPL-3.0+ (https://www.gnu.org/licenses/gpl-3.0.txt)
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 #
 # Really janky readahead script.  Requires dtas-player to be

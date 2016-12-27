@@ -43,7 +43,7 @@ Users of dtas-player will also be interested in the following scripts:
 
 All scripts have some documentation in the Documentation/ directory or
 manpages distributed with the gem.  Documentation is also available on
-http://dtas.80x24.org/$COMMAND.txt in plain-text form.
+https://80x24.org/dtas/$COMMAND.txt in plain-text form.
 
 dtas exposes no public APIs outside of command-line and YAML text.  dtas is
 aimed at users familiar with the *nix command-line and editing text files.
@@ -66,7 +66,7 @@ the git(7) suite for generating and sending patches.  Please format
 pull requests with the git-request-pull(1) script (also distributed
 with git(7)) and send them via email to <dtas-all@nongnu.org>.
 
-See http://www.git-scm.com/ for more information on git.
+See https://www.git-scm.com/ for more information on git.
 
 ## Contact
 
@@ -77,17 +77,17 @@ appreciated.
 Please send plain-text mail to the list at <dtas-all@nongnu.org>\
 HTML mail will not be read.  dtas is for GUI-phobes, by GUI-phobes.\
 Mailing list archives available at <ftp://lists.gnu.org/dtas-all>
-or <http://80x24.org/dtas-all/>
+or <https://80x24.org/dtas-all/>
 No subscription is necessary to post to the mailing list.
 You may also read via:
 NNTP: <nntp://news.public-inbox.org/inbox.comp.audio.dtas>
 	<nntp://news.gmane.org/gmane.comp.audio.dtas.general>
-Atom: <http://80x24.org/dtas-all/new.atom>
+Atom: <https://80x24.org/dtas-all/new.atom>
 
 ## Copyright
 
 Copyright 2013-2016 all contributors <dtas-all@nongnu.org>\
-License: GPL-3.0+ <http://www.gnu.org/licenses/gpl-3.0.txt>
+License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 
 dtas is copyrighted Free Software by all contributors, see logs
 in revision control for names and email addresses of all of them.
