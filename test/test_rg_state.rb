@@ -23,7 +23,8 @@ class TestRGState < Testcase
   def test_mode_set
     rg = DTAS::RGState.new
     orig = rg.mode
-    assert_equal DTAS::RGState::RG_DEFAULT["mode"], orig
+    assert_nil DTAS::RGState::RG_DEFAULT["mode"]
+    assert_nil orig
     %w(album_gain track_gain album_peak track_peak).each do |t|
       rg.mode = t
       assert_equal t, rg.mode
