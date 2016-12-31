@@ -134,7 +134,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       # or variable names.
       sink.valid_name?(name) or return io.emit("ERR sink name invalid")
 
-      sink.name = name
+      sink.name = name.freeze
       active_before = sink.active
       before = __sink_snapshot(sink)
 

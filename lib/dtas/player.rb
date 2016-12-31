@@ -168,6 +168,7 @@ class DTAS::Player # :nodoc:
 
       if sinks = hash["sinks"]
         sinks.each do |sink_hsh|
+          sink_hsh['name'].freeze
           sink = DTAS::Sink.load(sink_hsh)
           sink.env = to_omap(sink.env)
           @sinks[sink.name] = sink
