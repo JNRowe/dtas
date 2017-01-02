@@ -10,7 +10,6 @@ require_relative '../pipe'
 module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_AT_ONCE_1 = 65536
-  MAX_SIZE = File.read("/proc/sys/fs/pipe-max-size").to_i
   F_MOVE = IO::Splice::F_MOVE
 
   def buffer_size

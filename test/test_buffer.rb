@@ -6,6 +6,10 @@ require 'stringio'
 require 'dtas/buffer'
 
 class TestBuffer < Testcase
+
+  @@max_size = File.read("/proc/sys/fs/pipe-max-size").to_i
+  @@max_size = nil if @@max_size == 0
+
   def teardown
     @to_close.each { |io| io.close unless io.closed? }
   end
@@ -43,16 +47,16 @@ class TestBuffer < Testcase
 
   def test_set_buffer_size
     buf = new_buffer
-    buf.buffer_size = DTAS::Buffer::MAX_SIZE
-    assert_equal DTAS::Buffer::MAX_SIZE, buf.buffer_size
-  end if defined?(DTAS::Buffer::MAX_SIZE)
+    buf.buffer_size = @@max_size
+    assert_equal @@max_size, buf.buffer_size
+  end if @@max_size
 
   def test_buffer_size
     buf = new_buffer
     assert_operator buf.buffer_size, :>, 128
-    buf.buffer_size = DTAS::Buffer::MAX_SIZE
-    assert_equal DTAS::Buffer::MAX_SIZE, buf.buffer_size
-  end if defined?(DTAS::Buffer::MAX_SIZE)
+    buf.buffer_size = @@max_size
+    assert_equal @@max_size, buf.buffer_size
+  end if @@max_size
 
   def test_broadcast_1
     buf = new_buffer
