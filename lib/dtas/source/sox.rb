@@ -60,7 +60,7 @@ class DTAS::Source::Sox # :nodoc:
             key = $1.upcase
             key = eval "#{key.inspect}.freeze"
           end
-          (comments[key] ||= ''.b) << "#{line}\n" if line.size > 0
+          (comments[key] ||= ''.b) << "#{line}\n" unless line.empty?
         end
         comments.each do |k,v|
           v.chomp!
