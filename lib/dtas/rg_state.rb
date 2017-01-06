@@ -22,8 +22,6 @@ class DTAS::RGState # :nodoc:
   RG_DEFAULT = {
     "volume" => 1.0,
     # skip the effect if the adjustment is too small to be noticeable
-    "gain_threshold" => 0.00000001, # in dB
-    "norm_threshold" => 0.00000001,
 
     "preamp" => 0, # no extra adjustment
     # "mode" => "album_gain", # nil: off
@@ -73,23 +71,21 @@ class DTAS::RGState # :nodoc:
     when -1 then return 'gain -192'
     when 1 then return 'gain 192'
     else
-      sprintf('gain %0.8g', val).freeze
+      val.abs <= 0.00000001 and return
+      sprintf('gain %0.8f', val).freeze
     end
   end
 
   # returns a dB argument to the "gain" effect, nil if nothing found
   def rg_vol_gain(val)
     val = val.to_f + @preamp + vol_db
-    return if val.abs < @gain_threshold
     to_sox_gain(val)
   end
 
   # returns a DB argument to the "gain" effect
   def rg_vol_norm(val)
     n = @norm_level == 1.0 ? @volume : @norm_level
-    diff = n - val.to_f
-    return if (n - diff).abs < @norm_threshold
-    diff += n
+    diff = n * 2 - val.to_f
     to_sox_gain(linear_to_db(diff))
   end
 
@@ -99,7 +95,6 @@ class DTAS::RGState # :nodoc:
   # tag slips into the queue
   def rg_fallback_effect(reason)
     val = (@fallback_gain || 0) + @preamp + vol_db
-    return if val.abs < @gain_threshold
     warn(reason) if $DEBUG
     to_sox_gain(val)
   end

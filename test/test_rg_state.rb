@@ -20,6 +20,12 @@ class TestRGState < Testcase
     assert_equal({"preamp" => 0.666}, rg.to_hsh)
   end
 
+  def test_rg_vol_norm
+    rg = DTAS::RGState.new
+    assert_nil rg.rg_vol_norm(0.999999999)
+    assert_match(%r{\Again 0.827}, rg.rg_vol_norm(0.9))
+  end
+
   def test_mode_set
     rg = DTAS::RGState.new
     orig = rg.mode

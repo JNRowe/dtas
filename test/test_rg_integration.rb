@@ -63,7 +63,7 @@ class TestRgIntegration < Testcase
 
     check_gain.call(%r{gain -3}, "album_gain")
     check_gain.call(%r{gain -2}, "track_gain")
-    check_gain.call(%r{gain 0\.0}, "album_peak")
+    check_gain.call(%r{gain 0\.}, "album_peak")
     check_gain.call(%r{gain 2\.5}, "track_peak")
 
     s.req_ok("rg preamp+=1")

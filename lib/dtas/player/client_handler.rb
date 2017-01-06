@@ -274,8 +274,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       when "fallback_track"
         rv = set_bool(io, kv, v) { |b| @rg.fallback_track = b }
         rv == true or return rv
-      when %r{(?:gain_threshold|norm_threshold|
-              preamp|norm_level|fallback_gain|volume)[+-]?\z}x
+      when %r{(?:preamp|norm_level|fallback_gain|volume)[+-]?\z}x
         rv = adjust_numeric(io, @rg, k, v)
         rv == true or return rv
       end
