@@ -56,7 +56,7 @@ class DTAS::Source::Sox # :nodoc:
         # take advantage of the VM-wide dedupe in MRI (rb_fstring):
         key = nil
         $1.split(/\n/n).each do |line|
-          if line.sub!(/^([a-z]\w*)=/i, '')
+          if line.sub!(/^([^=]+)=/ni, '')
             key = $1.upcase
             key = eval "#{key.inspect}.freeze"
           end
