@@ -178,6 +178,7 @@ begin
     # queue has priority, work on it, first
     queue = YAML.load(c.req('queue cat'))
     while @todo_ra > 0 && track = queue.shift
+      next unless track.kind_of?(String)
       fp = nil
       begin
         fp = work[track] ||= do_open(track)
