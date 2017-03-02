@@ -190,7 +190,9 @@ class DTAS::Mlib # :nodoc:
       tag_id = tag_map[x] and tag_map["#{x}number"] = tag_id
     end
     @tag_rmap = tag_map.invert.freeze
-    tag_map.merge!(Hash[*(tag_map.map { |k,v| [k.upcase.freeze, v] }.flatten!)])
+    tag_map.merge!(Hash[*(tag_map.map { |k,v|
+      [DTAS.dedupe_str(k.upcase), v]
+    }.flatten!)])
     @tag_map = tag_map.freeze
   end
 
@@ -400,7 +402,7 @@ class DTAS::Mlib # :nodoc:
     return '/' if base == '' # root_node
     parent_id = node[:parent_id]
     base += '/' unless node[:tlen] >= 0
-    ppath = cache[parent_id] and return "#{ppath}/#{base}"
+    ppath = cache[parent_id] and return DTAS.dedupe_str("#{ppath}/#{base}")
     parts = []
     begin
       node = @db[:nodes][id: node[:parent_id]]
@@ -408,9 +410,9 @@ class DTAS::Mlib # :nodoc:
       parts.unshift node[:name]
     end while true
     parts.unshift('')
-    cache[parent_id] = parts.join('/')
+    cache[parent_id] = DTAS.dedupe_str(parts.join('/'))
     parts << base
-    parts.join('/').freeze
+    DTAS.dedupe_str(parts.join('/'))
   end
 
   def emit_recurse(node, cache, cb)

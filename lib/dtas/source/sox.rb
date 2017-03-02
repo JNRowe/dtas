@@ -52,19 +52,16 @@ class DTAS::Source::Sox # :nodoc:
 
       if out =~ /\nComments\s*:[ \t]*\n?(.*)\z/mn
         comments = dst['comments'] = {}
-        # we use eval "#{str.inspect}".freeze
-        # take advantage of the VM-wide dedupe in MRI (rb_fstring):
         key = nil
         $1.split(/\n/n).each do |line|
           if line.sub!(/^([^=]+)=/ni, '')
-            key = $1.upcase
-            key = eval "#{key.inspect}.freeze"
+            key = DTAS.dedupe_str($1.upcase)
           end
           (comments[key] ||= ''.b) << "#{line}\n" unless line.empty?
         end
         comments.each do |k,v|
           v.chomp!
-          comments[k] = eval "#{v.inspect}.freeze"
+          comments[k] = DTAS.dedupe_str(v)
         end
       end
       dst

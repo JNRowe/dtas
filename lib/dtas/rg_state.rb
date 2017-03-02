@@ -72,7 +72,7 @@ class DTAS::RGState # :nodoc:
     when 1 then return 'gain 192'
     else
       val.abs <= 0.00000001 and return
-      sprintf('gain %0.8f', val).freeze
+      DTAS.dedupe_str(sprintf('gain %0.8f', val))
     end
   end
 

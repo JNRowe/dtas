@@ -109,13 +109,17 @@ module DTAS::Source::AvFfCommon # :nodoc:
       f = $1.dup
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
-      f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase.freeze] = $2 }
+      f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_|
+        @comments[DTAS.dedupe_str($1.upcase)] = DTAS.dedupe_str($2)
+      }
     end
 
     # new avprobe
     s.scan(%r{^\[format\.tags\]\n(.*?)\n\n}m) do |_|
       f = $1.dup
-      f.gsub!(/^([^=]+)=(.*)$/ni) { |_| @comments[$1.upcase.freeze] = $2 }
+      f.gsub!(/^([^=]+)=(.*)$/ni) { |_|
+        @comments[DTAS.dedupe_str($1.upcase)] = DTAS.dedupe_str($2)
+      }
     end
     s.scan(%r{^\[format\]\n(.*?)\n\n}m) do |_|
       f = $1.dup

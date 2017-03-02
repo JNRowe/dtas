@@ -3,6 +3,7 @@
 # frozen_string_literal: true
 require_relative '../xs'
 require_relative '../parse_time'
+require_relative '../../dtas'
 
 # client protocol handling for -player
 module DTAS::Player::ClientHandler # :nodoc:
@@ -134,7 +135,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       # or variable names.
       sink.valid_name?(name) or return io.emit("ERR sink name invalid")
 
-      sink.name = name.freeze
+      sink.name = DTAS.dedupe_str(name)
       active_before = sink.active
       before = __sink_snapshot(sink)
 
@@ -143,7 +144,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         k, v = kv.split('=', 2)
         case k
         when %r{\Aenv\.([^=]+)\z}
-          sink.env[$1] = v
+          sink.env[DTAS.dedupe_str($1)] = v
         when %r{\Aenv#([^=]+)\z}
           v == nil or return io.emit("ERR unset env has no value")
           sink.env.delete($1)

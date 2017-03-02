@@ -95,7 +95,7 @@ class DTAS::FadeFX # :nodoc:
   def parse!(str)
     return nil if str.empty?
     type = "t"
-    str.sub!(/\A([a-z])/, "") and type = $1.freeze
+    str.sub!(/\A([a-z])/, "") and type = DTAS.dedupe_str($1)
     F.new(type, parse_time(str))
   end
 end
