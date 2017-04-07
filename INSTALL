@@ -37,12 +37,12 @@ For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
 # installing dtas via tarball and setup.rb
 
-Grab the latest tarball from our HTTP site:
+Grab the latest tarball from our HTTPS site:
 
-    https://80x24.org/dtas/2016/dtas-0.14.2.tar.gz
+    https://80x24.org/dtas/2017/dtas-0.15.0.tar.gz
 
-    $ tar zxvf dtas-0.14.2.tar.gz
-    $ cd dtas-0.14.2
+    $ tar zxvf dtas-0.15.0.tar.gz
+    $ cd dtas-0.15.0
     $ sudo ruby setup.rb
 
 GNU/Linux users may optionally install "io_splice" and
