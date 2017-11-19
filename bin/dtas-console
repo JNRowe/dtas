@@ -173,11 +173,11 @@ begin
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr(infile)
-      total = " [#{Time.at(samples / rate).strftime(tfmt)}]" if samples != 0
+      total = " [#{Time.at(samples / rate).utc.strftime(tfmt)}]" if samples != 0
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       if rate != 0
-        Curses.addstr("#{Time.at(elapsed).strftime(tfmt)}#{total} #{fmt}")
+        Curses.addstr("#{Time.at(elapsed).utc.strftime(tfmt)}#{total} #{fmt}")
       else
         Curses.addstr("#{elapsed} samples #{total} #{fmt}")
       end
