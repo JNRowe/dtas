@@ -93,7 +93,7 @@ task 'NEWS.atom' do
 end
 
 task rsync_docs: %w(NEWS NEWS.atom) do
-  dest = ENV["RSYNC_DEST"] || "80x24.org:/srv/dtas/"
+  dest = ENV["RSYNC_DEST"] || "80x24.org:/srv/80x24/dtas/"
   top = %w(INSTALL NEWS README COPYING NEWS.atom)
   files = []
 
