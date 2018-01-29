@@ -50,17 +50,19 @@ class DTAS::Source::Sox # :nodoc:
       out =~ /^Sample Rate\s*:\s*(\d+)/n and dst['rate'] = $1.to_i
       out =~ /^Precision\s*:\s*(\d+)-bit/n and dst['bits'] = $1.to_i
 
+      enc = Encoding.default_external # typically Encoding::UTF_8
       if out =~ /\nComments\s*:[ \t]*\n?(.*)\z/mn
         comments = dst['comments'] = {}
         key = nil
         $1.split(/\n/n).each do |line|
           if line.sub!(/^([^=]+)=/ni, '')
-            key = DTAS.dedupe_str($1.upcase)
+            key = DTAS.dedupe_str(DTAS.try_enc($1.upcase, enc))
           end
           (comments[key] ||= ''.b) << "#{line}\n" unless line.empty?
         end
         comments.each do |k,v|
           v.chomp!
+          DTAS.try_enc(v, enc)
           comments[k] = DTAS.dedupe_str(v)
         end
       end
