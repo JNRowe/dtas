@@ -4,7 +4,7 @@
 require_relative 'helper'
 begin
   require 'dtas/mlib'
-  require 'sequel/no_core_ext'
+  require 'sequel'
   require 'sqlite3'
 rescue LoadError => err
   warn "skipping mlib test: #{err.message}"
@@ -13,7 +13,7 @@ end
 
 class TestMlib < Testcase
   def setup
-    @db = Sequel.sqlite(':memory:')
+    @db = Sequel.sqlite(':memory:', case_sensitive_like: false)
   end
 
   def test_migrate

@@ -37,16 +37,13 @@ class DTAS::Mlib # :nodoc:
 
   def initialize(db)
     if String === db
+      require 'sequel'
+      opts = { single_threaded: true }
       db = "sqlite://#{db}" unless db.include?('://')
-      require 'sequel/no_core_ext'
-      db = Sequel.connect(db, single_threaded: true)
-    end
-    if db.class.to_s.downcase.include?('sqlite')
-      db.transaction_mode = :immediate
-      db.synchronous = :off
-      db.case_sensitive_like = false
-    else
-      warn 'non-SQLite databases may not work in the future'
+      opts[:transaction_mode] = :immediate
+      opts[:synchronous] = :off
+      opts[:case_sensitive_like] = false # only for 'search'
+      db = Sequel.connect(db, opts)
     end
     @db = db
     @pwd = nil
