@@ -66,7 +66,7 @@ class DTAS::Mlib # :nodoc:
   end
 
   def init_suffixes
-    `sox --help 2>/dev/null` =~ /\nAUDIO FILE FORMATS:\s*([^\n]+)/s
+    `sox --help 2>/dev/null` =~ /\nAUDIO FILE FORMATS:\s*([^\n]+)/
     re = $1.split(/\s+/).map! { |x| Regexp.quote(x) }.join('|')
     @suffixes = Regexp.new("\\.(?:#{re}|yml)\\z", Regexp::IGNORECASE)
   end

@@ -75,7 +75,7 @@ rescue Errno::ENOENT => e # race, process is dead
 end
 
 def children_of(ppid)
-  `ps h -o pid --ppid=#{ppid}`.split(/\s+/s).map(&:to_i)
+  `ps h -o pid --ppid=#{ppid}`.split(/\s+/).map(&:to_i)
 end
 
 def expand_pid(pid)
