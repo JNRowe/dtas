@@ -106,18 +106,10 @@ class DTAS::Mlib # :nodoc:
     return ignore(job) if tlen < 0
     tlen = tlen.round
     tmp = {}
-    found.comments.each do |tag, value|
-      tag_id = @tag_map[tag] or next
-      value.strip!
-
-      # FIXME: this fallback needs testing
-      [ Encoding::UTF_8, Encoding::ISO_8859_1 ].each do |enc|
-        value.force_encoding(enc)
-        if value.valid_encoding?
-          value.encode!(Encoding::UTF_8) if enc != Encoding::UTF_8
-          tmp[tag_id] = value
-          break
-        end
+    if comments = found.comments
+      comments.each do |tag, value|
+        tag_id = @tag_map[tag] or next
+        tmp[tag_id] = value if value.valid_encoding?
       end
     end
     @db.transaction do
