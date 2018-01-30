@@ -113,7 +113,7 @@ class DTAS::Mlib # :nodoc:
     end
     return ignore(job) unless found
     tlen = found.duration
-    return ignore(job) if tlen < 0
+    return ignore(job) if tlen.nil? || tlen < 0
     tlen = tlen.round
     tmp = {}
     if comments = found.comments
