@@ -10,6 +10,7 @@ require_relative 'source/av'
 require_relative 'source/ff'
 require_relative 'source/splitfx'
 require 'socket'
+require 'tempfile'
 
 # For the DTAS Music Library, based on what MPD uses.
 class DTAS::Mlib # :nodoc:
@@ -62,15 +63,24 @@ class DTAS::Mlib # :nodoc:
     ]
   end
 
+  def synchronize
+    @lock.flock(File::LOCK_EX)
+    @db.transaction { yield }
+  ensure
+    @lock.flock(File::LOCK_UN)
+  end
+
   def init_suffixes
     `sox --help 2>/dev/null` =~ /\nAUDIO FILE FORMATS:\s*([^\n]+)/
     re = $1.split(/\s+/).map! { |x| Regexp.quote(x) }.join('|')
     @suffixes = Regexp.new("\\.(?:#{re}|yml)\\z", Regexp::IGNORECASE)
   end
 
-  def worker(todo)
+  def worker(todo, lock)
+    old_lock = @lock
+    @lock = lock
     @work.close
-    @db.tables # reconnect before chdir
+    synchronize { @db.tables } # reconnect before chdir
     @pwd = Dir.pwd.b
     begin
       buf = todo.recv(16384) # 4x bigger than PATH_MAX ought to be enough
@@ -84,7 +94,7 @@ class DTAS::Mlib # :nodoc:
   end
 
   def ignore(job)
-    @db.transaction do
+    synchronize do
       node_ensure(job.parent_id, job.path, DM_IGN, job.ctime)
     end
   end
@@ -112,7 +122,7 @@ class DTAS::Mlib # :nodoc:
         tmp[tag_id] = value if value.valid_encoding?
       end
     end
-    @db.transaction do
+    synchronize do
       node_id = node_ensure(job.parent_id, path, tlen, job.ctime)[:id]
       vals = @db[:vals]
       comments = @db[:comments]
@@ -143,11 +153,20 @@ class DTAS::Mlib # :nodoc:
     @work and raise 'update already running'
     todo, @work = UNIXSocket.pair(:SOCK_SEQPACKET)
     @db.disconnect
-    jobs.times { |i| fork { worker(todo) } }
+
+    # like a Mutex between processes
+    @lock = Tempfile.new('dtas.mlib.lock')
+    jobs.times do |i|
+      lock = File.open(@lock.path, 'w')
+      fork { worker(todo, lock) }
+      lock.close
+    end
+    @lock.unlink
     todo.close
     scan_dir(path, st)
     @work.close
     Process.waitall
+    @lock.close
   ensure
     @work = nil
   end
@@ -235,7 +254,7 @@ class DTAS::Mlib # :nodoc:
   end
 
   def dir_vivify(parts, ctime)
-    @db.transaction do
+    synchronize do
       dir = root_node
       last = parts.pop
       parts.each do |name|
@@ -289,7 +308,7 @@ class DTAS::Mlib # :nodoc:
       dir = dir_vivify(@pwd.split(%r{/+}n), st.ctime.to_i)
       dir_id = dir[:id]
 
-      @db.transaction do
+      synchronize do
         @db[:nodes].where(parent_id: dir_id).each do |node|
           File.exist?(node[:name]) or remove_entry(node)
         end
