@@ -77,7 +77,6 @@ class DTAS::Mlib # :nodoc:
   end
 
   def worker(todo, lock)
-    old_lock = @lock
     @lock = lock
     @work.close
     synchronize { @db.tables } # reconnect before chdir
