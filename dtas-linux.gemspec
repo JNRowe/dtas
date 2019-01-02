@@ -5,7 +5,7 @@
 # for Linux users
 Gem::Specification.new do |s|
   s.name = %q{dtas-linux}
-  s.version = '1.0.0'
+  s.version = '1.1.0'
   s.authors = ["dtas hackers"]
   s.summary = "meta-package for dtas users on the Linux kernel"
   s.description = "gives small performance improvements for dtas users\n" \
