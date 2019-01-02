@@ -32,7 +32,7 @@ module DTAS::Buffer::Splice # :nodoc:
   def broadcast_one(targets, limit = nil)
     # single output is always non-blocking
     limit ||= MAX_AT_ONCE_1
-    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE, TRY)
+    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE|F_NONBLOCK, TRY)
     if Symbol === s
       targets # our one and only target blocked on write
     else
