@@ -39,10 +39,10 @@ For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
 
 Grab the latest tarball from our HTTPS site:
 
-    https://80x24.org/dtas/2019/dtas-0.16.0.tar.gz
+    https://80x24.org/dtas/2019/dtas-0.16.1.tar.gz
 
-    $ tar zxvf dtas-0.16.0.tar.gz
-    $ cd dtas-0.16.0
+    $ tar zxvf dtas-0.16.1.tar.gz
+    $ cd dtas-0.16.1
     $ sudo ruby setup.rb
 
 GNU/Linux users may optionally install the "sleepy_penguin" package:
