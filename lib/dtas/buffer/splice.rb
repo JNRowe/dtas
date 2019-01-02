@@ -2,15 +2,17 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'io/nonblock'
-require 'io/splice'
+require 'sleepy_penguin'
 require_relative '../../dtas'
 require_relative '../pipe'
 
-# Used by -player on Linux systems with the "io-splice" RubyGem installed
+# Used by -player on Linux systems with the "sleepy_penguin" RubyGem installed
 module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_AT_ONCE_1 = 65536
-  F_MOVE = IO::Splice::F_MOVE
+  F_MOVE = SleepyPenguin::F_MOVE
+  F_NONBLOCK = SleepyPenguin::F_NONBLOCK
+  TRY = { exception: false }.freeze
 
   def buffer_size
     @to_io.pipe_size
@@ -24,13 +26,13 @@ module DTAS::Buffer::Splice # :nodoc:
 
   # be sure to only call this with nil when all writers to @wr are done
   def discard(bytes)
-    IO.splice(@to_io, nil, DTAS.null, nil, bytes)
+    SleepyPenguin.splice(@to_io, DTAS.null, bytes)
   end
 
   def broadcast_one(targets, limit = nil)
     # single output is always non-blocking
     limit ||= MAX_AT_ONCE_1
-    s = IO.trysplice(@to_io, nil, targets[0], nil, limit, F_MOVE)
+    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE, TRY)
     if Symbol === s
       targets # our one and only target blocked on write
     else
@@ -46,7 +48,7 @@ module DTAS::Buffer::Splice # :nodoc:
   def __tee_in_full(src, dst, bytes)
     rv = 0
     while bytes > 0
-      s = IO.tee(src, dst, bytes)
+      s = SleepyPenguin.tee(src, dst, bytes)
       bytes -= s
       rv += s
     end
@@ -56,7 +58,7 @@ module DTAS::Buffer::Splice # :nodoc:
   def __splice_in_full(src, dst, bytes, flags)
     rv = 0
     while bytes > 0
-      s = IO.splice(src, nil, dst, nil, bytes, flags)
+      s = SleepyPenguin.splice(src, dst, bytes, flags)
       rv += s
       bytes -= s
     end
@@ -69,7 +71,7 @@ module DTAS::Buffer::Splice # :nodoc:
     targets.delete_if do |dst|
       begin
         t = (dst.nonblock? || most_teed == 0) ?
-            IO.trytee(@to_io, dst, chunk_size) :
+            SleepyPenguin.tee(@to_io, dst, chunk_size, F_NONBLOCK, TRY) :
             __tee_in_full(@to_io, dst, chunk_size)
         if Integer === t
           if t > most_teed
@@ -117,7 +119,7 @@ module DTAS::Buffer::Splice # :nodoc:
     begin
       targets << last
       if last.nonblock? || most_teed == 0
-        s = IO.trysplice(@to_io, nil, last, nil, bytes, F_MOVE)
+        s = SleepyPenguin.splice(@to_io, last, bytes, F_MOVE|F_NONBLOCK, TRY)
         if Symbol === s
           blocked << last
 

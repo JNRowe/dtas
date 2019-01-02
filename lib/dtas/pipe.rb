@@ -2,7 +2,7 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 begin
-  require 'io/splice'
+  require 'sleepy_penguin'
 rescue LoadError
 end
 require_relative '../dtas'
@@ -20,11 +20,14 @@ class DTAS::Pipe < DTAS::Nonblock # :nodoc:
     rv
   end
 
-  # create no-op methods for non-Linux
-  unless method_defined?(:pipe_size=)
-    def pipe_size=(_)
-    end
+  def pipe_size=(nr)
+    defined?(SleepyPenguin::F_SETPIPE_SZ) and
+      fcntl(SleepyPenguin::F_SETPIPE_SZ, nr)
   end
+
+  def pipe_size
+    fcntl(SleepyPenguin::F_GETPIPE_SZ)
+  end if defined?(SleepyPenguin::F_GETPIPE_SZ)
 
   # avoid syscall, we never change IO#nonblock= directly
   def nonblock?

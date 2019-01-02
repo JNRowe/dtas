@@ -13,8 +13,7 @@ Gem::Specification.new do |s|
   s.email = %q{e@80x24.org}
   s.files = []
   s.homepage = 'https://80x24.org/dtas/'
-  s.add_dependency(%q<dtas>)
-  s.add_dependency(%q<io_splice>, '~> 4')
-  s.add_dependency(%q<sleepy_penguin>, '~> 3')
+  s.add_dependency(%q<dtas>, '~> 0.16')
+  s.add_dependency(%q<sleepy_penguin>, '~> 3.5')
   s.licenses = 'GPL-3.0+'
 end

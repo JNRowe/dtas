@@ -7,7 +7,7 @@ require_relative '../pipe'
 require_relative '../nonblock'
 
 # compatibility code for systems lacking "splice" support via the
-# "io-splice" RubyGem.  Used only by -player
+# "sleepy_penguin" 3.5+ RubyGem.  Used only by -player
 module DTAS::Buffer::ReadWrite # :nodoc:
   MAX_AT_ONCE = 512 # min PIPE_BUF value in POSIX
   attr_accessor :buffer_size

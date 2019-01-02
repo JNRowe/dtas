@@ -2,7 +2,7 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 begin
-  require 'io/splice'
+  require 'sleepy_penguin'
   require './test/player_integration'
   class TestSinkPipeSizeIntegration < Testcase
     include PlayerIntegration
@@ -14,7 +14,7 @@ begin
       s.req_ok("sink ed default pipe_size=0x10000")
       s.req_ok("sink ed default pipe_size=")
       s.req_ok("sink ed default pipe_size=4096")
-    end if IO.method_defined?(:pipe_size=)
+    end if SleepyPenguin.const_defined?(:F_SETPIPE_SZ)
   end
 rescue LoadError
 end

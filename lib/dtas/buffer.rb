@@ -8,7 +8,9 @@ require_relative '../dtas'
 class DTAS::Buffer # :nodoc:
   begin
     raise LoadError, "no splice with _DTAS_POSIX" if ENV["_DTAS_POSIX"]
-    require 'io/splice' # splice is only in Linux for now...
+    require 'sleepy_penguin' # splice is only in Linux for now...
+    SleepyPenguin.respond_to?(:splice) or
+      raise LoadError, 'sleepy_penguin 3.5+ required for splice', []
     require_relative 'buffer/splice'
     include DTAS::Buffer::Splice
   rescue LoadError
