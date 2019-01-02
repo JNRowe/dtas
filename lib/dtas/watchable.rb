@@ -37,9 +37,13 @@ module DTAS::Watchable # :nodoc:
       @dir2wd = {}
       Array(paths).each do |path|
         watchdir, watchbase = File.split(File.expand_path(path))
-        wd = @dir2wd[watchdir] ||= add_watch(watchdir, FLAGS)
-        m = @watches[wd] ||= {}
-        m[watchbase] = true
+        begin
+          wd = @dir2wd[watchdir] ||= add_watch(watchdir, FLAGS)
+          m = @watches[wd] ||= {}
+          m[watchbase] = true
+        rescue SystemCallError => e
+          warn "#{watchdir.dump}: #{e.message} (#{e.class})"
+        end
       end
     end
   end
