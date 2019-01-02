@@ -59,7 +59,7 @@ Coming:
 
 ## Source code
 
-  git clone git://80x24.org/dtas
+  git clone https://80x24.org/dtas.git
 
 Please use git-format-patch(1) and git-send-email(1) distributed with
 the git(7) suite for generating and sending patches.  Please format
@@ -86,7 +86,7 @@ Atom: <https://80x24.org/dtas-all/new.atom>
 
 ## Copyright
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>\
+Copyright 2013-2019 all contributors <dtas-all@nongnu.org>\
 License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 
 dtas is copyrighted Free Software by all contributors, see logs

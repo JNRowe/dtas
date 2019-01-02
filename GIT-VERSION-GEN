@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2013-2016 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2019 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 CONSTANT = "DTAS::VERSION"
 RVF = "lib/dtas/version.rb"
 GVF = "GIT-VERSION-FILE"
-DEF_VER = "v0.15.0"
+DEF_VER = "v0.16.0"
 vn = DEF_VER
 
 # First see if there is a version file (included in release tarballs),
