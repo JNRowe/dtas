@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
     "This is currently a dummy package as dtas-mpris is not implemented"
   s.email = %q{e@80x24.org}
   s.files = []
-  s.homepage = 'https://80x24.org/dtas/'
+  s.homepage = 'https://80x24.org/dtas.git/about/'
   s.add_dependency(%q<dtas>)
   s.add_dependency(%q<ruby-dbus>)
   s.licenses = 'GPL-2.0+'

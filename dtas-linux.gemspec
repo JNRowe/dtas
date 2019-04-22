@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
                   "via tee(), splice() and eventfd() on Linux"
   s.email = %q{e@80x24.org}
   s.files = []
-  s.homepage = 'https://80x24.org/dtas/'
+  s.homepage = 'https://80x24.org/dtas.git/about/'
   s.add_dependency(%q<dtas>, '~> 0.16')
   s.add_dependency(%q<sleepy_penguin>, '~> 3.5')
   s.licenses = 'GPL-3.0+'

@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 # DTAS currently exposes no public API for Ruby programmers.
-# See https://80x24.org/dtas/ for more info.
+# See https://80x24.org/dtas.git/about/ for more info.
 module DTAS
 
   # try to use the monotonic clock in Ruby >= 2.1, it is immune to clock

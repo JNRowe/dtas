@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email = %q{e@80x24.org}
   s.executables = manifest.grep(%r{\Abin/}).map { |s| s.sub(%r{\Abin/}, "") }
   s.files = manifest
-  s.homepage = 'https://80x24.org/dtas/'
+  s.homepage = 'https://80x24.org/dtas.git/about/'
   s.licenses = "GPL-3.0+"
   s.required_ruby_version = '>= 1.9.3'
 end
