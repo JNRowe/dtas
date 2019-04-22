@@ -69,7 +69,7 @@ all :: txt
 
 %.txt : %.pod
 	$(pod2text) $< $@+
-	touch -r $< $@+ 2>/dev/null || true # GNU-ism
+	touch -r $< $@+
 	mv $@+ $@
 
 clean::
