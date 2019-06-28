@@ -123,7 +123,8 @@ foreach my $pid (sort { $a <=> $b } keys %pids) {
 print "\nPIPEID PIPE_INO\n";
 foreach my $pipe_id (sort { $a <=> $b } keys %graphed) {
 	printf "% 6s", "|$pipe_id";
-	print " ", $graphed{$pipe_id}, "\n";
+	my $ino = $graphed{$pipe_id};
+	printf " %u (0x%0x)\n", $ino, $ino;
 }
 
 print $graph->as_ascii;
