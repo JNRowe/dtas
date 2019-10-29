@@ -119,7 +119,6 @@ end
 pre_mute_vol = 1.0
 enc_locale = Encoding.find("locale")
 $stdout.set_encoding(enc_locale)
-enc_opts = { undef: :replace, invalid: :replace, replace: '?' }
 begin
   Curses.init_screen
   Curses.nonl
@@ -165,7 +164,8 @@ begin
       # FS encoding != locale encoding, but we need to display an FS path
       # name to whatever locale the terminal is encoded to, so force it
       # and risk mojibake...
-      infile.encode(enc_locale, enc_opts)
+      infile.encode(enc_locale,
+                    undef: :replace, invalid: :replace, replace: '?')
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr(infile)
