@@ -53,8 +53,6 @@ tfmt = update_tfmt(prec_step[prec_nr], tsec)
 events = []
 interval = 1.0 / 10 ** prec_nr
 
-pause = nil
-
 def show_events(lineno, screen, events)
   Curses.setpos(lineno += 1, 0)
   Curses.clrtoeol
@@ -135,7 +133,6 @@ begin
     pfmt = cur['format']
     elapsed = samples = 0
     fmt = total = ''
-    paused = false
     if current = cur['current']
       infile = current['infile'] || current['command']
       elapsed = DTAS.now - current['spawn_at']
@@ -150,7 +147,6 @@ begin
       end
     elsif cur['paused'] && infile = cur['current_paused']
       fmt = "[paused] (#{fmt_to_s(pfmt)})"
-      paused = true
       infile = infile['command'] if Hash === infile
       if Array === infile
         infile, elapsed = infile
@@ -220,10 +216,9 @@ begin
         case event
         when "pause"
           if current
-            pause = current['infile'] || current['command']
+            current['infile'] || current['command']
           end
         when %r{\Afile }
-          pause = nil
         end
         events << "#{Time.now.strftime(tfmt)} #{event}"
         # something happened, refresh current
