@@ -12,7 +12,6 @@ module DTAS::Buffer::Splice # :nodoc:
   MAX_AT_ONCE_1 = 65536
   F_MOVE = SleepyPenguin::F_MOVE
   F_NONBLOCK = SleepyPenguin::F_NONBLOCK
-  TRY = { exception: false }.freeze
 
   def buffer_size
     @to_io.pipe_size
@@ -32,7 +31,8 @@ module DTAS::Buffer::Splice # :nodoc:
   def broadcast_one(targets, limit = nil)
     # single output is always non-blocking
     limit ||= MAX_AT_ONCE_1
-    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE|F_NONBLOCK, TRY)
+    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE|F_NONBLOCK,
+                             exception: false)
     if Symbol === s
       targets # our one and only target blocked on write
     else
@@ -71,7 +71,8 @@ module DTAS::Buffer::Splice # :nodoc:
     targets.delete_if do |dst|
       begin
         t = (dst.nonblock? || most_teed == 0) ?
-            SleepyPenguin.tee(@to_io, dst, chunk_size, F_NONBLOCK, TRY) :
+            SleepyPenguin.tee(@to_io, dst, chunk_size, F_NONBLOCK,
+                              exception: false) :
             __tee_in_full(@to_io, dst, chunk_size)
         if Integer === t
           if t > most_teed
@@ -119,7 +120,8 @@ module DTAS::Buffer::Splice # :nodoc:
     begin
       targets << last
       if last.nonblock? || most_teed == 0
-        s = SleepyPenguin.splice(@to_io, last, bytes, F_MOVE|F_NONBLOCK, TRY)
+        s = SleepyPenguin.splice(@to_io, last, bytes, F_MOVE|F_NONBLOCK,
+                                 exception: false)
         if Symbol === s
           blocked << last
 
