@@ -282,7 +282,7 @@ class DTAS::Player # :nodoc:
     if deleted[0]
       warn("#{sink.name} died unexpectedly: #{status.inspect}")
       deleted.each { |t| drop_target(t) }
-      __current_drop unless @targets[0]
+      do_pause unless @targets[0]
       return # sink stays dead if it died unexpectedly
     end
 
@@ -451,7 +451,7 @@ class DTAS::Player # :nodoc:
   # pull data from sink_buf into @targets, source feeds into sink_buf
   def sink_iter
     wait_iter = broadcast_iter(@sink_buf, @targets)
-    __current_drop if nil == wait_iter # sink error, stop source
+    do_pause if nil == wait_iter # sink error, stop source
     return wait_iter if @current
 
     # no source left to feed sink_buf, drain the remaining data
