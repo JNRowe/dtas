@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-dtas-player_protocol - protocol for controling dtas-player
+dtas-player_protocol - protocol for controlling dtas-player
 
 =head1 DESCRIPTION
 
@@ -382,7 +382,7 @@ Clear current tracklist
 
 Show/or change consume status of the tracklist.  Enabling this causes
 tracks to be deleted from the tracklist after they are played or skipped.
-With no args, this will show "true" or "false
+With no args, this will show "true" or "false"
 
 =item tl current
 

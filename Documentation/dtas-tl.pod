@@ -29,7 +29,7 @@ client).
 =item consume [BOOLEAN] - show, enable, or disable consume mode
 
 Enabling "consume" mode causes tracks to be removed when they are
-done playing (or skipped.
+done playing (or skipped).
 
 =item current - display the current track, "NONE" if not playing
 
@@ -78,7 +78,7 @@ display the current tracklist
 
         $ dtas-tl cat
 
-to add an an entire directory of FLAC files
+to add an entire directory of FLAC files
 
         $ dtas-tl addtail /path/to/directory/*.flac
 

@@ -25,7 +25,7 @@ for audio.  dtas-player supports:
 * ReplayGain (including fallback gain and peak normalization)
 
 dtas-player is a *nix pipeline and process manager.  It may be used
-spawn and pipe to abitrary Unix commands, not just audio-related
+spawn and pipe to arbitrary Unix commands, not just audio-related
 commands.  It can interactively restart/replace the source (audio
 decoder) component of a pipeline while keeping the sink (playback
 endpoint) running.

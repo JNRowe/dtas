@@ -10,7 +10,7 @@ As dtas uses Bourne shell and exposes it to users, dtas should have
 a cohesive set of common environment variables across its audio
 production and playback environments.  This attempts to document
 them.  Most of these environments are set and managed by dtas
-itself, but users editing commands (e.g. via L<dtas-sourcedit(1)>
+itself, but users editing commands (e.g. via L<dtas-sourcedit(1)>)
 should be aware of them.
 
 =head1 ENVIRONMENT

@@ -14,7 +14,7 @@ dtas-sinkedit spawns an editor to allow editing of a sink as a YAML file.
 See L<dtas-player_protocol(7)> for details on SINKARGS.
 
 On Linux machines with the sleepy_penguin RubyGem installed, L<inotify(7)>
-is used to monitor the file for changes while the text exitor is running.
+is used to monitor the file for changes while the text editor is running.
 Each time a user finishes saving a file, changes are committed immediately.
 This behavior may be disabled by using the -N or --no-watch command-line
 switch.
