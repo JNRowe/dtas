@@ -1,0 +1,114 @@
+#compdef dtas-ctl
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+
+_arguments \
+    ':dtas-ctl command:((
+        cd\:"change the current working directory of the player"
+        clear\:"clear current queue"
+        cue\:"display the index/offsets of the embedded CUE sheet"
+        current\:"output information about the current track/command in YAML"
+        enq\:"enqueue the given FILENAME for playback"
+        enq-cmd\:"run the following command for playback"
+        env\:"set/unset environment variables"
+        format\:"configure the format between source and sink"
+        pause\:"pause playback"
+        play\:"restart playback from pause"
+        play_pause\:"toggle the play/pause state"
+        queue\ cat\:"dump the contents of the queue as YAML"
+        restart\:"restarts all processes in the current pipeline"
+        rg\:"configure ReplayGain support"
+        seek\:"seek the current track to a specified time"
+        skip\:"abort current track/command"
+        sink\:"control sinks"
+        source\:"control sources"
+        state\ dump\:"immediately dump the state of the player"
+        tl\:"control tracklist"
+        trim\:"limits playback of all tracks in the tracklist"
+        watch\:"adds the client to the passive watch list for notifications"
+    ))' \
+    "*::subcmd:->subcmd" && return 0
+
+case "$words[1]" in
+(cd)
+    _arguments \
+        ":select dir:_path_files -/"
+    ;;
+(cue)
+    _arguments \
+        ':dtas-ctl command:((
+            next\:"skip to the next cue sheet offset"
+            prev\:"skip to the previous cue sheet offset"
+            goto\:"go to the cue index"
+            seek\:"seek within the current cue index"
+        ))'
+    ;;
+(enq)
+    _arguments \
+        "*:select file:_files"
+    ;;
+(format)
+    _arguments \
+        '*:dtas-ctl format command:((
+            channels\:"number of channels to use internally"
+            endian\:"change endianess"
+            bits\:"sample precision"
+            rate\:"sample rate of audio"
+            type\:"change the raw PCM format"
+        ))'
+    ;;
+(seek)
+    _arguments \
+        ":select track:_guard '[0-9]#' 'track number'"
+    ;;
+(sink)
+    _arguments \
+        ':sink subcommand:((
+            ls\:"list names of current sinks"
+            cat\:"dump SINKNAME config in YAML"
+            rm\:"remove SINKNAME"
+            ed\:"create/edit SINKNAME"
+        ))'
+    ;;
+(source)
+    _arguments \
+        ':source subcommand:((
+            cat\:"dump the current source command and env in YAML"
+            ed\:"edit the source parameters"
+            ls\:"dump the names of sources sorted by tryorder"
+            restart\:"restart the current source command"
+        ))'
+    ;;
+(state dump)
+    _arguments \
+        ":select file:_files"
+    ;;
+(tl)
+    _arguments \
+        ':tl subcommand:((
+            add\:"add files to the tracklist"
+            clear\:"clear current tracklist"
+            consume\:"show/or change consume status of the tracklist"
+            current\:"display the pathname to the currently playing track"
+            current-id\:"display the TRACKID of the currently playing track"
+            remove\:"remove the track with the given TRACKID from the track list"
+            get\:"returns a list of TRACKIDS mapped to shell-escaped filenames"
+            goto\:"plays the given TRACKID"
+            max\:"sets or gets the maximum number of tracks allowed in the tracklist"
+            next\:"jump to the next track in the tracklist"
+            prev\:"jump to the previous track in the tracklist"
+            repeat\:"show/or change repeat status of the tracklist"
+            shuffle\:"show/or change the current shuffle status of the tracklist"
+            swap\:"swaps the positions of two tracks"
+            tracks\:"returns a list of all TRACKIDS in the tracklist"
+        ))'
+    ;;
+(trim)
+    _arguments \
+        ":select beginning" \
+        ":select end"
+    ;;
+(*)
+    ;;
+esac

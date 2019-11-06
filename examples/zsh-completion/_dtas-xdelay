@@ -1,0 +1,17 @@
+#compdef dtas-xdelay
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+
+_arguments -S \
+    "--crossover-frequency=[frequency at which to set the crossover]: :_guard '[0-9]#' frequency" \
+    "--lowpass-delay[delay the lowpass frequency instead of the highpass one]" \
+    "--channels=[number of channels]:select channels:(1 2)" \
+    "--rate=[sample rate of audio]:select sample rate:(22050 44100 48000)" \
+    "--type=[file type]:select output type:($(sox --help 2> /dev/null | sed -n '/AUDIO FILE FORMATS/s/.*: //p'))" \
+    "--dry-run[only print commands, do not run them]" \
+    "--lowpass=[Custom format string for lowpass filter]" \
+    "--highpass=[Custom format string for highpass filter]" \
+    ":select input1:_files" \
+    ":select input2:_files" \
+    ":select delay:_guard '[0-9]#' delay"

@@ -1,0 +1,16 @@
+#compdef dtas-archive
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+
+_arguments -S \
+    "--type=[file type]" \
+    "--compression=[compression factor for sox]:select compression:({0..8})" \
+    "--jobs=[number of jobs]: :_guard '[0-9]#' value" \
+    "--stats[save stats on the file]" \
+    "--keep-going[continue after error]" \
+    "--dry-run[only print commands, do not run them]" \
+    "--repeat=[number of times to check]: :_guard '[0-9]#' value" \
+    "--help[display help message]" \
+    ":select source:_files" \
+    ":select destination:_files"

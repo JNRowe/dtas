@@ -1,0 +1,3 @@
+To use the completion functions defined in this directory either: add
+the completions you wish to use to a directory in your $fpath, or add
+this directory's path to $fpath *prior* to calling compinit.

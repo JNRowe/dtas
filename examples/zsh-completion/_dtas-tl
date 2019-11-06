@@ -1,0 +1,52 @@
+#compdef dtas-tl
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+
+_arguments \
+    ':dtas-tl command:((
+       aac\:"add tracks after current track in the tracklist"
+       addhead\:"add tracks to the beginning of the tracklist"
+       addtail\:"add tracks to the end of the tracklist"
+       consume\:"enabling \"consume\" mode"
+       current\:"display the current track"
+       current-id\:"display the track of the current track"
+       cat\:"display a tracklist"
+       clear\:"remove all tracks from the tracklist"
+       edit\:"spawn an editor to allow editing the tracklist"
+       goto\:"play track immediately"
+       reto\:"play track matching regular expression"
+       next\:"play the next track in the tracklist"
+       prev\:"play the previous track in the tracklist"
+       repeat\:"control track repeating"
+       shuffle\:"control playback randomization"
+    ))' \
+    "*::subcmd:->subcmd" && return 0
+
+case "$words[1]" in
+(aac|addtail)
+    _arguments \
+        ":select file:_files"
+    ;;
+(addhead)
+    _arguments \
+        "*:select file:_files"
+    ;;
+(consume|repeat|shuffle)
+    _arguments \
+        ":select state:(true false)"
+    ;;
+(goto)
+    _arguments \
+        ":select track:($(dtas-ctl tl tracks 2> /dev/null))"
+    ;;
+(reto)
+    _arguments \
+        "-F[use fixed strings]" \
+        "-i[ignore case]" \
+        ":search term" \
+        ":select beginning"
+    ;;
+(*)
+    ;;
+esac

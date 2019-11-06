@@ -1,0 +1,29 @@
+#compdef dtas-mlib
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+#
+_arguments \
+    "--database=[database]:select file:_files" \
+    "--force[force updates]" \
+    "--help[display help message]" \
+    ':dtas-mlib action:((
+            dump\:"dump database"
+            search\:"search database"
+            stats\:"display statistics"
+            update\:"migrate database"
+        ))' \
+    "*::subcmd:->subcmd" && return 0
+
+case "$words[1]" in
+(dump|update)
+    _arguments -S \
+        ":select directory:_path_files -/"
+    ;;
+(search)
+    _arguments -S \
+        "*:search term:"
+    ;;
+(*)
+    ;;
+esac

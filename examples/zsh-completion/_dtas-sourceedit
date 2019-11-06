@@ -1,0 +1,11 @@
+#compdef dtas-sourceedit
+
+# To the extent possible under law, James Rowe has waived all copyright and
+# related or neighboring rights to this example.
+
+_arguments \
+    "--no-watch[disable inotify support]" \
+    "--dry-run[only print commands, do not run them]" \
+    "--verbose[print out commands sent to change the source]" \
+    "--help[display help message]" \
+    ":select source:($(dtas-ctl source ls 2> /dev/null))"
