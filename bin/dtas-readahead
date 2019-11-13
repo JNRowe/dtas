@@ -57,7 +57,7 @@ def seek_to_cur_pos(cur_pid, fp)
       end
     end
   rescue Errno::ENOENT => e # race, process is dead
-    return false
+    return nil
   rescue => e
     warn "error reading FDs from for PID:#{cur_pid}: #{e.message}"
   end
@@ -71,7 +71,7 @@ def seek_to_cur_pos(cur_pid, fp)
   end
   pos
 rescue Errno::ENOENT => e # race, process is dead
-  return false
+  return nil
 end
 
 def children_of(ppid)
