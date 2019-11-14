@@ -3,7 +3,9 @@
 
 * tests for bin/*
 
+* consider rewriting piecemeal in a more stable glue language than Ruby
+
 # COPYRIGHT
 
-Copyright 2013-2016 all contributors <dtas-all@nongnu.org>\
+Copyright 2013-2019 all contributors <dtas-all@nongnu.org>
 License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
