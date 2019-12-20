@@ -16,18 +16,7 @@ Debian 7+ users can install dependencies easily:
 
     sudo apt-get install sox libsox-fmt-all mp3gain flac ruby-dev
 
-# installing dtas RubyGem on GNU/Linux (Linux kernel 2.6.32+)
-
-Be sure to have Ruby development headers and a working C compiler.
-This will pull in the sleepy_penguin RubyGems for minor
-speedups.  If you cannot be bothered to have a development
-environment, just use "gem install dtas".
-
-    sudo gem install dtas-linux
-
-This should pull in the "sleepy_penguin" RubyGems
-
-For future upgrades of dtas (upgrades to dtas-linux will be infrequent)
+For future upgrades of dtas
 
     sudo gem update dtas
 
@@ -45,7 +34,8 @@ Grab the latest tarball from our HTTPS site:
     $ cd dtas-0.17.0
     $ sudo ruby setup.rb
 
-GNU/Linux users may optionally install the "sleepy_penguin" package:
+GNU/Linux users may optionally install the "sleepy_penguin" RubyGem
+for a tiny speed improvement over the default "fiddle" RubyGem.
 
     * sleepy_penguin - https://bogomips.org/sleepy_penguin/
 
