@@ -25,6 +25,14 @@ module DTAS
     @null ||= File.open('/dev/null', 'r+')
   end
 
+  @libc = nil
+  def self.libc
+    @libc ||= begin
+      require 'fiddle'
+      Fiddle.dlopen(nil)
+    end
+  end
+
   # String#-@ will deduplicate strings when Ruby 2.5 is released (Dec 2017)
   # https://bugs.ruby-lang.org/issues/13077
   if RUBY_VERSION.to_f >= 2.5

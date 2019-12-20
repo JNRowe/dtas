@@ -3,6 +3,8 @@
 
 # used in various places for safe wakeups from IO.select via signals
 # This requires a modern Linux system and the "sleepy_penguin" RubyGem
+require 'sleepy_penguin'
+
 class DTAS::Sigevent < SleepyPenguin::EventFD # :nodoc:
   def self.new
     super(0, :CLOEXEC)

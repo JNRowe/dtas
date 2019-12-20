@@ -3,7 +3,7 @@
 # frozen_string_literal: true
 
 # used in various places for safe wakeups from IO.select via signals
-# A fallback for non-Linux systems lacking the "sleepy_penguin" RubyGem
+# A fallback for non-Linux systems lacking the "splice" syscall
 require_relative '../nonblock'
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io

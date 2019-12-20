@@ -3,8 +3,11 @@
 # frozen_string_literal: true
 begin
   raise LoadError, "no eventfd with _DTAS_POSIX" if ENV["_DTAS_POSIX"]
-  require 'sleepy_penguin'
-  require_relative 'sigevent/efd'
+  begin
+    require_relative 'sigevent/efd'
+  rescue LoadError
+    require_relative 'sigevent/fiddle_efd'
+  end
 rescue LoadError
   require_relative 'sigevent/pipe'
 end
