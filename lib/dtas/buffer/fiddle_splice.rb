@@ -2,18 +2,64 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'io/nonblock'
-require 'sleepy_penguin'
+require 'fiddle' # require_relative caller should expect LoadError
 require_relative '../../dtas'
 require_relative '../pipe'
-SleepyPenguin.respond_to?(:splice) or
-  raise LoadError, 'sleepy_penguin 3.5+ required for splice', []
 
-# Used by -player on Linux systems with the "sleepy_penguin" RubyGem installed
-module DTAS::Buffer::Splice # :nodoc:
+# Used by -player on Linux systems with the "splice" syscall
+module DTAS::Buffer::FiddleSplice # :nodoc:
   MAX_AT_ONCE = 4096 # page size in Linux
   MAX_AT_ONCE_1 = 65536
-  F_MOVE = SleepyPenguin::F_MOVE
-  F_NONBLOCK = SleepyPenguin::F_NONBLOCK
+  F_MOVE = 1
+  F_NONBLOCK = 2
+
+  Splice = Fiddle::Function.new(DTAS.libc['splice'], [
+      Fiddle::TYPE_INT, # int fd_in,
+      Fiddle::TYPE_VOIDP, # loff_t *off_in
+      Fiddle::TYPE_INT, # int fd_out
+      Fiddle::TYPE_VOIDP, # loff_t *off_out
+      Fiddle::TYPE_SIZE_T, # size_t len
+      Fiddle::TYPE_INT, # unsigned int flags
+    ],
+    Fiddle::TYPE_SSIZE_T) # ssize_t
+
+  Tee = Fiddle::Function.new(DTAS.libc['tee'], [
+      Fiddle::TYPE_INT, # int fd_in,
+      Fiddle::TYPE_INT, # int fd_out
+      Fiddle::TYPE_SIZE_T, # size_t len
+      Fiddle::TYPE_INT, # unsigned int flags
+    ],
+    Fiddle::TYPE_SSIZE_T) # ssize_t
+
+  def _syserr(s, func)
+    raise "BUG: we should not encounter EOF on #{func}" if s == 0
+    case errno = Fiddle.last_error
+    when Errno::EAGAIN::Errno
+      return :EAGAIN
+    when Errno::EPIPE::Errno
+      raise Errno::EPIPE.exception
+    when Errno::EINTR::Errno
+      return nil
+    else
+      raise SystemCallError, "#{func} error: #{errno}"
+    end
+  end
+
+  def splice(src, dst, len, flags)
+    begin
+      s = Splice.call(src.fileno, nil, dst.fileno, nil, len, flags)
+      return s if s > 0
+      sym = _syserr(s, 'splice') and return sym
+    end while true
+  end
+
+  def tee(src, dst, len, flags = 0)
+    begin
+      s = Tee.call(src.fileno, dst.fileno, len, flags)
+      return s if s > 0
+      sym = _syserr(s, 'tee') and return sym
+    end while true
+  end
 
   def buffer_size
     @to_io.pipe_size
@@ -27,14 +73,13 @@ module DTAS::Buffer::Splice # :nodoc:
 
   # be sure to only call this with nil when all writers to @wr are done
   def discard(bytes)
-    SleepyPenguin.splice(@to_io, DTAS.null, bytes)
+    splice(@to_io, DTAS.null, bytes, 0)
   end
 
   def broadcast_one(targets, limit = nil)
     # single output is always non-blocking
     limit ||= MAX_AT_ONCE_1
-    s = SleepyPenguin.splice(@to_io, targets[0], limit, F_MOVE|F_NONBLOCK,
-                             exception: false)
+    s = splice(@to_io, targets[0], limit, F_MOVE|F_NONBLOCK)
     if Symbol === s
       targets # our one and only target blocked on write
     else
@@ -50,7 +95,7 @@ module DTAS::Buffer::Splice # :nodoc:
   def __tee_in_full(src, dst, bytes)
     rv = 0
     while bytes > 0
-      s = SleepyPenguin.tee(src, dst, bytes)
+      s = tee(src, dst, bytes)
       bytes -= s
       rv += s
     end
@@ -60,7 +105,7 @@ module DTAS::Buffer::Splice # :nodoc:
   def __splice_in_full(src, dst, bytes, flags)
     rv = 0
     while bytes > 0
-      s = SleepyPenguin.splice(src, dst, bytes, flags)
+      s = splice(src, dst, bytes, flags)
       rv += s
       bytes -= s
     end
@@ -73,9 +118,8 @@ module DTAS::Buffer::Splice # :nodoc:
     targets.delete_if do |dst|
       begin
         t = (dst.nonblock? || most_teed == 0) ?
-            SleepyPenguin.tee(@to_io, dst, chunk_size, F_NONBLOCK,
-                              exception: false) :
-            __tee_in_full(@to_io, dst, chunk_size)
+              tee(@to_io, dst, chunk_size, F_NONBLOCK) :
+              __tee_in_full(@to_io, dst, chunk_size)
         if Integer === t
           if t > most_teed
             chunk_size = t if most_teed == 0
@@ -122,8 +166,7 @@ module DTAS::Buffer::Splice # :nodoc:
     begin
       targets << last
       if last.nonblock? || most_teed == 0
-        s = SleepyPenguin.splice(@to_io, last, bytes, F_MOVE|F_NONBLOCK,
-                                 exception: false)
+        s = splice(@to_io, last, bytes, F_MOVE|F_NONBLOCK)
         if Symbol === s
           blocked << last
 

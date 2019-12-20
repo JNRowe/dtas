@@ -49,14 +49,14 @@ class TestBuffer < Testcase
     buf = new_buffer
     buf.buffer_size = @@max_size
     assert_equal @@max_size, buf.buffer_size
-  end if defined?(SleepyPenguin::F_GETPIPE_SZ)
+  end if defined?(DTAS::Pipe::F_GETPIPE_SZ)
 
   def test_buffer_size
     buf = new_buffer
     assert_operator buf.buffer_size, :>, 128
     buf.buffer_size = @@max_size
     assert_equal @@max_size, buf.buffer_size
-  end if defined?(SleepyPenguin::F_GETPIPE_SZ)
+  end if defined?(DTAS::Pipe::F_GETPIPE_SZ)
 
   def test_broadcast_1
     buf = new_buffer
@@ -108,7 +108,7 @@ class TestBuffer < Testcase
     assert_equal "HELLO", a[0].read(5)
     assert_equal "HELLO", b[0].read(5)
 
-    return unless defined?(SleepyPenguin::F_GETPIPE_SZ)
+    return unless defined?(DTAS::Pipe::F_GETPIPE_SZ)
 
     b[1].nonblock = true
     b[1].write('*' * pipe_size(b[1]))
@@ -167,7 +167,7 @@ class TestBuffer < Testcase
     buf.wr.write "HELLO"
     assert_equal tmp, buf.broadcast(tmp)
     assert_equal [a[1], b[1]], tmp
-  end if defined?(SleepyPenguin::F_GETPIPE_SZ)
+  end if defined?(DTAS::Pipe::F_GETPIPE_SZ)
 
   def test_serialize
     buf = new_buffer
@@ -206,6 +206,6 @@ class TestBuffer < Testcase
   end
 
   def pipe_size(io)
-    io.fcntl(SleepyPenguin::F_GETPIPE_SZ)
+    io.fcntl(DTAS::Pipe::F_GETPIPE_SZ)
   end
 end
