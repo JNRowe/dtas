@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright 2015-2016 all contributors <dtas-all@nongnu.org>
+# Copyright 2015-2020 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 contact = %q{

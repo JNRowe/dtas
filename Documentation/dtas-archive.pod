@@ -56,7 +56,7 @@ Number of times to repeat the L<sndfile-cmp(1)> check.  Default: 1
 
 =head1 COPYRIGHT
 
-Copyright 2013-2016 all contributors L<mailto:dtas-all@nongnu.org>
+Copyright 2013-2020 all contributors L<mailto:dtas-all@nongnu.org>
 
 License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 

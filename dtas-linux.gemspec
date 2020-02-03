@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 #
 # this just declares dependencies to make gem installation a little easier
