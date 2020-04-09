@@ -207,11 +207,11 @@ class DTAS::SplitFX # :nodoc:
       env["DITHERFX"] = "dither -s"
     end
     comments = Tempfile.new(%W(dtas-splitfx-#{t.comments["TRACKNUMBER"]} .txt))
-    comments.sync = true
     t.comments.each do |k,v|
       env[k] = v.to_s
       comments.puts("#{k}=#{v}")
     end
+    comments.flush
     env["COMMENTS"] = "--comment-file=#{comments.path}"
     infile_env(env, @infile)
     outarg = outfmt.to_sox_arg
