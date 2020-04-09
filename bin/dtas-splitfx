@@ -23,11 +23,18 @@ OptionParser.new('', 24, '  ') do |op|
   end
   op.on('-b', '--bits RATE', Integer) { |val| opts[:bits] = val }
   op.on('-t', '--trim POSITION') { |val| opts[:trim] = val.tr(',', ' ') }
+  op.on('-E', '--err-suffix SUFFIX') do |val|
+    opts[:err_suffix] = val.start_with?('.') ? val.freeze : ".#{val}"
+  end
   op.on('-p', '--sox-pipe') do
     opts[:sox_pipe] = true
     default_target = 'sox'
   end
   op.parse!(ARGV)
+end
+
+if opts[:sox_pipe] && opts[:err_suffix]
+  abort '--err-suffix and --sox-pipe are mutually exclusive'
 end
 
 args = []

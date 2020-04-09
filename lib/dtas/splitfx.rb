@@ -250,7 +250,10 @@ class DTAS::SplitFX # :nodoc:
     command = 'true' if opts[:dryrun] # still gotta fork
 
     # pgroup: false so Ctrl-C on command-line will immediately stop everything
-    [ dtas_spawn(env, command, pgroup: false), comments ]
+    o = { pgroup: false }
+    e = opts[:err_suffix] and
+      o[:err] = [ "#{env['OUTDIR']}#{env['TRACKNUMBER']}#{e}", 'a' ]
+    [ dtas_spawn(env, command, o), comments ]
   end
 
   def load_tracks!(hash)

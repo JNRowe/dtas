@@ -41,6 +41,12 @@ Silent operation, commands are not printed as executed
 Disable automatic setting of the DITHERFX env.  This also passes
 the option to L<sox(1)> via SOX_OPTS.
 
+=item -E, --err-suffix SUFFIX
+
+Write the contents of C<stderr>.  This is useful for capturing
+the per-track output of the L<sox(1)> C<stats> effect when
+combined with parallel C<--jobs>.
+
 =item -O, --outdir OUTDIR
 
 Set output directory instead of current directory.
