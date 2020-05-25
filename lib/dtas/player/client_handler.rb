@@ -197,19 +197,20 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
   end
 
+  def __offset_to_i(offset, src)
+    # either "999s" for 999 samples or HH:MM:SS for time
+    offset.sub!(/s\z/, '') ? offset.to_i : src.format.hhmmss_to_samples(offset)
+  end
+
   def __offset_to_samples(offset)
-    offset.sub!(/s\z/, '') and return offset.to_i
-    @current.format.hhmmss_to_samples(offset)
+    __offset_to_i(offset, @current)
   end
 
   # returns seek offset as an Integer in sample count
-  def __seek_offset_adj(dir, offset)
-    if offset.sub!(/s\z/, '')
-      offset = offset.to_i
-    else # time
-      offset = @current.format.hhmmss_to_samples(offset)
-    end
-    n = __current_decoded_samples + (dir * offset)
+  def __seek_offset_adj(dir, offset,
+                        src = @current,
+                        current_decoded_samples = __current_decoded_samples)
+    n = current_decoded_samples + (dir * __offset_to_i(offset, src))
     n = 0 if n < 0
     "#{n}s"
   end
@@ -391,15 +392,17 @@ module DTAS::Player::ClientHandler # :nodoc:
     end
   end
 
+  def __offset_direction(offset)
+    offset.sub!(/\A\+/, '') ? 1 : (offset.sub!(/\A-/, '') ? -1 : nil)
+  end
+
   def dpc_seek(io, msg)
     offset = msg[0] or return io.emit('ERR usage: seek OFFSET')
     if @current
       if @current.respond_to?(:infile)
         begin
-          if offset.sub!(/\A\+/, '')
-            offset = __seek_offset_adj(1, offset)
-          elsif offset.sub!(/\A-/, '')
-            offset = __seek_offset_adj(-1, offset)
+          if direction = __offset_direction(offset)
+            offset = __seek_offset_adj(direction, offset)
           # else: pass to sox directly
           end
         rescue ArgumentError
@@ -413,7 +416,12 @@ module DTAS::Player::ClientHandler # :nodoc:
       case file = @queue[0]
       when String
         @queue[0] = [ file, offset ]
-      when Array
+      when Array # offset already stored, adjust
+        if direction = __offset_direction(offset)
+          tmp = try_file(*file)
+          cur_off = __offset_to_i(file[1].dup, tmp)
+          offset = __seek_offset_adj(direction, offset, tmp, cur_off)
+        end
         file[1] = offset
       else
         return io.emit("ERR unseekable")
