@@ -11,15 +11,14 @@ module DTAS::Encoding # :nodoc:
 private
 
   def try_enc_harder(str, enc, old) # :nodoc:
+    begin
+      require 'charlock_holmes'
+      @charlock_holmes = CharlockHolmes::EncodingDetector.new
+    rescue LoadError
+      @charlock_holmes = false
+    end if @charlock_holmes.nil?
+
     case @charlock_holmes
-    when nil
-      begin
-        require 'charlock_holmes'
-        @charlock_holmes = CharlockHolmes::EncodingDetector.new
-      rescue LoadError
-        warn "`charlock_holmes` gem not available for encoding detection"
-        @charlock_holmes = false
-      end
     when false
       enc_fallback(str, enc, old)
     else
