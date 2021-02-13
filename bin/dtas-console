@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2021 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 #
@@ -112,7 +112,8 @@ def rg_string(rg, current)
   rv
 end
 
-def may_fail(res, events)
+def may_fail(c, req, events)
+  res = c.req(req)
   events << res if res != "OK"
 end
 
@@ -227,17 +228,17 @@ begin
       when $stdin
         # keybindings taken from mplayer / vi
         case key = Curses.getch
-        when "j" then c.req_ok("seek -5")
-        when "k" then c.req_ok("seek +5")
+        when "j" then may_fail(c, "seek -5", events)
+        when "k" then may_fail(c, "seek +5", events)
         when "q" then exit(0)
-        when Curses::KEY_DOWN then c.req_ok("seek -60")
-        when Curses::KEY_UP then c.req_ok("seek +60")
-        when Curses::KEY_LEFT then c.req_ok("seek -10")
-        when Curses::KEY_RIGHT then c.req_ok("seek +10")
-        when Curses::KEY_BACKSPACE then c.req_ok("seek 0")
+        when Curses::KEY_DOWN then may_fail(c, "seek -60", events)
+        when Curses::KEY_UP then may_fail(c, "seek +60", events)
+        when Curses::KEY_LEFT then may_fail(c, "seek -10", events)
+        when Curses::KEY_RIGHT then may_fail(c, "seek +10", events)
+        when Curses::KEY_BACKSPACE then may_fail(c, "seek 0", events)
         # yes, some of us have long audio files
-        when Curses::KEY_PPAGE then c.req_ok("seek +600")
-        when Curses::KEY_NPAGE then c.req_ok("seek -600")
+        when Curses::KEY_PPAGE then may_fail(c, "seek +600", events)
+        when Curses::KEY_NPAGE then may_fail(c, "seek -600", events)
         when '9' then c.req_ok('rg volume-=0.01')
         when '0' then c.req_ok('rg volume+=0.01')
         when '=' then c.req_ok('rg volume=1')
@@ -248,8 +249,8 @@ begin
         when "f" then c.req_ok("rg fallback_gain-=1")
         when ">" then c.req_ok("tl next")
         when "<" then c.req_ok("tl prev")
-        when "!" then may_fail(c.req("cue prev"), events)
-        when "@" then may_fail(c.req("cue next"), events)
+        when "!" then may_fail(c, "cue prev", events)
+        when "@" then may_fail(c, "cue next", events)
         when "o" then tfmt = update_tfmt(prec_step[prec_nr], tsec = !tsec)
         when " "
           c.req("play_pause")
