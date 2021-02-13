@@ -1,4 +1,4 @@
-Uncommon for audio software, dtas is implemented in Ruby.
+Uncommon for audio software, dtas is currently implemented in Ruby.
 
 The latest stable release or development snapshot of Ruby is recommended.
 However, Ruby 1.9.3 and later works, but older versions of Ruby do not.
@@ -8,13 +8,14 @@ dtas-player uses SoX by default and you will need it unless you've
 reconfigured dtas-player to use something else.
 
 mp3gain is required if you want to use ReplayGain with MP3s
+(it is no longer in new versions of Debian)
 
 If you only intend to use dtas-cueedit, you will need metaflac(1) from
 the FLAC package.
 
-Debian 7+ users can install dependencies easily:
+Debian 10+ users can install dependencies easily:
 
-    sudo apt-get install sox libsox-fmt-all mp3gain flac ruby-dev
+    sudo apt-get install sox libsox-fmt-all flac ruby-dev ruby-charlock-holmes
 
 For future upgrades of dtas
 
@@ -49,5 +50,5 @@ No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2020 all contributors <dtas-all@nongnu.org>
+Copyright 2013-2021 all contributors <dtas-all@nongnu.org>
 License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
