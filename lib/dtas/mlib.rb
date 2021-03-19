@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# Copyright (C) 2015-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2015-2021 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 #
@@ -129,9 +129,13 @@ class DTAS::Mlib # :nodoc:
       comments.where(q).delete
       tmp.each do |tid, val|
         v = vals[val: val]
-        q[:val_id] = v ? v[:id] : vals.insert(val: val)
-        q[:tag_id] = tid
-        comments.insert(q)
+        begin
+          q[:val_id] = v ? v[:id] : vals.insert(val: val)
+          q[:tag_id] = tid
+          comments.insert(q)
+        rescue => e
+          warn "E: #{e.message} (#{e.class}) q=#{q.inspect} val=#{val.inspect}"
+        end
       end
     end
   end
@@ -214,12 +218,16 @@ class DTAS::Mlib # :nodoc:
     end
   end
 
+  def maybe_blob(path)
+    path.valid_encoding? ? path : Sequel.blob(path)
+  end
+
   def scan_file(path, st, parent_id)
     return if @suffixes !~ path || st.size == 0
 
     # no-op if no change
     unless @force
-      if node = @db[:nodes][name: path, parent_id: parent_id]
+      if node = @db[:nodes][name: maybe_blob(path), parent_id: parent_id]
         return if st.ctime.to_i == node[:ctime] || node[:tlen] == DM_IGN
       end
     end
@@ -271,14 +279,16 @@ class DTAS::Mlib # :nodoc:
     node_id = node.delete(:id)
     @db[:nodes].where(id: node_id).update(node.merge(q))
     node[:id] = node_id
+  rescue => e
+    warn "E: #{e.message} (#{e.class}) node=#{node.inspect}"
   end
 
   def node_lookup(parent_id, name)
-    @db[:nodes][name: name, parent_id: parent_id]
+    @db[:nodes][name: maybe_blob(name), parent_id: parent_id]
   end
 
   def node_ensure(parent_id, name, tlen, ctime = nil)
-    q = { name: name, parent_id: parent_id }
+    q = { name: maybe_blob(name), parent_id: parent_id }
     if node = @db[:nodes][q]
       node_update_maybe(node, tlen, ctime)
     else
@@ -289,6 +299,8 @@ class DTAS::Mlib # :nodoc:
       node[:id] = @db[:nodes].insert(node)
     end
     node
+  rescue => e
+    warn "E: #{e.message} (#{e.class}) q=#{q.inspect}"
   end
 
   def cd(path)
