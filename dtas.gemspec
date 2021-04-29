@@ -1,9 +1,9 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2021 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 Gem::Specification.new do |s|
   manifest = File.read('.gem-manifest').split(/\n/)
   s.name = %q{dtas}
-  s.version = ENV["VERSION"].dup
+  s.version = (ENV["VERSION"] || '0.18.0').dup
   s.authors = ["dtas hackers"]
   s.summary = "duct tape audio suite for *nix"
   s.description = File.read("README").split(/\n\n/)[1].strip
