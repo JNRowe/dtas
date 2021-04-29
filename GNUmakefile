@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) 2013-2021 all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 all::
 pkg = dtas
@@ -73,6 +73,18 @@ $(pkgtgz): .tgz-manifest
 	mv $@+ $@
 
 package: $(pkgtgz) $(pkggem)
+
+# Install symlinks to ~/bin (which is hopefuly in PATH) which point to
+# this source tree.
+# prefix + bindir matches git.git Makefile:
+prefix = $(HOME)
+bindir = $(prefix)/bin
+symlink-install :
+	mkdir -p $(bindir)
+	dtas=$(CURDIR)/dtas.sh && cd $(bindir) && \
+	for x in $(CURDIR)/bin/*; do \
+		ln -sf "$$dtas" $$(basename "$$x"); \
+	done
 
 .PHONY: all .FORCE-GIT-VERSION-FILE test $(test_units) NEWS
 .PHONY: check-warnings fix-perms
