@@ -113,7 +113,7 @@ class DTAS::Source::Sox # :nodoc:
   def src_spawn(player_format, rg_state, opts)
     raise "BUG: #{self.inspect}#src_spawn called twice" if @to_io
     e = @env.merge!(player_format.to_env)
-    e["INFILE"] = xs(@infile)
+    e["INFILE"] = @infile
 
     # make sure these are visible to the "current" command...
     e["TRIMFX"] = trimfx

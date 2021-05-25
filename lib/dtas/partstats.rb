@@ -3,7 +3,6 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../dtas'
-require_relative 'xs'
 require_relative 'process'
 require_relative 'sigevent'
 
@@ -56,7 +55,7 @@ class DTAS::PartStats # :nodoc:
     rd, wr = IO.pipe
     env = opts[:env]
     env = env ? env.dup : {}
-    env["INFILE"] = xs(@infile)
+    env["INFILE"] = @infile
     env["TRIMFX"] = "trim #{trim_part.tbeg}s #{trim_part.tlen}s"
     opts = { pgroup: true, close_others: true, err: wr }
     pid = spawn(env, CMD, opts)

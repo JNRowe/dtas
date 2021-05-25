@@ -4,7 +4,6 @@
 require_relative '../dtas'
 require_relative 'format'
 require_relative 'process'
-require_relative 'xs'
 require 'tempfile'
 
 # The backend for dtas-splitfx(1) command, but also supported by dtas-player
@@ -13,7 +12,6 @@ require 'tempfile'
 class DTAS::SplitFX # :nodoc:
   CMD = 'sox "$INFILE" $COMMENTS $OUTFMT $OUTDST $TRIMFX $FX $RATEFX $DITHERFX'
   include DTAS::Process
-  include DTAS::XS
   attr_reader :infile, :env, :command
 
   # for --trim on the command-line
@@ -404,10 +402,10 @@ class DTAS::SplitFX # :nodoc:
   end
 
   def infile_env(env, infile)
-    env["INFILE"] = xs(infile)
+    env["INFILE"] = infile
     dir, base = File.split(File.expand_path(infile))
-    env["INDIR"] = xs(dir)
-    env["INBASE"] = xs(base)
+    env["INDIR"] = dir
+    env["INBASE"] = base
   end
 
   def expand_cmd(env, command) # for display purposes only
