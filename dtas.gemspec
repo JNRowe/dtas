@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   manifest = File.read('.gem-manifest').split(/\n/)
   s.name = %q{dtas}
-  s.version = (ENV["VERSION"] || '0.18.0').dup
+  s.version = (ENV["VERSION"] || '0.19.0').dup
   s.authors = ["dtas hackers"]
   s.summary = "duct tape audio suite for *nix"
   s.description = File.read("README").split(/\n\n/)[1].strip
