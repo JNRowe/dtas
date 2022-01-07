@@ -8,7 +8,7 @@ require 'dtas/splitfx'
 usage = "#$0 [-n|--dry-run][-j [JOBS]][-s|--silent] SPLITFX_FILE.yml [TARGET]"
 overrides = {} # FIXME: not tested
 default_target = "flac"
-opts = { jobs: 1 }
+opts = { jobs: nil }
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
   op.on('-n', '--dry-run') { opts[:dryrun] = true }
@@ -35,6 +35,11 @@ end
 
 if opts[:sox_pipe] && opts[:err_suffix]
   abort '--err-suffix and --sox-pipe are mutually exclusive'
+end
+
+if opts[:jobs].nil?
+  require 'etc'
+  opts[:jobs] = Etc.nprocessors
 end
 
 args = []
