@@ -29,6 +29,7 @@ repeat = 1
 stats = false
 keep_going = false
 compression = []
+comment = []
 
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
@@ -36,6 +37,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-C', '--compression [FACTOR]', 'compression factor for sox') { |c|
     compression = [ '-C', c ]
   }
+  op.on('--comment=TEXT', String) { |c| comment.push('--comment', c) }
   op.on('-j', '--jobs [JOBS]', Integer) { |j| jobs = j }
   op.on('-S', '--stats', 'save stats on the file') { stats = true }
   op.on('-k', '--keep-going', 'continue after error') { keep_going = true }
@@ -52,6 +54,8 @@ OptionParser.new('', 24, '  ') do |op|
   end
   op.parse!(ARGV)
 end
+
+comment.push('--comment', '') if comment.empty?
 
 dst = ARGV.pop
 src = ARGV.dup
@@ -137,7 +141,7 @@ thrs = jobs.times.map do |i|
 
       if dry_run || !silent
         names = job.map { |x| Shellwords.escape(x) }
-        cmd = [ 'sox', *names ]
+        cmd = [ 'sox', names[0], *compression, *comment, names[1] ]
         if stats
           cmd << 'stats'
           cmd << "2>#{Shellwords.escape(stats_out)}"
@@ -151,7 +155,7 @@ thrs = jobs.times.map do |i|
         end
       end
 
-      cmd = [ 'sox', input, *compression, output ]
+      cmd = [ 'sox', input, *compression, *comment, output ]
       if stats
         cmd << 'stats'
         cmd = [ *cmd, { err: stats_out } ]
