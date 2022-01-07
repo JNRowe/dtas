@@ -113,7 +113,7 @@ class DTAS::SplitFX # :nodoc:
     end
 
     case v = hash["track_zpad"]
-    when Integer then @track_zpad = val
+    when Integer then @track_zpad = v
     else
       _bool(hash, "track_zpad") { |val| @track_zpad = val }
     end
