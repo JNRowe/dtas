@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2013-2021 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 #
@@ -26,6 +26,7 @@ w.req_ok('watch')
 c = DTAS::UNIXClient.new
 cur = YAML.load(c.req('current'))
 readable = [ se, w, $stdin ]
+set_title = ENV['DISPLAY'] ? $stdout : nil
 
 # current rg mode
 rg_mode = DTAS::RGState::RG_MODE.keys.unshift("off")
@@ -167,6 +168,10 @@ begin
       # and risk mojibake...
       infile.encode(enc_locale,
                     undef: :replace, invalid: :replace, replace: '?')
+      if set_title
+        dir, base = File.split(infile)
+        set_title.syswrite("\033]0;#{base} dtas-console\07")
+      end
       Curses.setpos(lineno += 1, 0)
       Curses.clrtoeol
       Curses.addstr(infile)
