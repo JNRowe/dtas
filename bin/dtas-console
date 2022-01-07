@@ -35,6 +35,7 @@ if (rg = cur["rg"]) && (rg = rg["mode"])
 else
   rg_mode_i = 0
 end
+show_info = false
 
 def update_tfmt(prec, tsec)
   if tsec
@@ -208,6 +209,27 @@ begin
     Curses.addstr(extra.join(' '))
     pre_mute_vol = cur_vol if cur_vol != 0
 
+    if show_info && current && comments = current['comments']
+      Curses.setpos(lineno += 1, 0)
+      Curses.clrtoeol
+      Curses.addstr('comments:')
+      comments.each do |k,v|
+        v = v.split(/\n+/)
+        k = k.dump if /[[:cntrl:]]/ =~ k
+        if first = v.shift
+          Curses.setpos(lineno += 1, 0)
+          Curses.clrtoeol
+          first = first.dump if /[[:cntrl:]]/ =~ first
+          Curses.addstr("  #{k}: #{first}")
+          v.each do |val|
+            val = val.dump if /[[:cntrl:]]/ =~ val
+            Curses.setpos(lineno += 1, 0)
+            Curses.clrtoeol
+            Curses.addstr("   #{val}")
+          end
+        end
+      end
+    end
     show_events(lineno, screen, events)
 
     Curses.refresh # draw and wait
@@ -277,6 +299,9 @@ begin
             interval = 1.0 / 10 ** prec_nr
           end
         when 27 # TODO readline/edit mode?
+        when 'i'
+          show_info = !show_info
+          Curses.clear if !show_info
         else
           Curses.setpos(screen.maxy - 1, 0)
           Curses.clrtoeol
