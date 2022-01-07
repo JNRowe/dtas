@@ -4,7 +4,7 @@
 # test_trimfx.rb relies on this.
 ---
 infile: foo.flac
-env: !omap
+env:
   PATH: $PATH
   SOX_OPTS: $SOX_OPTS -R
   I2: second.flac

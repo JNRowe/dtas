@@ -11,7 +11,7 @@ comments:
 # the sox command for dtas-player playback, there is no need to
 # specify this as it is the default:
 # command: exec sox "$INFILE" $SOXFMT - $TRIMFX $RGFX $FX
-env: !omap
+env:
   PATH: $PATH
   # these effects may be used in any command in this file, including targets
   SOX_OPTS: $SOX_OPTS -R

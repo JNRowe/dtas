@@ -90,9 +90,9 @@ moves printing of output to stderr and disables parallel job invocation.
 
 =item infile - string, the pathname of the original audio file
 
-=item env - ordered hash of environment variables to set for all commands
+=item env - hash of environment variables to set for all commands
 
-    env: !omap
+    env:
       FX: gain 3 stats
 
 =item comments - hash of common tags for all audio (e.g. ARTIST, ALBUM, YEAR)
