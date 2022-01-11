@@ -62,7 +62,7 @@ class TestBuffer < Testcase
     buf = new_buffer
     r, w = IO.pipe
     buf.wr.write "HIHI"
-    assert_equal :wait_readable, buf.broadcast([w])
+    assert_equal [w], buf.broadcast([w])
     assert_equal 4, buf.bytes_xfer
     tmp = [w]
     r.close

@@ -39,7 +39,8 @@ module DTAS::Buffer::Splice # :nodoc:
       targets # our one and only target blocked on write
     else
       @bytes_xfer += s
-      :wait_readable # we want to read more from @to_io soon
+      # s < limit means targets[0] is full
+      s < limit ? targets : :wait_readable
     end
   rescue Errno::EPIPE, IOError => e
     __dst_error(targets[0], e)
