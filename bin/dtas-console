@@ -26,7 +26,7 @@ w.req_ok('watch')
 c = DTAS::UNIXClient.new
 cur = YAML.load(c.req('current'))
 readable = [ se, w, $stdin ]
-set_title = ENV['DISPLAY'] ? $stdout : nil
+set_title = (ENV['DISPLAY'] || ENV['WAYLAND_DISPLAY']) ? $stdout : nil
 
 # current rg mode
 rg_mode = DTAS::RGState::RG_MODE.keys.unshift("off")
