@@ -63,7 +63,7 @@ class DTAS::Source::Sox # :nodoc:
         comments.each do |k,v|
           v.chomp!
           DTAS.try_enc(v, enc)
-          comments[k] = v
+          comments[k] = -v
         end
       end
       dst

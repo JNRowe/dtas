@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 # encoding: binary
@@ -22,7 +22,7 @@ class DTAS::Mcache
     @tbl[bucket] = begin
       cur = cur ? cur.clear : {}
       if ret = yield(infile, cur)
-        ret[:infile] = infile.frozen? ? infile : infile.dup.freeze
+        ret[:infile] = infile.frozen? ? infile : -(infile.dup)
         ret[:btime] = DTAS.now
       end
       ret

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 
@@ -13,7 +13,7 @@ class DTAS::Sigevent # :nodoc:
     Fiddle::TYPE_INT) # fd
 
   attr_reader :to_io
-  ONE = [ 1 ].pack('Q').freeze
+  ONE = -([ 1 ].pack('Q'))
 
   def initialize
     fd = EventFD.call(0, 02000000|00004000) # EFD_CLOEXEC|EFD_NONBLOCK

@@ -9,6 +9,6 @@ class DTAS::Track # :nodoc:
 
   def initialize(track_id, path)
     @track_id = track_id
-    @to_path = path
+    @to_path = -path
   end
 end

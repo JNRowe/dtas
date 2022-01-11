@@ -208,13 +208,13 @@ class DTAS::Player # :nodoc:
     command = msg.shift
     case command
     when "enq"
-      enq_handler(io, msg[0])
+      enq_handler(io, -msg[0])
     when "enq-cmd"
-      enq_handler(io, { "command" => msg[0]})
+      enq_handler(io, { "command" => -msg[0]})
     when "pause", "play", "play_pause"
       play_pause_handler(io, command)
     when "pwd"
-      io.emit(Dir.pwd)
+      io.emit(-Dir.pwd)
     else
       m = "dpc_#{command.tr('-', '_')}"
       __send__(m, io, msg) if respond_to?(m)

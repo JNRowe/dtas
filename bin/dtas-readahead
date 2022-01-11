@@ -141,7 +141,7 @@ def do_open(path)
         buf << fp.read(fp.size - 4)
         Dir.chdir(File.dirname(path)) do
           yml = DTAS.yaml_load(buf)
-          x = yml['infile'] and return File.open(File.expand_path(x).freeze)
+          x = yml['infile'] and return File.open(-File.expand_path(x))
         end
       end
     end
@@ -158,9 +158,8 @@ begin
   cur = DTAS.yaml_load(c.req('current'))
   while @todo_ra > 0 && fp.nil?
     if current = cur['current']
-      track = current['infile']
+      track = -current['infile']
       break unless track.kind_of?(String)
-      track.freeze
       fp = work[track] ||= do_open(track)
       cur_pid = current['pid']
       if fp
@@ -197,7 +196,7 @@ begin
     repeat = c.req('tl repeat').split[-1]
     while @todo_ra > 0 && idx && (cid = ids[idx])
       fp = nil
-      track = c.req("tl get #{cid}").sub!(/\A1 \d+=/, '').freeze
+      track = -(c.req("tl get #{cid}").sub!(/\A1 \d+=/, ''))
       begin
         fp = work[track] ||= do_open(track)
       rescue SystemCallError
