@@ -18,6 +18,9 @@ rescue LoadError
   abort "please install the 'curses' RubyGem to use #$0"
 end
 
+# workaround https://bugs.debian.org/958973
+$VERBOSE = nil if RUBY_VERSION.to_f < 3.0
+
 tsec = false
 se = DTAS::Sigevent.new
 trap(:WINCH) { se.signal }
