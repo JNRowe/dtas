@@ -1,7 +1,6 @@
 # Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
-require 'yaml'
 require 'shellwords'
 require_relative '../dtas'
 require_relative 'xs'
@@ -123,10 +122,6 @@ class DTAS::Player # :nodoc:
     rv
   end
 
-  def to_omap(hash)
-    YAML::Omap === hash ? hash : YAML::Omap.new.merge!(hash)
-  end
-
   def self.load(hash)
     rv = new
     rv.instance_eval do
@@ -157,7 +152,6 @@ class DTAS::Player # :nodoc:
         @source_map.each do |name, src|
           src_hsh = v[name] or next
           src.load!(src_hsh)
-          src.env = to_omap(src.env)
         end
         source_map_reload
       end
@@ -170,7 +164,6 @@ class DTAS::Player # :nodoc:
         sinks.each do |sink_hsh|
           sink_hsh['name'] = -sink_hsh['name']
           sink = DTAS::Sink.load(sink_hsh)
-          sink.env = to_omap(sink.env)
           @sinks[sink.name] = sink
         end
       end
