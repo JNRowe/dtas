@@ -1,10 +1,9 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require './test/player_integration'
 class TestPlayerIntegration < Testcase
   include PlayerIntegration
-  include DTAS::SpawnFix
 
   def test_cmd_rate
     env = ENV.to_hash.merge(@fmt.to_env)

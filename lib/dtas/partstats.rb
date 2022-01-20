@@ -1,5 +1,5 @@
 # -*- encoding: binary -*-
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../dtas'
@@ -11,7 +11,6 @@ require_relative 'sigevent'
 class DTAS::PartStats # :nodoc:
   CMD = 'sox "$INFILE" -n $TRIMFX $SOXFX stats $STATSOPTS'
   include DTAS::Process
-  include DTAS::SpawnFix
   attr_reader :key_idx
   attr_reader :key_width
 

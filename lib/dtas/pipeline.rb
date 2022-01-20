@@ -1,12 +1,9 @@
-# Copyright (C) 2017-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../dtas'
-require_relative 'spawn_fix'
 
 module DTAS::Pipeline # :nodoc:
-  include DTAS::SpawnFix
-
   # Process.spawn wrapper which supports running Proc-like objects in
   # a separate process, not just external commands.
   # Returns the pid of the spawned process

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'yaml'
@@ -7,8 +7,6 @@ require 'thread'
 require_relative 'helper'
 
 class TestSplitfx < Testcase
-  include DTAS::SpawnFix
-
   def tmp_err(path)
     err = $stderr.dup
     $stderr.reopen(path, 'a')

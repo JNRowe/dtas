@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2021 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 Gem::Specification.new do |s|
   manifest = File.read('.gem-manifest').split(/\n/)
@@ -12,5 +12,5 @@ Gem::Specification.new do |s|
   s.files = manifest
   s.homepage = 'https://80x24.org/dtas.git/about/'
   s.licenses = "GPL-3.0+"
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.3'
 end
