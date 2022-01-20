@@ -27,7 +27,7 @@ trap(:WINCH) { se.signal }
 w = DTAS::UNIXClient.new
 w.req_ok('watch')
 c = DTAS::UNIXClient.new
-cur = YAML.load(c.req('current'))
+cur = DTAS.yaml_load(c.req('current'))
 readable = [ se, w, $stdin ]
 set_title = (ENV['DISPLAY'] || ENV['WAYLAND_DISPLAY']) ? $stdout : nil
 
@@ -254,7 +254,7 @@ begin
         events << "#{Time.now.strftime(tfmt)} #{event}"
         # something happened, refresh current
         # we could be more intelligent here, maybe, but too much work.
-        cur = YAML.load(c.req('current'))
+        cur = DTAS.yaml_load(c.req('current'))
       when $stdin
         # keybindings taken from mplayer / vi
         case key = Curses.getch

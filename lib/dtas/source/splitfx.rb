@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'yaml'
@@ -36,7 +36,7 @@ class DTAS::Source::SplitFX < DTAS::Source::Sox # :nodoc:
 
     sfx = DTAS::SplitFX.new
     Dir.chdir(File.dirname(ymlfile)) do # ugh
-      @ymlhash = YAML.load(buf)
+      @ymlhash = DTAS.yaml_load(buf)
       @ymlhash['tracks'] ||= [ "t 0 default" ]
       sfx.import(@ymlhash)
       sfx.infile.replace(File.expand_path(sfx.infile))

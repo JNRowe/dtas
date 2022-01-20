@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require './test/helper'
@@ -12,7 +12,7 @@ class TestTFX < Testcase
   end
 
   def test_example
-    ex = YAML.load(File.read("examples/tfx.sample.yml"))
+    ex = DTAS.yaml_load(File.read("examples/tfx.sample.yml"))
     effects = []
     ex["effects"].each do |line|
       words = Shellwords.split(line)

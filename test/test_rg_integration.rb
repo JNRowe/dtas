@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require './test/player_integration'
@@ -39,7 +39,7 @@ class TestRgIntegration < Testcase
     yaml = cur = nil
     Timeout.timeout(5) do
       begin
-        cur = YAML.load(yaml = s.req("current"))
+        cur = DTAS.yaml_load(yaml = s.req("current"))
       end while cur["current_offset"] == 0 && sleep(0.01)
     end
 
@@ -55,7 +55,7 @@ class TestRgIntegration < Testcase
       Timeout.timeout(5) do
         begin
           yaml = s.req("current")
-          cur = YAML.load(yaml)
+          cur = DTAS.yaml_load(yaml)
         end while cur["current"]["env"]["RGFX"] !~ expect && sleep(0.01)
       end
       assert_match expect, cur["current"]["env"]["RGFX"]
@@ -67,27 +67,27 @@ class TestRgIntegration < Testcase
     check_gain.call(%r{gain 2\.5}, "track_peak")
 
     s.req_ok("rg preamp+=1")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_equal 1, rg["preamp"]
 
     s.req_ok("rg preamp-=1")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_nil rg["preamp"]
 
     s.req_ok("rg preamp=2")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_equal 2, rg["preamp"]
 
     s.req_ok("rg preamp-=0.3")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_equal 1.7, rg["preamp"]
 
     s.req_ok("rg preamp-=-0.3")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_equal 2.0, rg["preamp"]
 
     s.req_ok("rg preamp-=+0.3")
-    rg = YAML.load(yaml = s.req("rg"))
+    rg = DTAS.yaml_load(yaml = s.req("rg"))
     assert_equal 1.7, rg["preamp"]
 
     dethrottle_decoder(s)

@@ -25,6 +25,12 @@ module DTAS
       Fiddle.dlopen(nil)
     end
   end
+
+  # prevent breakage in Psych 4.x; we're a shell and designed to execute code
+  def self.yaml_load(buf)
+    require 'yaml'
+    YAML.respond_to?(:unsafe_load) ? YAML.unsafe_load(buf) : YAML.load(buf)
+  end
   # :startdoc:
 end
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 # encoding: binary
@@ -51,7 +51,7 @@ def do_edit(c)
   # jump to the line of the currently playing track if using vi or vim
   # Patches for other editors welcome: dtas-all@nongnu.org
   if ed =~ /vim?\z/
-    cur = YAML.load(c.req('current'))
+    cur = DTAS.yaml_load(c.req('current'))
     if tl = cur['tracklist']
       if pos = tl['pos']
         ed += " +#{pos + 1}"

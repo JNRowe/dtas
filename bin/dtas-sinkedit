@@ -36,10 +36,10 @@ st_in = $stdin.stat
 
 buf = c.req(%W(sink cat #{name}))
 abort(buf) if buf =~ /\AERR/
-orig = YAML.load(buf)
+orig = DTAS.yaml_load(buf)
 
 commit_update = lambda do |buf|
-  sink = YAML.load(buf)
+  sink = DTAS.yaml_load(buf)
   cmd = %W(sink ed #{name})
   update_cmd_env(cmd, orig, sink)
 

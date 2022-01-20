@@ -139,7 +139,7 @@ class TestPlayerIntegration < Testcase
     Timeout.timeout(5) do
       begin
         yaml = s.req("current")
-        cur = YAML.load(yaml)
+        cur = DTAS.yaml_load(yaml)
       end while cur["sinks"] && sleep(0.01)
     end
 
@@ -166,7 +166,7 @@ class TestPlayerIntegration < Testcase
     Timeout.timeout(len) do
       begin
         yaml = s.req("current")
-        cur = YAML.load(yaml)
+        cur = DTAS.yaml_load(yaml)
       end while cur["sinks"] && sleep(0.01)
     end
     assert(system("cmp", dump.path, expect.path),
@@ -195,13 +195,13 @@ class TestPlayerIntegration < Testcase
     state.close!
     s = client_socket
     s.req_ok(%W(state dump #{state_path}))
-    hash = YAML.load(IO.binread(state_path))
+    hash = DTAS.yaml_load(IO.binread(state_path))
     assert_equal @sock_path, hash["socket"]
     assert_equal "default", hash["sinks"][0]["name"]
 
     assert_equal "", IO.binread(@state_tmp.path)
     s.req_ok(%W(state dump))
-    orig = YAML.load(IO.binread(@state_tmp.path))
+    orig = DTAS.yaml_load(IO.binread(@state_tmp.path))
     assert_equal orig, hash
   ensure
     File.unlink(state_path)
@@ -216,11 +216,11 @@ class TestPlayerIntegration < Testcase
     assert_equal "sox av ff splitfx", s.req("source ls")
 
     s.req_ok("source ed sox command=true")
-    sox = YAML.load(s.req("source cat sox"))
+    sox = DTAS.yaml_load(s.req("source cat sox"))
     assert_equal "true", sox["command"]
 
     s.req_ok("source ed sox command=")
-    sox = YAML.load(s.req("source cat sox"))
+    sox = DTAS.yaml_load(s.req("source cat sox"))
     assert_equal DTAS::Source::Sox::SOX_DEFAULTS["command"], sox["command"]
   end
 

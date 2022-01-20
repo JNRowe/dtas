@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'yaml'
@@ -48,7 +48,7 @@ ARGV.each do |arg|
   when %r{\A(\w+)=(.*)\z}
     key, val = $1, $2
     # only one that makes sense is infile=another_file
-    overrides[key] = YAML.load(val)
+    overrides[key] = DTAS.yaml_load(val)
   when %r{\A(\w+)\.(\w+)=(.*)\z}
     # comments.ARTIST='blah'
     top, key, val = $1, $2, $3
@@ -63,5 +63,5 @@ trap(:INT) { exit 130 }
 file = args.shift or abort usage
 target = args.shift || default_target
 splitfx = DTAS::SplitFX.new
-splitfx.import(YAML.load(File.read(file)), overrides)
+splitfx.import(DTAS.yaml_load(File.read(file)), overrides)
 splitfx.run(target, opts)

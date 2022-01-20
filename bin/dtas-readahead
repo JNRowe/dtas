@@ -140,7 +140,7 @@ def do_open(path)
       when "---\n"
         buf << fp.read(fp.size - 4)
         Dir.chdir(File.dirname(path)) do
-          yml = YAML.load(buf)
+          yml = DTAS.yaml_load(buf)
           x = yml['infile'] and return File.open(File.expand_path(x).freeze)
         end
       end
@@ -155,7 +155,7 @@ begin
   @todo_ra = @max_ra
   t0 = DTAS.now
   fp = nil
-  cur = YAML.load(c.req('current'))
+  cur = DTAS.yaml_load(c.req('current'))
   while @todo_ra > 0 && fp.nil?
     if current = cur['current']
       track = current['infile']
@@ -177,7 +177,7 @@ begin
     end
 
     # queue has priority, work on it, first
-    queue = YAML.load(c.req('queue cat'))
+    queue = DTAS.yaml_load(c.req('queue cat'))
     while @todo_ra > 0 && track = queue.shift
       next unless track.kind_of?(String)
       fp = nil
@@ -209,7 +209,7 @@ begin
       end
     end
     idx or break
-    cur = YAML.load(c.req('current'))
+    cur = DTAS.yaml_load(c.req('current'))
     current = cur['current'] or break
   end
   if current

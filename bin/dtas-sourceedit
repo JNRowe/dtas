@@ -36,10 +36,10 @@ st_in = $stdin.stat
 
 buf = c.req(%W(source cat #{name}))
 abort(buf) if buf =~ /\AERR/
-orig = YAML.load(buf)
+orig = DTAS.yaml_load(buf)
 
 commit_update = lambda do |buf|
-  source = YAML.load(buf)
+  source = DTAS.yaml_load(buf)
   cmd = %W(source ed #{name})
   update_cmd_env(cmd, orig, source)
 

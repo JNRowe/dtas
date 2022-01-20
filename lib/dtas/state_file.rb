@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'yaml'
@@ -14,7 +14,7 @@ class DTAS::StateFile # :nodoc:
   end
 
   def tryload
-    YAML.load(IO.binread(@path)) if File.readable?(@path)
+    DTAS.yaml_load(IO.binread(@path)) if File.readable?(@path)
   end
 
   def dump(obj, force_fsync = false)

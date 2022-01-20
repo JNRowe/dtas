@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require './test/helper'
@@ -71,7 +71,7 @@ class TestPlayerClientHandler < Testcase
     @sinks["default"] = sink
     dpc_sink(@io, %W(cat default))
     assert_equal 1, @io.size
-    hsh = YAML.load(@io[0])
+    hsh = DTAS.yaml_load(@io[0])
     assert_kind_of Hash, hsh
     assert_equal "default", hsh["name"]
     assert_match("dither -s", hsh["command"])

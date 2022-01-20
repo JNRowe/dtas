@@ -39,7 +39,7 @@ class TestSplitfx < Testcase
   end
 
   def test_example
-    hash = YAML.load(File.read("examples/splitfx.sample.yml"))
+    hash = DTAS.yaml_load(File.read("examples/splitfx.sample.yml"))
     sfx = DTAS::SplitFX.new
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
