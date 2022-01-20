@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 # encoding: binary
@@ -56,14 +56,14 @@ class DTAS::Source::Sox # :nodoc:
         key = nil
         $1.split(/\n/n).each do |line|
           if line.sub!(/^([^=]+)=/ni, '')
-            key = DTAS.dedupe_str(DTAS.try_enc($1.upcase, enc))
+            key = DTAS.try_enc($1.upcase, enc)
           end
           (comments[key] ||= ''.b) << "#{line}\n" unless line.empty?
         end
         comments.each do |k,v|
           v.chomp!
           DTAS.try_enc(v, enc)
-          comments[k] = DTAS.dedupe_str(v)
+          comments[k] = v
         end
       end
       dst

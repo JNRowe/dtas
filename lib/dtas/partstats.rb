@@ -171,7 +171,7 @@ becomes:
       else
         next
       end
-      key = DTAS.dedupe_str($1)
+      key = -$1
       key_idx = @key_idx[key]
       parts = line.split(/\s+/)
       nshift.times { parts.shift } # remove stuff we don't need

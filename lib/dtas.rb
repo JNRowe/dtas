@@ -25,19 +25,6 @@ module DTAS
       Fiddle.dlopen(nil)
     end
   end
-
-  # String#-@ will deduplicate strings when Ruby 2.5 is released (Dec 2017)
-  # https://bugs.ruby-lang.org/issues/13077
-  if RUBY_VERSION.to_f >= 2.5
-    def self.dedupe_str(str)
-      -str
-    end
-  else
-    # Ruby 2.1 - 2.4, noop for older Rubies
-    def self.dedupe_str(str)
-      eval "#{str.inspect}.freeze"
-    end
-  end
   # :startdoc:
 end
 

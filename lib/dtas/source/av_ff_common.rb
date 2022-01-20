@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../../dtas'
@@ -110,7 +110,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
       f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_|
-        @comments[DTAS.dedupe_str($1.upcase)] = DTAS.dedupe_str($2)
+        @comments[$1.upcase] = -($2)
       }
     end
 
@@ -118,7 +118,7 @@ module DTAS::Source::AvFfCommon # :nodoc:
     s.scan(%r{^\[format\.tags\]\n(.*?)\n\n}m) do |_|
       f = $1.dup
       f.gsub!(/^([^=]+)=(.*)$/ni) { |_|
-        @comments[DTAS.dedupe_str($1.upcase)] = DTAS.dedupe_str($2)
+        @comments[$1.upcase] = -$2
       }
     end
     s.scan(%r{^\[format\]\n(.*?)\n\n}m) do |_|

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../xs'
@@ -135,7 +135,7 @@ module DTAS::Player::ClientHandler # :nodoc:
       # or variable names.
       sink.valid_name?(name) or return io.emit("ERR sink name invalid")
 
-      sink.name = DTAS.dedupe_str(name)
+      sink.name = -name
       active_before = sink.active
       before = __sink_snapshot(sink)
 
@@ -144,7 +144,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         k, v = kv.split('=', 2)
         case k
         when %r{\Aenv\.([^=]+)\z}
-          sink.env[DTAS.dedupe_str($1)] = v
+          sink.env[$1] = v
         when %r{\Aenv#([^=]+)\z}
           v == nil or return io.emit("ERR unset env has no value")
           sink.env.delete($1)
