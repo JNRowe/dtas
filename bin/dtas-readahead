@@ -12,7 +12,6 @@ end
 @ffprobe = 'ffprobe'
 @avprobe = 'avprobe'
 
-require 'yaml'
 require 'io/wait'
 require 'dtas/unix_client'
 require 'dtas/process'

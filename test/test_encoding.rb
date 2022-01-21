@@ -3,7 +3,6 @@
 # frozen_string_literal: true
 require './test/helper'
 require 'dtas'
-require 'yaml'
 
 class TestEncoding < Testcase
   def test_encoding

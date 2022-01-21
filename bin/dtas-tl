@@ -23,7 +23,6 @@ end
 
 def do_edit(c)
   require 'dtas/edit_client'
-  require 'yaml'
   require 'tempfile'
   extend DTAS::EditClient
   tmp = Tempfile.new(%w(dtas-tl-edit .txt))

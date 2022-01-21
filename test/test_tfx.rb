@@ -4,7 +4,6 @@
 require './test/helper'
 require 'dtas/tfx'
 require 'dtas/format'
-require 'yaml'
 
 class TestTFX < Testcase
   def rate

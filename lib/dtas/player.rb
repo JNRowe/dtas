@@ -2,6 +2,7 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'shellwords'
+require 'yaml'
 require_relative '../dtas'
 require_relative 'xs'
 require_relative 'source'

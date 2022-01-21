@@ -1,11 +1,10 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require './test/helper'
 require 'dtas/player'
 require 'dtas/state_file'
 require 'dtas/unix_client'
-require 'yaml'
 require 'tempfile'
 require 'shellwords'
 require 'timeout'

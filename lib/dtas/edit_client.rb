@@ -2,7 +2,6 @@
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'tempfile'
-require 'yaml'
 require_relative 'unix_client'
 require_relative 'disclaimer'
 
