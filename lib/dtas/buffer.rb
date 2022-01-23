@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'io/wait'
@@ -45,7 +45,7 @@ class DTAS::Buffer # :nodoc:
 
   def __dst_error(dst, e)
     warn "dropping #{dst.inspect} due to error: #{e.message} (#{e.class})"
-    dst.close unless dst.closed?
+    dst.close
   end
 
   # This will modify targets

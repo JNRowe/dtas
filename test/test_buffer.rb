@@ -11,7 +11,7 @@ class TestBuffer < Testcase
   @@max_size = nil if @@max_size == 0
 
   def teardown
-    @to_close.each { |io| io.close unless io.closed? }
+    @to_close.each(&:close)
   end
 
   def setup

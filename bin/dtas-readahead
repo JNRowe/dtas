@@ -205,7 +205,7 @@ begin
     timeout = 0 if timeout < 0
   else
     work.each_value(&:close).clear
-    fp.close if fp && !fp.closed?
+    fp.close if fp
     fp = timeout = nil
   end
   r = w.to_io.wait_readable(timeout)

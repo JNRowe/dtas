@@ -21,7 +21,7 @@ class TestUNIXServer < Testcase
   end
 
   def teardown
-    @clients.each { |io| io.close unless io.closed? }
+    @clients.each(&:close)
     if File.exist?(@tmp.path)
       @tmp.close!
     else
