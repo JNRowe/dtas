@@ -7,6 +7,8 @@
 # itself is also unstable, but better than this one probably).
 require 'dtas/unix_client'
 require 'shellwords'
+$stdout.binmode
+$stderr.binmode
 
 def get_track_ids(c)
   track_ids = c.req("tl tracks")
@@ -16,18 +18,11 @@ def get_track_ids(c)
   track_ids
 end
 
-def fix_enc!(str, enc)
-  str.force_encoding(enc)
-  str.force_encoding(Encoding::ASCII_8BIT) unless str.valid_encoding?
-end
-
 def each_track(c)
-  enc = Encoding.default_external
   get_track_ids(c).each_slice(128) do |track_ids|
     res = c.req("tl get #{track_ids.join(' ')}")
     res = Shellwords.split(res.sub!(/\A\d+ /, ''))
     while line = res.shift
-      fix_enc!(line, enc)
       yield line
     end
   end
@@ -109,7 +104,6 @@ def do_edit(c)
     path = File.expand_path(path)
     unless File.exist?(path)
       path = orig.dup
-      fix_enc!(path, enc)
       path = Shellwords.split(path)[0]
       path = File.expand_path(path)
     end
