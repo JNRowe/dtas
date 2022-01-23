@@ -1,15 +1,14 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 
 # used in various places for safe wakeups from IO.select via signals
 # A fallback for non-Linux systems lacking the "splice" syscall
-require_relative '../nonblock'
 class DTAS::Sigevent # :nodoc:
   attr_reader :to_io
 
   def initialize
-    @to_io, @wr = DTAS::Nonblock.pipe
+    @to_io, @wr = IO.pipe
     @rbuf = ''.b
   end
 

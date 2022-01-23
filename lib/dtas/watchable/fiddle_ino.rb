@@ -22,7 +22,7 @@ class DTAS::Watchable::InotifyReadableIter # :nodoc:
   def initialize # :nodoc:
     fd = Inotify_init.call(02000000 | 04000) # CLOEXEC | NONBLOCK
     raise "inotify_init failed: #{Fiddle.last_error}" if fd < 0
-    @to_io = DTAS::Nonblock.for_fd(fd)
+    @to_io = IO.for_fd(fd)
     @buf = ''.b
     @q = []
   end

@@ -1,10 +1,9 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'io/nonblock'
 require_relative '../../dtas'
 require_relative '../pipe'
-require_relative '../nonblock'
 
 # compatibility code for non-Linux systems lacking "splice" support.
 # Used only by -player

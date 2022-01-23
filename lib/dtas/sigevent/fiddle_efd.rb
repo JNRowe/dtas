@@ -4,7 +4,6 @@
 
 # used in various places for safe wakeups from IO.select via signals
 # This requires a modern GNU/Linux system with eventfd(2) support
-require_relative '../nonblock'
 require 'fiddle'
 class DTAS::Sigevent # :nodoc:
 
@@ -18,7 +17,7 @@ class DTAS::Sigevent # :nodoc:
   def initialize
     fd = EventFD.call(0, 02000000|00004000) # EFD_CLOEXEC|EFD_NONBLOCK
     raise "eventfd failed: #{Fiddle.last_error}" if fd < 0
-    @to_io = DTAS::Nonblock.for_fd(fd)
+    @to_io = IO.for_fd(fd)
     @buf = ''.b
   end
 

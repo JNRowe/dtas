@@ -5,7 +5,6 @@ require 'io/wait'
 require 'shellwords'
 require_relative '../dtas'
 require_relative 'xs'
-require_relative 'nonblock'
 
 # process management helpers
 module DTAS::Process # :nodoc:
@@ -88,12 +87,12 @@ module DTAS::Process # :nodoc:
       env = {}
     end
     buf = ''.b
-    r, w = DTAS::Nonblock.pipe
+    r, w = IO.pipe
     opts = opts.merge(out: w)
     r.binmode
     no_raise = opts.delete(:no_raise)
     if err_str = opts.delete(:err_str)
-      re, we = DTAS::Nonblock.pipe
+      re, we = IO.pipe
       re.binmode
       opts[:err] = we
     end

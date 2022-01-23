@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require 'socket'
@@ -59,7 +59,7 @@ class DTAS::UNIXServer # :nodoc:
 
   def readable_iter
     # we do not do anything with the block passed to us
-    case rv = accept_nonblock
+    case rv = @to_io.accept_nonblock(exception: false)
     when :wait_readable then return rv
     else
       @readers[DTAS::UNIXAccepted.new(rv[0])] = true
@@ -112,18 +112,6 @@ class DTAS::UNIXServer # :nodoc:
     r[0].each do |io|
       @readers.delete(io)
       wait_ctl(io, io.readable_iter { |_io, msg| yield(_io, msg) })
-    end
-  end
-
-  if RUBY_VERSION.to_f >= 2.3
-    def accept_nonblock
-      @to_io.accept_nonblock(exception: false)
-    end
-  else
-    def accept_nonblock
-      @to_io.accept_nonblock
-    rescue Errno::EAGAIN, Errno::ECONNABORTED, Errno::EPROTO
-      :wait_readable
     end
   end
 end
