@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../dtas'
@@ -39,7 +39,7 @@ class DTAS::UNIXClient # :nodoc:
   end
 
   def res_wait(timeout = nil)
-    IO.select([@to_io], nil, nil, timeout)
+    @to_io.wait_readable(timeout)
     nr = @to_io.nread
     nr > 0 or raise EOFError, "unexpected EOF from server"
     @to_io.recv(nr)

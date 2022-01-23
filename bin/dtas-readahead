@@ -28,18 +28,6 @@ null = DTAS.null
 @redir = { err: null, out: null, in: null }.freeze
 require 'pp'
 
-if RUBY_VERSION.to_r >= '2.3'.to_r
-  # Old Rubies did FIONREAD, which breaks on SOCK_SEQPACKET
-  def wait_read(w, timeout)
-    w.to_io.wait_readable(timeout)
-  end
-else
-  def wait_read(w, timeout)
-    r = IO.select([w], nil, nil, timeout)
-    r ? r[0] : nil
-  end
-end
-
 def seek_to_cur_pos(cur_pid, fp)
   cur_fd = []
   fpst = fp.stat
@@ -120,7 +108,7 @@ def do_ra(fp, pos, w)
     len -= n
 
     # stop reading immediately if there's an event
-    if wait_read(w, 0)
+    if w.to_io.wait_readable(0)
       adj = @todo_ra
       pos += size
       break
@@ -220,7 +208,7 @@ begin
     fp.close if fp && !fp.closed?
     fp = timeout = nil
   end
-  r = wait_read(w, timeout)
+  r = w.to_io.wait_readable(timeout)
   p w.res_wait if r
 rescue EOFError
   abort "dtas-player exited"
