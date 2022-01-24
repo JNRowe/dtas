@@ -299,6 +299,7 @@ class DTAS::SplitFX # :nodoc:
           t.fade_in = $1.split(/\s+/)
         when %r{\Afade_out=(.+)\z} # $1 = "t 4" or just "4"
           t.fade_out = $1.split(/\s+/)
+        when %r{\Aenv\.([^=]+)=(.+)\z} then t.env[$1] = -$2
         when %r{\A\.(\w+)=(.+)\z} then t.comments[$1] = $2
         else
           raise ArgumentError, "unrecognized arg(s): #{xs(argv)}"
