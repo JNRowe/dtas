@@ -360,6 +360,14 @@ class DTAS::SplitFX # :nodoc:
 
     fails = []
     tracks = @tracks.dup
+    (opts[:filter] || []).each do |re|
+      field, val = re.split(/=/, 2)
+      if val
+        tracks.delete_if { |t| (t.comments[field] || '') !~ /#{val}/ }
+      else
+        tracks.delete_if { |t| t.comments.values.grep(/#{re}/).empty? }
+      end
+    end
     pids = {}
     jobs = opts[:jobs] || tracks.size # jobs == nil => everything at once
     if opts[:sox_pipe]
