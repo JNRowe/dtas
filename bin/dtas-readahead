@@ -145,8 +145,9 @@ begin
   cur = DTAS.yaml_load(c.req('current'))
   while @todo_ra > 0 && fp.nil?
     if current = cur['current']
-      track = -current['infile']
+      track = current['infile']
       break unless track.kind_of?(String)
+      track = -track
       fp = work[track] ||= do_open(track)
       cur_pid = current['pid']
       if fp
