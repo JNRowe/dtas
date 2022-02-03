@@ -26,7 +26,8 @@ to use L<ecasound(1)>, too.
 =item -j, --jobs [JOBS]
 
 Number of jobs to run in parallel.  If no number is specified, all
-jobs are run in parallel.
+jobs are run in parallel.  Default: number of CPUS (dtas 0.20.0+),
+previous versions of dtas defaulted to 1.
 
 =item -n, --dry-run
 
@@ -76,6 +77,16 @@ outputs the result as a single file with the TRACKNUMBER
 of "000".  For ease-of-typing, commas in this command-line
 argument are automatically expanded to spaces when passed to sox.
 
+This switch may not be combined with L</--filter>
+
+=item -f, --filter [FIELD=]VALUE
+
+Only process tracks matching a given comment FIELD and VALUE.
+If no C<=> is exists, then all comment fields are matched
+against the specified VALUE.
+
+This switch may not be combined with L</--trim>
+
 =item -p, --sox-pipe
 
 Used in place of an output target to specify outputting audio data in
@@ -121,7 +132,12 @@ highest-numbered track.  Default: true
 
 =item targets - hash, see "TARGETS" section
 
-=item command - used only by L<dtas-player(1)>
+=item command - override the default sox invocation
+
+This command may be used to specify an alternate command to process each
+track.
+
+Default: sox "$INFILE" $COMMENTS $OUTFMT $OUTDST $TRIMFX $FX $RATEFX $DITHERFX
 
 =back
 
@@ -133,11 +149,22 @@ segment.
 
 =over
 
-=item t TIME TITLE [fade_in/fade_out=FADE_ARGS]
+=item t TIME TITLE [fade_in/fade_out=FADE_ARGS] [.FIELD=VALUE] [env.X=Y]
 
-The start of a new track
-at TIME with TITLE.  An optional fade_in and fade_out may be specified
-for the first/last tracks.
+The start of a new track at TIME with TITLE.
+An optional L</fade_in> and L</fade_out> may be specified for any tracks.
+Per-track comments may be specified in the form of C<.FIELD=VALUE>.
+Using per-track C<.ARTIST=FOO> allows proper tagging of multi-artist
+compilations.
+
+Per-track environment variables may be specified in the form
+of C<env.K=V> where C<K> is the environment variable name and
+C<V> is its value.  Per-track environment variables do not affect
+playback of YAML files via L<dtas-player(1)> nor use of the L</--trim>
+command-line option.  However, per-track environment variables do affect
+any tracks written to the filesystem, including those using the L</--filter>
+switch.   These environment variables are intended to affect the specified
+L</command> or default L<sox(1)> invocation.
 
 =item skip TIME - skip a segment starting at TIME
 
@@ -268,7 +295,7 @@ imbalance in a live concert recording from the audience:
 
 =head1 COPYRIGHT
 
-Copyright 2013-2020 all contributors L<mailto:dtas-all@nongnu.org>
+Copyright all contributors L<mailto:dtas-all@nongnu.org>
 
 License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
