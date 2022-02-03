@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 require_relative '../dtas'
@@ -357,7 +357,9 @@ class DTAS::SplitFX # :nodoc:
     @rate = opts[:rate]
     @bits = opts[:bits]
     trim = opts[:trim] and @tracks = [ UTrim.new(trim, @env, @comments) ]
-
+    if trim && opts[:filter]
+      raise ArgumentError, 'trim and filter are mutually exclusive'
+    end
     fails = []
     tracks = @tracks.dup
     (opts[:filter] || []).each do |re|
