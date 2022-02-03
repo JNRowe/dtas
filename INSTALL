@@ -1,7 +1,8 @@
-Uncommon for audio software, dtas is currently implemented in Ruby.
+Uncommon for audio software, dtas is currently implemented in Ruby
+(and some Perl5).
 
 The latest stable release or development snapshot of Ruby is recommended.
-However, Ruby 1.9.3 and later works, but older versions of Ruby do not.
+However, Ruby 2.3 and later works, but older versions of Ruby do not.
 
 SoX is a dependency of dtas-player.  While not _strictly_ required,
 dtas-player uses SoX by default and you will need it unless you've
@@ -25,14 +26,19 @@ For future upgrades of dtas
 
     sudo gem install dtas
 
-# installing dtas via tarball and setup.rb
+# installing dtas via tarball
 
 Grab the latest tarball from our HTTPS site:
 
-    https://80x24.org/dtas/2021/dtas-0.19.0.tar.gz
+    https://80x24.org/dtas/2022/dtas-0.20.0.tar.gz
 
-    $ tar zxvf dtas-0.19.0.tar.gz
-    $ cd dtas-0.19.0
+    $ tar zxvf dtas-0.20.0.tar.gz
+    $ cd dtas-0.20.0
+
+    # To install symlinks into ~/bin (assuming your Ruby executable is "ruby")
+    $ make symlink-install
+
+    # or using setup.rb:
     $ sudo ruby setup.rb
 
 # CONTACT
@@ -45,5 +51,5 @@ No subscription is necessary to post to the mailing list.
 
 # COPYRIGHT
 
-Copyright 2013-2021 all contributors <dtas-all@nongnu.org>
+Copyright all contributors <dtas-all@nongnu.org>
 License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
