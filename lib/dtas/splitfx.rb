@@ -395,7 +395,7 @@ class DTAS::SplitFX # :nodoc:
         @out.puts "DONE #{done[0].inspect}" if $DEBUG
         done[1].close!
       else
-        fails << [ t, status ]
+        fails << [ done[0], status ]
       end
     end
 
