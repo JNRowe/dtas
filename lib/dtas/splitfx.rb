@@ -290,6 +290,7 @@ class DTAS::SplitFX # :nodoc:
       t = T.new
       t.tbeg = @t2s.call(start_time)
       t.comments = @comments.dup
+      title.valid_encoding? or warn "#{title.inspect} encoding invalid"
       t.comments["TITLE"] = title
       t.env = @env.dup
 
