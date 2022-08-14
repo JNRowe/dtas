@@ -37,6 +37,7 @@ class DTAS::Player # :nodoc:
     @paused = false
     @format = DTAS::Format.new
     @bypass = [] # %w(rate bits channels) (not worth Hash overhead)
+    @bypass_next = nil # source_spec
 
     @sinks = {} # { user-defined name => sink }
     @targets = [] # order matters
@@ -331,6 +332,7 @@ class DTAS::Player # :nodoc:
 
   # called when the player is leaving idle state
   def spawn_sinks(source_spec)
+    @bypass_next = nil
     return true if @targets[0]
     @sinks.each_value do |sink|
       sink.active or next
@@ -392,6 +394,8 @@ class DTAS::Player # :nodoc:
       if ! @bypass.empty? && pending.respond_to?(:format)
         new_fmt = bypass_match!(@format.dup, pending.format)
         if new_fmt != @format
+          @bypass_next = source_spec
+          return if @sink_buf.inflight > 0
           stop_sinks # we may fail to start below
           format_update!(new_fmt)
         end
@@ -434,6 +438,7 @@ class DTAS::Player # :nodoc:
   end
 
   def stop_sinks
+    @bypass_next = nil
     @targets.each { |t| drop_target(t) }.clear
   end
 
@@ -458,7 +463,9 @@ class DTAS::Player # :nodoc:
     end
 
     # nothing left inflight, stop the sinks until we have a source
+    bn = @bypass_next
     stop_sinks
+    next_source(bn) if bn # are we restarting for bypass?
     :ignore
   end
 
