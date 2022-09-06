@@ -30,10 +30,10 @@ For future upgrades of dtas
 
 Grab the latest tarball from our HTTPS site:
 
-    https://80x24.org/dtas/2022/dtas-0.20.0.tar.gz
+    https://80x24.org/dtas/2022/dtas-0.21.0.tar.gz
 
-    $ tar zxvf dtas-0.20.0.tar.gz
-    $ cd dtas-0.20.0
+    $ tar zxvf dtas-0.21.0.tar.gz
+    $ cd dtas-0.21.0
 
     # To install symlinks into ~/bin (assuming your Ruby executable is "ruby")
     $ make symlink-install
