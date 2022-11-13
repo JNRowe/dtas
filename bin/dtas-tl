@@ -43,7 +43,8 @@ def do_edit(c)
     track_id = $1.to_i
     orig_idx[track_id] = orig.size
     orig << track_id
-    tmp.write("#{Shellwords.escape(line)} =#{track_id}\n")
+    line = Shellwords.escape(line) if line.include?("\n")
+    tmp.write("#{line} =#{track_id}\n")
   end
   tmp.flush
 
@@ -100,13 +101,8 @@ def do_edit(c)
   non_existent = []
   add.each do |path, after_id|
     orig = path
-    path = Shellwords.split(path)[0]
-    path = File.expand_path(path)
-    unless File.exist?(path)
-      path = orig.dup
-      path = Shellwords.split(path)[0]
-      path = File.expand_path(path)
-    end
+    path = File.expand_path(orig)
+    path = File.expand_path(Shellwords.split(path)[0]) unless File.exist?(path)
 
     if File.exist?(path)
       cmd = %W(tl add #{path})
