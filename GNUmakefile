@@ -82,7 +82,7 @@ bindir = $(prefix)/bin
 symlink-install :
 	mkdir -p $(bindir)
 	dtas=$(CURDIR)/dtas.sh && cd $(bindir) && \
-	for x in $(CURDIR)/bin/*; do \
+	for x in $(CURDIR)/bin/* $(CURDIR)/script/*; do \
 		ln -sf "$$dtas" $$(basename "$$x"); \
 	done
 

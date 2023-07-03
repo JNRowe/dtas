@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+# Copyright (C) all contributors <dtas-all@nongnu.org>
+# License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
+# parse soxi output and generates a dtas-splitfx-compatible YAML snippet
+# usage: dtas-2splitfx 1.flac 2.flac ... >tracks.yml
+use v5.12;
+use POSIX qw(strftime);
+open my $fh, '-|', 'soxi', @ARGV or die $!;
+my $title = '';
+my $off = 0;
+my $sec = 0;
+
+my $flush = sub {
+	my ($start) = @_;
+	my $frac = $start =~ s/\.([0-9]+)\z// ? $1 : 0;
+	$start = strftime('%H:%M:%S', gmtime($start));
+	$start .= ".$frac" if $frac;
+	$start;
+};
+
+while (<$fh>) {
+	if (/^Duration\s*:\s*([0-9:\.]+)/) {
+		my $t = $1;
+		$sec = $t =~ s/\.([0-9]+)\z// ? "0.$1" : 0;
+		my @t = split(/:/, $t); # HH:MM:SS
+		my $mult = 1;
+		while (defined(my $part = pop @t)) {
+			$sec += $part * $mult;
+			$mult *= 60;
+		}
+	} elsif (s/^title=//i) {
+		chomp;
+		$title = $_;
+		$title =~ tr!"!'!;
+	} elsif (/^\s*\z/s && $sec) {
+		my $start = $flush->($off);
+		say qq(- t $start "), , $title, '"';
+		$off += $sec;
+		$sec = 0;
+		$title = '';
+	}
+}
+close $fh or die "soxi failed: \$?=$?";
+say qq(- stop ), $flush->($off);
