@@ -188,9 +188,9 @@ when "reto"
   re = ARGV[1]
   time = ARGV[2]
   re = Regexp.quote(re) if fixed
-  re = ignorecase ? %r{#{re}}i : %r{#{re}}
+  re = ignorecase ? %r{#{re}}in : %r{#{re}}n
   each_track(c) do |line|
-    line.sub!(/\A(\d+)=/, '')
+    line.sub!(/\A(\d+)=/n, '') or abort "unexpected line=#{line.inspect}\n"
     track_id = $1
     if re =~ line
       req = %W(tl goto #{track_id})
