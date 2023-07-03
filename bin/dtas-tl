@@ -138,6 +138,8 @@ case cmd = ARGV[0]
 when 'cat'
   each_track(c) { |line| print "#{line}\n" }
 when 'prune'
+  c2 = nil
+  pending = 0
   each_track(c) do |line|
     line.sub!(/\A(\d+)=/n, '') or abort "unexpected line=#{line.inspect}\n"
     track_id = $1.to_i
@@ -149,7 +151,19 @@ when 'prune'
       warn "# #{line}: #{e.class}"
       # raise other exceptions
     end
-    c.req("tl remove #{track_id}") unless ok
+    unless ok
+      c2 ||= DTAS::UNIXClient.new
+      if pending > 5
+        c2.res_wait
+        pending -= 1
+      end
+      pending += 1
+      c2.req_start("tl remove #{track_id}")
+    end
+  end
+  while pending > 0
+    c2.res_wait
+    pending -= 1
   end
 when 'aac' # add-after-current
   ARGV.shift
