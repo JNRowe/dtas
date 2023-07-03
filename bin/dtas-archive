@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (C) 2015-2020 all contributors <dtas-all@nongnu.org>
+# Copyright (C) all contributors <dtas-all@nongnu.org>
 # License: GPL-3.0+ <https://www.gnu.org/licenses/gpl-3.0.txt>
 # frozen_string_literal: true
 usage = "#$0 SOURCE DESTINATION"
@@ -30,6 +30,7 @@ stats = false
 keep_going = false
 compression = []
 comment = []
+match = nil
 
 OptionParser.new('', 24, '  ') do |op|
   op.banner = usage
@@ -47,6 +48,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.on('-r', '--repeat [COUNT]', 'number of times to check', Integer) do |r|
     repeat = r
   end
+  op.on('-m', '--match=REGEX', String) { |s| match = Regexp.new(s) }
   op.on('-s', '--quiet', '--silent') { silent = true }
   op.on('-h', '--help') do
     puts(op.to_s)
@@ -55,6 +57,7 @@ OptionParser.new('', 24, '  ') do |op|
   op.parse!(ARGV)
 end
 
+match ||= %r/./
 comment.push('--comment', '') if comment.empty?
 
 dst = ARGV.pop
@@ -67,6 +70,7 @@ src.each do |s|
   src_st = File.stat(s)
   if src_st.directory?
     Find.find(s) do |path|
+      path =~ match or next
       File.file?(path) or next
       dir = File.dirname(path)
       dir_st = File.stat(dir)

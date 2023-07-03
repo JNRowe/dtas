@@ -52,11 +52,20 @@ Continue after error
 
 Number of times to repeat the L<sndfile-cmp(1)> check.  Default: 1
 
+=item -m, --match REGEX
+
+Only archive files matching a given Ruby (or Perl-compatible) regular
+expression.  The regular expression is implementation-dependent and
+using the Perl-compatible subset of Ruby regexps is recommended as dtas
+will be moving away from Ruby at some point.
+
+Added for dtas v0.22.0
+
 =back
 
 =head1 COPYRIGHT
 
-Copyright 2013-2020 all contributors L<mailto:dtas-all@nongnu.org>
+Copyright all contributors L<mailto:dtas-all@nongnu.org>
 
 License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
