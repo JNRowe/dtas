@@ -175,10 +175,10 @@ when "reto"
   time = ARGV[2]
   re = Regexp.quote(re) if fixed
   re = ignorecase ? %r{#{re}}i : %r{#{re}}
-  get_track_ids(c).each do |track_id|
-    res = c.req("tl get #{track_id}")
-    res.sub!(/\A1 \d+=/, '')
-    if re =~ res
+  each_track(c) do |line|
+    line.sub!(/\A(\d+)=/, '')
+    track_id = $1
+    if re =~ line
       req = %W(tl goto #{track_id})
       req << time if time
       res = c.req(req)
