@@ -104,13 +104,14 @@ module DTAS::Source::AvFfCommon # :nodoc:
       prev_cmd = cmd
     end while incomplete.compact[0]
 
+    enc = Encoding.default_external # typically Encoding::UTF_8
     # old avprobe
     s.scan(%r{^\[FORMAT\]\n(.*?)\n\[/FORMAT\]\n}m) do |_|
       f = $1.dup
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
       # TODO: multi-line/multi-value/repeated tags
       f.gsub!(/^TAG:([^=]+)=(.*)$/ni) { |_|
-        @comments[$1.upcase] = -($2)
+        @comments[-DTAS.try_enc($1.upcase, enc)] = $2
       }
     end
 
@@ -118,12 +119,16 @@ module DTAS::Source::AvFfCommon # :nodoc:
     s.scan(%r{^\[format\.tags\]\n(.*?)\n\n}m) do |_|
       f = $1.dup
       f.gsub!(/^([^=]+)=(.*)$/ni) { |_|
-        @comments[$1.upcase] = -$2
+        @comments[-DTAS.try_enc($1.upcase, enc)] = $2
       }
     end
     s.scan(%r{^\[format\]\n(.*?)\n\n}m) do |_|
       f = $1.dup
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
+    end
+    comments.each do |k,v|
+      v.chomp!
+      comments[k] = -DTAS.try_enc(v, enc)
     end
 
     # ffprobe always uses "track", favor FLAC convention "TRACKNUMBER":
