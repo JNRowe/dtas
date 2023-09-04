@@ -41,7 +41,7 @@ class TestUNIXServer < Testcase
     @srv.run_once # nothing
     msgs = []
     clients = []
-    client.send("HELLO", Socket::MSG_EOR)
+    client.send("HELLO", 0)
     @srv.run_once do |c, msg|
       clients << c
       msgs << msg

@@ -17,7 +17,7 @@ class DTAS::UNIXAccepted # :nodoc:
   # returns :wait_readable on success
   def emit(msg)
     if @sbuf.empty?
-      case rv = @to_io.sendmsg_nonblock(msg, Socket::MSG_EOR, exception: false)
+      case rv = @to_io.sendmsg_nonblock(msg, 0, exception: false)
       when :wait_writable
         @sbuf << msg
         rv
@@ -34,7 +34,7 @@ class DTAS::UNIXAccepted # :nodoc:
 
   # flushes pending data if it got buffered
   def writable_iter
-    case @to_io.sendmsg_nonblock(@sbuf[0], Socket::MSG_EOR, exception: false)
+    case @to_io.sendmsg_nonblock(@sbuf[0], 0, exception: false)
     when :wait_writable then return :wait_writable
     else
       @sbuf.shift

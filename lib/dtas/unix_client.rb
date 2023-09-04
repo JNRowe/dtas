@@ -24,7 +24,7 @@ class DTAS::UNIXClient # :nodoc:
 
   def req_start(args)
     args = xs(args) if Array === args
-    @to_io.send(args, Socket::MSG_EOR)
+    @to_io.send(args, 0)
   end
 
   def req_ok(args, timeout = nil)

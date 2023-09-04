@@ -564,7 +564,7 @@ module DTAS::Player::ClientHandler # :nodoc:
         rescue => e
           res = "ERR dumping to #{xs(sf.path)} #{e.message}"
         end
-        io.to_io.send(res, Socket::MSG_EOR)
+        io.to_io.send(res, 0)
       ensure
         exit!(0)
       end
