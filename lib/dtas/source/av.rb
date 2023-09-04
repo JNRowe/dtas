@@ -18,6 +18,7 @@ class DTAS::Source::Av # :nodoc:
 
   def initialize
     command_init(AV_DEFAULTS)
+    @mcache = nil
     @av_ff_probe = "avprobe"
   end
 

@@ -18,6 +18,7 @@ class DTAS::Source::Ff  # :nodoc:
 
   def initialize
     command_init(FF_DEFAULTS)
+    @mcache = nil
     @av_ff_probe = "ffprobe"
   end
 

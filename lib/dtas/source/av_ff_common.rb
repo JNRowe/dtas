@@ -21,10 +21,23 @@ module DTAS::Source::AvFfCommon # :nodoc:
   attr_reader :format
   attr_reader :duration
 
+  CACHE_KEYS = [ :@duration, :@probe_harder, :@comments, :@astreams,
+                 :@format ].freeze
+
+  def mcache_lookup(infile)
+    (@mcache ||= DTAS::Mcache.new).lookup(infile) do |input, dst|
+      tmp = source_file_dup(infile, nil, nil)
+      tmp.av_ff_ok? or return nil
+      CACHE_KEYS.each { |k| dst[k] = tmp.instance_variable_get(k) }
+      dst
+    end
+  end
+
   def try(infile, offset = nil, trim = nil)
-    rv = source_file_dup(infile, offset, trim)
-    rv.av_ff_ok? or return
-    rv
+    ent = mcache_lookup(infile) or return
+    ret = source_file_dup(infile, offset, trim)
+    CACHE_KEYS.each { |k| ret.instance_variable_set(k, ent[k]) }
+    ret
   end
 
   def __parse_astream(cmd, stream)
