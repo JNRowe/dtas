@@ -70,10 +70,10 @@ To play audio on my favorite USB DAC directly to ALSA, I use:
 =head2 Seeking/playing audio from large video containers (e.g. VOB) fails
 
 This is a problem with large VOBs.  We recommend breaking up the
-VOB into smaller files or using L<avconv(1)> or L<ffmpeg(1)> to extract
-the desired audio stream.
+VOB into smaller files or using L<ffmpeg(1)> to extract
+the desired audio stream at C<$STREAM_NR>.
 
-      avconv -analyzeduration 2G -probesize 2G \
+      ffmpeg -analyzeduration 2G -probesize 2G \
         -i input.vob -vn -sn -c:a copy -map 0:$STREAM_NR output.ext
 
 =head1 ADVANCED EXAMPLES
@@ -115,7 +115,7 @@ No subscription is necessary to post to the mailing list.
 
 =head1 COPYRIGHT
 
-Copyright 2013-2020 all contributors L<mailto:dtas-all@nongnu.org>
+Copyright all contributors L<mailto:dtas-all@nongnu.org>
 
 License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
@@ -123,4 +123,4 @@ License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
 L<dtas-player_protocol(7)>, L<dtas-ctl(1)>, L<dtas-enq(1)>,
 L<dtas-sourceedit(1)>, L<dtas-sinkedit(1)>, L<sox(1)>, L<play(1)>,
-L<avconv(1)>, L<ffmpeg(1)>, L<screen(1)>, L<tmux(1)>
+L<ffmpeg(1)>, L<screen(1)>, L<tmux(1)>

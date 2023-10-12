@@ -51,11 +51,7 @@ of a previous "dtas-ctl source cat sox" invocation:
 
 	$ dtas-sourceedit sox < saved.yml
 
-To change the way dtas-player calls avconv (part of libav):
-
-	$ dtas-sourceedit av
-
-To change the way dtas-player calls ffmpeg (lightly-tested):
+To change the way dtas-player calls ffmpeg:
 
 	$ dtas-sourceedit ff
 
@@ -77,7 +73,7 @@ No subscription is necessary to post to the mailing list.
 
 =head1 COPYRIGHT
 
-Copyright 2013-2020 all contributors L<mailto:dtas-all@nongnu.org>
+Copyright all contributors L<mailto:dtas-all@nongnu.org>
 
 License: GPL-3.0+ L<https://www.gnu.org/licenses/gpl-3.0.txt>
 
