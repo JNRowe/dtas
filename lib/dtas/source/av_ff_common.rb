@@ -126,6 +126,11 @@ module DTAS::Source::AvFfCommon # :nodoc:
       f =~ /^duration=([\d\.]+)\s*$/nm and @duration = $1.to_f
     end
 
+    # ffprobe always uses "track", favor FLAC convention "TRACKNUMBER":
+    if @comments['TRACK'] && !@comments['TRACKNUMBER']
+      @comments['TRACKNUMBER'] = @comments.delete('TRACK')
+    end
+
     ! @astreams.compact.empty?
   end
 
