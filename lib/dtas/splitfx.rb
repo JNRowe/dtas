@@ -10,7 +10,8 @@ require 'tempfile'
 # Unlike the stuff for dtas-player, dtas-splitfx is fairly tied to sox
 # (but we may still pipe to ecasound or anything else)
 class DTAS::SplitFX # :nodoc:
-  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT $OUTDST $TRIMFX $FX $RATEFX $DITHERFX'
+  CMD = 'sox "$INFILE" $COMMENTS $OUTFMT $OUTDST $TRIMFX $FX' \
+        ' $RATEFX $DITHERFX $STATS'
   include DTAS::Process
   attr_reader :infile, :env, :command
 
@@ -204,6 +205,7 @@ class DTAS::SplitFX # :nodoc:
     elsif outfmt.bits && outfmt.bits <= 16
       env["DITHERFX"] = "dither -s"
     end
+    env['STATS'] = 'stats' if opts[:stats]
     comments = Tempfile.new(%W(dtas-splitfx-#{t.comments["TRACKNUMBER"]} .txt))
     t.comments.each do |k,v|
       env[k] = v.to_s

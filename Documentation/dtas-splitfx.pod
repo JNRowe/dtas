@@ -37,6 +37,12 @@ Print, but do not run the commands to be executed
 
 Silent operation, commands are not printed as executed
 
+=item -S, --stats
+
+Add the sox "stats" effect to the end of the effects chain,
+use this with L</--err-suffix> to get a C<.stats> file with
+every track output
+
 =item -D, --no-dither
 
 Disable automatic setting of the DITHERFX env.  This also passes
@@ -46,7 +52,8 @@ the option to L<sox(1)> via SOX_OPTS.
 
 Write the contents of C<stderr>.  This is useful for capturing
 the per-track output of the L<sox(1)> C<stats> effect when
-combined with parallel C<--jobs>.
+combined with parallel C<--jobs>.  Recommended for use with the
+L</--stats> switch.
 
 =item -O, --outdir OUTDIR
 
