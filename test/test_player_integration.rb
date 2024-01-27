@@ -209,11 +209,11 @@ class TestPlayerIntegration < Testcase
 
   def test_source_ed
     s = client_socket
-    assert_equal "sox av ff splitfx", s.req("source ls")
+    assert_equal "sox ff av splitfx", s.req("source ls")
     s.req_ok("source ed av tryorder=-1")
     assert_equal "av sox ff splitfx", s.req("source ls")
     s.req_ok("source ed av tryorder=")
-    assert_equal "sox av ff splitfx", s.req("source ls")
+    assert_equal "sox ff av splitfx", s.req("source ls")
 
     s.req_ok("source ed sox command=true")
     sox = DTAS.yaml_load(s.req("source cat sox"))
